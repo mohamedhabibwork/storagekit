@@ -1,6 +1,6 @@
 {
   "name": "@mohamedhabibwork/storagekit",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Unified TypeScript file-management API across Local, S3, MinIO, Azure Blob and Oracle OCI Object Storage — with strongly-typed native provider options.",
   "license": "MIT",
   "author": "Mohamed Habib <mohamedhabibwork@gmail.com>",
