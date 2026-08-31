@@ -57,6 +57,12 @@ reproducible), then open a PR. The cache key in `docs.yml` is keyed off
 the hash of this file, so a version bump invalidates the pip cache
 automatically.
 
+**Compatibility note:** `mkdocs-material<9.7.0` declares
+`pymdown-extensions~=10.2`, which is incompatible with
+`pymdown-extensions 11.x`. If you bump `pymdown-extensions` past 10.2,
+bump `mkdocs-material` to `>=9.7.0` in the same PR — otherwise the
+`pip install` step in `docs.yml` will fail with `ResolutionImpossible`.
+
 ## One-time GitHub setting
 
 Pages must be **initialized** on the repo exactly once, by an admin,

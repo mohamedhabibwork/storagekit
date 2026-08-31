@@ -1,5 +1,8 @@
 # Pinned for reproducible MkDocs builds in CI.
 # Bump these in a separate PR when upgrading.
+# NOTE: mkdocs-material<9.7.0 pins pymdown-extensions~=10.2, which is
+# incompatible with pymdown-extensions 11.x. If you bump pymdown-extensions
+# past 10.2, bump mkdocs-material to >=9.7.0 in the same PR.
 mkdocs==1.6.1
-mkdocs-material==9.6.14
+mkdocs-material==9.7.7
 pymdown-extensions==11.0.1
