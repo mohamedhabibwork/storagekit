@@ -322,6 +322,52 @@ accept a normalized `versionId` (S3, Azure, MinIO, Oracle), while native
 controls (S3 `ServerSideEncryption: 'aws:kms'`, Azure access tiers, OCI
 `storageTier`) remain available through `native`.
 
+## Custom drivers
+
+Register your own storage type against the same unified API. Implement the
+`StorageDriver` interface, register it, and `createStorage` resolves it by
+its `type` string — native slots are typed `unknown` for custom types.
+
+```ts
+import {
+  createStorage,
+  registerStorageDriver,
+  defineDriver,
+  type StorageDriver,
+} from '@mohamedhabibwork/storagekit';
+
+const driver = defineDriver({
+  type: 'memory',
+  async upload(path, body, options) { /* … */ return { path, provider: 'memory' }; },
+  async download(path) { /* → { stream, buffer(), text(), json() } */ },
+  async delete(path) {},
+  async deleteMany(paths, options) { /* → { deleted, failed } */ },
+  async exists(path) { return false; },
+  async stat(path) { /* → FileStat */ },
+  async list(options) { /* → { files, directories, cursor, hasMore } */ },
+  async copy(source, destination, options) {},
+  async move(source, destination, options) {},
+  async getUrl(path) { return ''; },
+  async getSignedUrl(path, options) { throw new Error('unsupported'); },
+  native() { return store; },
+  nativeRequest(fn) { return fn(store); },
+  capabilities() {
+    return {
+      signedUrls: false, multipartUpload: true, serverSideCopy: true,
+      versioning: false, metadata: true, directories: false, bulkDelete: false,
+    };
+  },
+});
+
+registerStorageDriver('memory', (config) => driver);
+
+const storage = await createStorage({ type: 'memory', /* custom config fields */ });
+```
+
+Registration is global to the process, cannot collide with builtin types,
+and an optional async `ready()` method on the driver is awaited by the
+factory. Validate your driver against the published contract suite (below).
+
 ## Testing your own driver
 
 The shared contract suite is published so custom drivers can prove they

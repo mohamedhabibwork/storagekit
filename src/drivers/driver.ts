@@ -1,4 +1,3 @@
-import type { Readable } from 'node:stream';
 import type {
   CopyOptions,
   DeleteManyOptions,
@@ -19,15 +18,16 @@ import type {
   UploadResult,
   UrlOptions,
 } from '../core/types';
-import type { NativeClientMap } from '../core/maps';
+import type { MapValueFor, NativeClientMap } from '../core/maps';
 
 /**
- * Runtime contract implemented by every provider adapter. The type parameter
- * is fixed to the driver's own storage type so driver code stays fully typed
- * while the wrapper layer works with the erased form.
+ * Runtime contract implemented by every provider adapter — builtin or
+ * custom. The type parameter is fixed to the driver's own storage type so
+ * driver code stays fully typed while the wrapper layer works with the
+ * erased form. Custom drivers get `unknown` native slots.
  */
 export interface StorageDriver<
-  T extends StorageType = StorageType,
+  T extends string = string,
 > {
   readonly type: T;
 
@@ -74,23 +74,20 @@ export interface StorageDriver<
 
   getSignedUrl(path: string, options?: SignedUrlOptions<T>): Promise<string>;
 
-  native(): NativeClientMap[T];
+  native(): MapValueFor<NativeClientMap, T>;
 
-  nativeRequest<R>(fn: (client: NativeClientMap[T]) => Promise<R>): Promise<R>;
+  nativeRequest<R>(fn: (client: MapValueFor<NativeClientMap, T>) => Promise<R>): Promise<R>;
 
   capabilities(): StorageCapabilities;
 }
 
-export function emptyDownloadResultHelpers(stream: Readable) {
-  return {
-    buffer: () => import('../core/streams.js').then((m) => m.streamToBuffer(stream)),
-    text: () =>
-      import('../core/streams.js').then(async (m) =>
-        (await m.streamToBuffer(stream)).toString('utf8'),
-      ),
-    json: <V>() =>
-      import('../core/streams.js').then(async (m) =>
-        JSON.parse((await m.streamToBuffer(stream)).toString('utf8')) as V,
-      ),
-  };
+
+/**
+ * Identity helper that types a custom driver implementation. Purely for
+ * ergonomics — editor feedback and future-proofing.
+ */
+export function defineDriver<T extends string>(
+  driver: StorageDriver<T>,
+): StorageDriver<T> {
+  return driver;
 }

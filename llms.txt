@@ -259,6 +259,43 @@ Hook errors in `beforeX` abort nothing silently — `beforeX` errors propagate;
    download/stat/delete, but semantics (S3 vs Azure vs OCI) are not identical —
    don't assume one behavior.
 
+## Custom drivers
+
+Implement `StorageDriver<T>` (exported), register it, then create storages
+with that type string. Builtin type names cannot be overridden; duplicate
+registrations throw `StorageInvalidConfigError`.
+
+```ts
+import { registerStorageDriver, defineDriver, type StorageDriver } from '@mohamedhabibwork/storagekit';
+
+const driver: StorageDriver<'memory'> = defineDriver({
+  type: 'memory',
+  upload(path, body, options) { /* returns { path, size?, etag?, versionId?, url?, provider } */ },
+  download(path) { /* returns { stream, contentType?, contentLength?, buffer(), text(), json() } */ },
+  delete(path) {},                                    // idempotent, like builtins
+  deleteMany(paths, options) { /* { deleted, failed } */ },
+  exists(path) { /* HEAD-style check */ },
+  stat(path) { /* FileStat */ },
+  list(options) { /* { files, directories (trailing '/'), cursor, hasMore } — one level unless options.recursive */ },
+  copy(source, destination, options) {},
+  move(source, destination, options) {},              // copy + delete
+  getUrl(path) { /* unsigned URL or throw StorageUnsupportedOperationError */ },
+  getSignedUrl(path, options) { /* or throw unsupported */ },
+  native() { return client; },
+  nativeRequest(fn) { return fn(native()); },
+  capabilities() { return { signedUrls: false, multipartUpload: true, serverSideCopy: true, versioning: false, metadata: true, directories: false, bulkDelete: false }; },
+});
+
+registerStorageDriver('memory', (config, runtime) => driver);
+const storage = await createStorage({ type: 'memory', /* custom fields */ });
+```
+
+Custom types get `unknown` native slots (`MapValueFor` fallback). Optional
+async `ready()` on the driver is awaited by the factory. The registry is
+shared process-wide (globalThis symbol), visible across entrypoints.
+Missing methods (missing `type` string / non-function `upload`/`download`)
+are rejected at registration/use with `StorageInvalidConfigError`.
+
 ## Testing custom drivers
 
 ```ts

@@ -1,0 +1,341 @@
+- generic [active] [ref=f6e1]:
+  - generic [ref=f6e3]:
+    - link "New:Socket for Asana Is Now Available. Learn more →" [ref=f6e4] [cursor=pointer]:
+      - /url: https://socket.dev/blog/socket-for-asana-now-available
+      - generic [ref=f6e6]:
+        - generic [ref=f6e7]:
+          - text: "New:"
+          - generic [ref=f6e8]: Socket for Asana Is Now Available.
+        - generic [ref=f6e9]: Learn more →
+    - generic [ref=f6e10]:
+      - banner [ref=f6e11]:
+        - generic [ref=f6e13]:
+          - link "Socket home" [ref=f6e14] [cursor=pointer]:
+            - /url: /
+          - navigation "Main" [ref=f6e25]:
+            - list [ref=f6e27]:
+              - listitem [ref=f6e28]:
+                - button "Product" [ref=f6e29] [cursor=pointer]
+              - listitem [ref=f6e30]:
+                - button "Why Socket" [ref=f6e31] [cursor=pointer]
+              - listitem [ref=f6e32]:
+                - button "Company" [ref=f6e33] [cursor=pointer]
+              - listitem [ref=f6e34]:
+                - link "Blog" [ref=f6e35] [cursor=pointer]:
+                  - /url: /blog
+              - listitem [ref=f6e36]:
+                - link "Pricing" [ref=f6e37] [cursor=pointer]:
+                  - /url: /pricing
+              - listitem [ref=f6e38]:
+                - link "Contact" [ref=f6e39] [cursor=pointer]:
+                  - /url: /contact
+          - generic [ref=f6e41]:
+            - button "Search packages" [ref=f6e42] [cursor=pointer]:
+              - generic [ref=f6e43]: npm
+            - link "Get Started" [ref=f6e47] [cursor=pointer]:
+              - /url: /auth/login
+      - generic [ref=f6e48]:
+        - generic [ref=f6e49]:
+          - generic [ref=f6e50]:
+            - generic [ref=f6e51]:
+              - paragraph [ref=f6e52]: "@mohamedhabibwork/storagekit"
+              - combobox "Package version" [ref=f6e55]:
+                - option "0.1.0 (latest)" [selected]
+            - generic [ref=f6e57]:
+              - link "Package Overview" [ref=f6e58] [cursor=pointer]:
+                - /url: /npm/package/@mohamedhabibwork/storagekit/overview/0.1.0
+              - link "Dependencies 7" [ref=f6e64] [cursor=pointer]:
+                - /url: /npm/package/@mohamedhabibwork/storagekit/dependencies/0.1.0
+                - generic [ref=f6e65]:
+                  - generic [ref=f6e73]: Dependencies
+                  - generic [ref=f6e74]: "7"
+              - link "Maintainers 1" [ref=f6e77] [cursor=pointer]:
+                - /url: /npm/package/@mohamedhabibwork/storagekit/maintainers/0.1.0
+                - generic [ref=f6e78]:
+                  - generic [ref=f6e82]: Maintainers
+                  - generic [ref=f6e83]: "1"
+              - link "Versions 1" [ref=f6e86] [cursor=pointer]:
+                - /url: /npm/package/@mohamedhabibwork/storagekit/versions/0.1.0
+                - generic [ref=f6e87]:
+                  - generic [ref=f6e91]: Versions
+                  - generic [ref=f6e92]: "1"
+              - link "Alerts" [ref=f6e95] [cursor=pointer]:
+                - /url: /npm/package/@mohamedhabibwork/storagekit/alerts/0.1.0
+              - link "File Explorer" [ref=f6e101] [cursor=pointer]:
+                - /url: /npm/package/@mohamedhabibwork/storagekit/files/0.1.0
+            - generic [ref=f6e107]:
+              - paragraph [ref=f6e108]: Advanced tools
+              - link "License" [ref=f6e110] [cursor=pointer]:
+                - /url: /npm/package/@mohamedhabibwork/storagekit/license/0.1.0
+          - generic [ref=f6e117]:
+            - generic [ref=f6e118]:
+              - img "Socket logo" [ref=f6e119]
+              - paragraph [ref=f6e120]: Install Socket
+            - paragraph [ref=f6e121]: Detect and block malicious and high-risk dependencies
+            - link "Install" [ref=f6e122] [cursor=pointer]:
+              - /url: /install-github-app?source=package_nav_prompt
+        - generic [ref=f6e126]:
+          - navigation "breadcrumb" [ref=f6e127]:
+            - list [ref=f6e128]:
+              - listitem [ref=f6e129]:
+                - link "npm" [ref=f6e130] [cursor=pointer]:
+                  - /url: /npm
+              - listitem [ref=f6e131]
+              - listitem [ref=f6e134]:
+                - link "@mohamedhabibwork/storagekit" [ref=f6e135] [cursor=pointer]:
+                  - /url: /npm/package/@mohamedhabibwork/storagekit/overview/0.1.0
+              - listitem [ref=f6e136]
+              - listitem [ref=f6e139]:
+                - paragraph [ref=f6e140]: Alerts
+          - heading "@mohamedhabibwork/storagekit - Package Alerts" [level=1] [ref=f6e141]
+          - generic [ref=f6e143]:
+            - tablist [ref=f6e144]:
+              - tab [ref=f6e145] [cursor=pointer]:
+                - paragraph [ref=f6e148]: Package Alerts
+              - tab [selected] [ref=f6e149] [cursor=pointer]:
+                - paragraph [ref=f6e156]: Dependency Alerts
+            - tabpanel "Dependency Alerts" [ref=f6e158]:
+              - generic [ref=f6e159]:
+                - generic [ref=f6e163]:
+                  - generic [ref=f6e165]:
+                    - paragraph [ref=f6e166]: Socket optimized override available
+                    - generic [ref=f6e167]: Maintenance
+                  - generic [ref=f6e168]:
+                    - paragraph [ref=f6e169]: Package can be replaced with a Socket optimized override.
+                    - paragraph [ref=f6e170]: Found 2 instances in 2 packages
+                - generic [ref=f6e174]:
+                  - generic [ref=f6e176]:
+                    - paragraph [ref=f6e177]: Obfuscated code
+                    - generic [ref=f6e178]: Supply chain risk
+                  - generic [ref=f6e179]:
+                    - paragraph [ref=f6e180]: Obfuscated files are intentionally packed to hide their behavior. This could be a sign of malware.
+                    - paragraph [ref=f6e181]: Found 2 instances in 2 packages
+                - generic [ref=f6e185]:
+                  - generic [ref=f6e187]:
+                    - paragraph [ref=f6e188]: Network access
+                    - generic [ref=f6e189]: Supply chain risk
+                  - generic [ref=f6e190]:
+                    - paragraph [ref=f6e191]: This module accesses the network.
+                    - paragraph [ref=f6e192]: Found 12 instances in 12 packages
+                - generic [ref=f6e196]:
+                  - generic [ref=f6e198]:
+                    - paragraph [ref=f6e199]: Trivial Package
+                    - generic [ref=f6e200]: Supply chain risk
+                  - paragraph [ref=f6e202]: Packages less than 10 lines of code are easily copied into your own project and may not warrant the additional supply chain risk of an external dependency.
+                - generic [ref=f6e206]:
+                  - generic [ref=f6e208]:
+                    - paragraph [ref=f6e209]: AI-detected potential security risk
+                    - generic [ref=f6e210]: Supply chain risk
+                  - paragraph [ref=f6e212]: AI has determined that this package may contain potential security issues or vulnerabilities.
+                - generic [ref=f6e216]:
+                  - generic [ref=f6e218]:
+                    - paragraph [ref=f6e219]: Uses eval
+                    - generic [ref=f6e220]: Supply chain risk
+                  - generic [ref=f6e221]:
+                    - paragraph [ref=f6e222]: Package uses dynamic code execution (e.g., eval()), which is a dangerous practice. This can prevent the code from running in certain environments and increases the risk that the code may contain exploits or malicious behavior.
+                    - paragraph [ref=f6e223]: Found 2 instances in 2 packages
+                - generic [ref=f6e227]:
+                  - generic [ref=f6e229]:
+                    - paragraph [ref=f6e230]: Shell access
+                    - generic [ref=f6e231]: Supply chain risk
+                  - paragraph [ref=f6e233]: This module accesses the system shell. Accessing the system shell increases the risk of executing arbitrary code.
+                - generic [ref=f6e237]:
+                  - generic [ref=f6e239]:
+                    - paragraph [ref=f6e240]: Filesystem access
+                    - generic [ref=f6e241]: Supply chain risk
+                  - generic [ref=f6e242]:
+                    - paragraph [ref=f6e243]: Accesses the file system, and could potentially read sensitive data.
+                    - paragraph [ref=f6e244]: Found 11 instances in 11 packages
+                - generic [ref=f6e248]:
+                  - generic [ref=f6e250]:
+                    - paragraph [ref=f6e251]: URL strings
+                    - generic [ref=f6e252]: Supply chain risk
+                  - generic [ref=f6e253]:
+                    - paragraph [ref=f6e254]: Package contains fragments of external URLs or IP addresses, which the package may be accessing at runtime.
+                    - paragraph [ref=f6e255]: Found 38 instances in 37 packages
+                - generic [ref=f6e259]:
+                  - generic [ref=f6e261]:
+                    - paragraph [ref=f6e262]: Unmaintained
+                    - generic [ref=f6e263]: Maintenance
+                  - generic [ref=f6e264]:
+                    - paragraph [ref=f6e265]: Package has not been updated in more than 5 years and may be unmaintained. Problems with the package may go unaddressed.
+                    - paragraph [ref=f6e266]: Found 32 instances in 32 packages
+                - generic [ref=f6e270]:
+                  - generic [ref=f6e272]:
+                    - paragraph [ref=f6e273]: Environment variable access
+                    - generic [ref=f6e274]: Supply chain risk
+                  - generic [ref=f6e275]:
+                    - paragraph [ref=f6e276]: Package accesses environment variables, which may be a sign of credential stuffing or data theft.
+                    - paragraph [ref=f6e277]: Found 16 instances in 16 packages
+                - generic [ref=f6e281]:
+                  - generic [ref=f6e283]:
+                    - paragraph [ref=f6e284]: AI-detected potential code anomaly
+                    - generic [ref=f6e285]: Supply chain risk
+                  - generic [ref=f6e286]:
+                    - paragraph [ref=f6e287]: AI has identified unusual behaviors that may pose a security risk.
+                    - paragraph [ref=f6e288]: Found 16 instances in 12 packages
+                - generic [ref=f6e292]:
+                  - generic [ref=f6e294]:
+                    - paragraph [ref=f6e295]: New author
+                    - generic [ref=f6e296]: Supply chain risk
+                  - generic [ref=f6e297]:
+                    - paragraph [ref=f6e298]: A new npm collaborator published a version of the package for the first time. New collaborators are usually benign additions to a project, but do indicate a change to the security surface area of a package.
+                    - paragraph [ref=f6e299]: Found 4 instances in 4 packages
+                - generic [ref=f6e303]:
+                  - generic [ref=f6e305]:
+                    - paragraph [ref=f6e306]: Minified code
+                    - generic [ref=f6e307]: Quality
+                  - generic [ref=f6e308]:
+                    - paragraph [ref=f6e309]: This package contains minified code. This may be harmless in some cases where minified code is included in packaged libraries, however packages on npm should not minify code.
+                    - paragraph [ref=f6e310]: Found 5 instances in 5 packages
+      - contentinfo [ref=f6e311]:
+        - generic [ref=f6e313]:
+          - generic [ref=f6e314]:
+            - generic [ref=f6e315]:
+              - link [ref=f6e316] [cursor=pointer]:
+                - /url: /features/github
+                - paragraph [ref=f6e321]: Socket for GitHub
+              - link [ref=f6e322] [cursor=pointer]:
+                - /url: /features/firewall
+                - paragraph [ref=f6e327]: Socket Firewall
+              - link [ref=f6e328] [cursor=pointer]:
+                - /url: /features/cli
+                - paragraph [ref=f6e333]: Socket CLI
+              - link [ref=f6e334] [cursor=pointer]:
+                - /url: /features/patches
+                - paragraph [ref=f6e339]: Socket Certified Patches
+              - link [ref=f6e340] [cursor=pointer]:
+                - /url: /features/web-extension
+                - paragraph [ref=f6e345]: Socket Web Extension
+              - link [ref=f6e346] [cursor=pointer]:
+                - /url: /features/optimize
+                - paragraph [ref=f6e351]: Socket Optimize
+              - link [ref=f6e352] [cursor=pointer]:
+                - /url: /features/dependency-search
+                - paragraph [ref=f6e357]: Socket Dependency Search
+              - link [ref=f6e358] [cursor=pointer]:
+                - /url: /features/reachability
+                - paragraph [ref=f6e363]: Socket Reachability
+            - generic [ref=f6e364]:
+              - paragraph [ref=f6e365]: Languages
+              - generic [ref=f6e366]:
+                - link "JavaScript / TypeScript" [ref=f6e370] [cursor=pointer]:
+                  - /url: /integrations/javascript
+                - link "Python" [ref=f6e375] [cursor=pointer]:
+                  - /url: /integrations/python
+                - link "Go" [ref=f6e380] [cursor=pointer]:
+                  - /url: /integrations/go
+                - link "Ruby" [ref=f6e385] [cursor=pointer]:
+                  - /url: /integrations/ruby
+                - link "All Languages" [ref=f6e388] [cursor=pointer]:
+                  - /url: /integrations#languages
+            - generic [ref=f6e390]:
+              - paragraph [ref=f6e391]: Integrations
+              - generic [ref=f6e392]:
+                - link "All Integrations" [ref=f6e394] [cursor=pointer]:
+                  - /url: /integrations
+                - link "Source Control" [ref=f6e397] [cursor=pointer]:
+                  - /url: /integrations#scm
+                - link "Ticketing & Messaging" [ref=f6e400] [cursor=pointer]:
+                  - /url: /integrations#ticketing-and-messaging
+                - link "Package Managers" [ref=f6e403] [cursor=pointer]:
+                  - /url: /integrations#package-managers
+                - link "SIEM" [ref=f6e406] [cursor=pointer]:
+                  - /url: /integrations#siem
+          - generic [ref=f6e408]:
+            - generic [ref=f6e409]:
+              - paragraph [ref=f6e410]: Resources
+              - generic [ref=f6e411]:
+                - link "Docs" [ref=f6e413] [cursor=pointer]:
+                  - /url: https://docs.socket.dev
+                - link "Changelog" [ref=f6e416] [cursor=pointer]:
+                  - /url: /changelog
+                - link "Package Alerts" [ref=f6e419] [cursor=pointer]:
+                  - /url: /alerts
+                - link "FAQ" [ref=f6e422] [cursor=pointer]:
+                  - /url: /faq
+                - link "Glossary" [ref=f6e425] [cursor=pointer]:
+                  - /url: /glossary
+            - generic [ref=f6e427]:
+              - paragraph [ref=f6e428]: Company
+              - generic [ref=f6e429]:
+                - link "About" [ref=f6e431] [cursor=pointer]:
+                  - /url: /about
+                - link "Careers" [ref=f6e434] [cursor=pointer]:
+                  - /url: /careers
+                - link "Socket Labs" [ref=f6e437] [cursor=pointer]:
+                  - /url: /labs
+                - link "Investors" [ref=f6e440] [cursor=pointer]:
+                  - /url: /about#investors
+                - link "Security" [ref=f6e443] [cursor=pointer]:
+                  - /url: /security
+                - link "Love" [ref=f6e446] [cursor=pointer]:
+                  - /url: /love
+            - generic [ref=f6e448]:
+              - paragraph [ref=f6e449]: News
+              - generic [ref=f6e450]:
+                - link "Security" [ref=f6e452] [cursor=pointer]:
+                  - /url: /blog/category/security-news
+                - link "Company" [ref=f6e455] [cursor=pointer]:
+                  - /url: /blog/category/news
+                - link "Engineering" [ref=f6e458] [cursor=pointer]:
+                  - /url: /blog/category/engineering
+                - link "Application Security" [ref=f6e461] [cursor=pointer]:
+                  - /url: /blog/category/security
+                - link "View All" [ref=f6e464] [cursor=pointer]:
+                  - /url: /blog
+            - generic [ref=f6e466]:
+              - paragraph [ref=f6e467]: Achievements
+              - generic [ref=f6e468]:
+                - link "SOC 2 Type 2" [ref=f6e470] [cursor=pointer]:
+                  - /url: /blog/announcing-soc-2-type-2-compliance
+                - link "Raised $125M" [ref=f6e473] [cursor=pointer]:
+                  - /url: /blog/series-c
+                - link "Fortune Cyber 60" [ref=f6e476] [cursor=pointer]:
+                  - /url: /blog/socket-recognized-on-fortune-cyber-60-list
+                - link "Top Customers" [ref=f6e479] [cursor=pointer]:
+                  - /url: /customers
+                - link "Company News" [ref=f6e482] [cursor=pointer]:
+                  - /url: /blog/category/news
+          - generic [ref=f6e484]:
+            - generic [ref=f6e485]:
+              - link "Socket home" [ref=f6e486] [cursor=pointer]:
+                - /url: /
+              - generic [ref=f6e497]:
+                - link "Socket on X" [ref=f6e498] [cursor=pointer]:
+                  - /url: https://x.com/SocketSecurity
+                - link "Socket on GitHub" [ref=f6e501] [cursor=pointer]:
+                  - /url: https://github.com/SocketDev
+                - link "Socket on LinkedIn" [ref=f6e504] [cursor=pointer]:
+                  - /url: https://www.linkedin.com/company/socketinc
+                - link "Socket on Discord" [ref=f6e507] [cursor=pointer]:
+                  - /url: https://discord.gg/JkhgPpXDSd
+                - link "Socket on Bluesky" [ref=f6e510] [cursor=pointer]:
+                  - /url: https://bsky.app/profile/socket.dev
+            - generic [ref=f6e513]:
+              - paragraph [ref=f6e514]: Stay in touch
+              - paragraph [ref=f6e515]: Get open source security insights delivered straight into your inbox.
+              - generic [ref=f6e516]:
+                - textbox "Enter email" [ref=f6e517]
+                - button "Subscribe to newsletter" [ref=f6e518] [cursor=pointer]
+            - generic [ref=f6e521]:
+              - link "Book a Demo" [ref=f6e522] [cursor=pointer]:
+                - /url: /demo
+              - link "Get Started" [ref=f6e524] [cursor=pointer]:
+                - /url: /auth/login
+            - generic [ref=f6e526]:
+              - link "Terms" [ref=f6e527] [cursor=pointer]:
+                - /url: /terms
+              - link "Privacy" [ref=f6e529] [cursor=pointer]:
+                - /url: /privacy
+              - link "Security" [ref=f6e531] [cursor=pointer]:
+                - /url: /security
+          - generic [ref=f6e533]:
+            - generic [ref=f6e534]:
+              - paragraph [ref=f6e535]: Made with ⚡️ by Socket Inc
+              - paragraph [ref=f6e536]: U.S. Patent No. 12,346,443 & 12,314,394. Other pending.
+            - link [ref=f6e537] [cursor=pointer]:
+              - /url: /security
+              - img "SOC 2 Type II certified" [ref=f6e538]
+  - alert [ref=f6e539]
+  - region "top-end Notifications alt+T"

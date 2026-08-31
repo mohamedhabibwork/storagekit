@@ -217,6 +217,13 @@ export interface NativeListResultMap {
   oracle: OracleNativeListResult;
 }
 
-export type NativeOptionsFor<T extends StorageType> = NativeOptionsMap[T];
-export type NativeClientFor<T extends StorageType> = NativeClientMap[T];
+/**
+ * Lookup into a provider map that tolerates CUSTOM (non-builtin) storage
+ * types: builtin types get their strong native types, custom types fall
+ * back to `unknown`.
+ */
+export type MapValueFor<M, T extends string> = T extends keyof M ? M[T] : unknown;
+
+export type NativeOptionsFor<T extends string> = MapValueFor<NativeOptionsMap, T>;
+export type NativeClientFor<T extends string> = MapValueFor<NativeClientMap, T>;
 export type StorageConfigFor<T extends StorageType> = StorageConfigMap[T];

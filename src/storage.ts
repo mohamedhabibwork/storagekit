@@ -26,7 +26,7 @@ import type {
   UploadResult,
   UrlOptions,
 } from './core/types';
-import type { NativeClientMap } from './core/maps';
+import type { MapValueFor, NativeClientMap } from './core/maps';
 import type { StorageDriver } from './drivers/driver';
 
 export interface StorageInstanceOptions {
@@ -40,7 +40,7 @@ export interface StorageInstanceOptions {
  * Wraps a driver with the public `Storage<T>` behavior: lifecycle hooks,
  * operation events, and a final error-normalization safety net.
  */
-export class StorageInstance<T extends StorageType> implements Storage<T> {
+export class StorageInstance<T extends string> implements Storage<T> {
   readonly type: T;
   readonly hooks: StorageHooks;
 
@@ -296,14 +296,14 @@ export class StorageInstance<T extends StorageType> implements Storage<T> {
     }
   }
 
-  native(): NativeClientMap[T] {
+  native(): MapValueFor<NativeClientMap, T> {
     if (this.nativeCache === undefined) {
       this.nativeCache = this.driver.native();
     }
-    return this.nativeCache as NativeClientMap[T];
+    return this.nativeCache as MapValueFor<NativeClientMap, T>;
   }
 
-  nativeRequest<R>(fn: (client: NativeClientMap[T]) => Promise<R>): Promise<R> {
+  nativeRequest<R>(fn: (client: MapValueFor<NativeClientMap, T>) => Promise<R>): Promise<R> {
     return this.driver.nativeRequest(fn);
   }
 

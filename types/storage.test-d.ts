@@ -139,3 +139,22 @@ describe('storage manager typing', () => {
     manager.disk('nope');
   });
 });
+
+describe('custom driver types', () => {
+  it('infers Storage<customType> for registered drivers', () => {
+    expectTypeOf(
+      createStorage({ type: 'postgres', connectionString: 'postgres://' }),
+    ).toEqualTypeOf<Promise<Storage<'postgres'>>>();
+
+    const custom = {} as Storage<'postgres'>;
+    // native slots fall back to unknown for custom types
+    expectTypeOf(custom.native()).toEqualTypeOf<unknown>();
+    // arbitrary custom native bags are accepted
+    custom.upload('a', 'x', { native: { table: 'objects' } });
+  });
+
+  it('rejects custom configs without a type discriminant', () => {
+    // @ts-expect-error custom configs still need `type`
+    createStorage({ engine: 'postgres' });
+  });
+});

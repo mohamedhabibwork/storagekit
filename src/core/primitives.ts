@@ -124,7 +124,8 @@ export type StorageHooks = {
 };
 
 export interface StorageOperationEvent {
-  provider: StorageType;
+  /** Builtin type name or the custom driver's registered type. */
+  provider: string;
   operation: string;
   path?: string;
   duration: number;

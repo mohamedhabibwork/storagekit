@@ -1,0 +1,109 @@
+name: Publish
+
+# Auto-publish flow:
+#   1. Bump:            npm version patch|minor|major   (creates vX.Y.Z tag + commit)
+#   2. Push:            git push --follow-tags
+#   3. This workflow:   quality gate -> tag/version match -> npm publish -> GitHub release
+#
+# Requires the NPM_TOKEN secret (an npm automation/granular token with
+# publish rights to @mohamedhabibwork): repo Settings -> Secrets and
+# variables -> Actions -> New repository secret.
+
+on:
+  push:
+    tags: ['v*']
+  release:
+    types: [published]
+  workflow_dispatch:
+
+concurrency:
+  group: publish
+  cancel-in-progress: false
+
+jobs:
+  quality:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Typecheck
+        run: npm run typecheck
+      - name: Unit + contract + mocked tests
+        run: npm test
+      - name: Type tests
+        run: npm run test:types
+      - name: Build (ESM + CJS)
+        run: npm run build
+
+  check-version:
+    # On tag pushes, the tag must match package.json — prevents publishing
+    # a version that was never bumped.
+    if: startsWith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Verify tag matches package.json version
+        run: |
+          PKG_VERSION="v$(node -p "require('./package.json').version")"
+          if [ "$PKG_VERSION" != "$GITHUB_REF_NAME" ]; then
+            echo "::error::Tag $GITHUB_REF_NAME does not match package.json version $PKG_VERSION"
+            exit 1
+          fi
+
+  publish:
+    needs: [quality, check-version]
+    if: >-
+      ${{
+        !cancelled() &&
+        needs.quality.result == 'success' &&
+        (needs.check-version.result == 'success' || needs.check-version.result == 'skipped')
+      }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write # npm provenance, if enabled later in publishConfig
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          registry-url: 'https://registry.npmjs.org'
+      - run: npm ci
+      - run: npm run build
+      - name: Publish to npm
+        run: npm publish --access=public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+  github-release:
+    # Ensure a GitHub release exists for the published tag (with notes).
+    needs: [publish]
+    if: >-
+      ${{
+        !cancelled() &&
+        needs.publish.result == 'success' &&
+        startsWith(github.ref, 'refs/tags/v')
+      }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - name: Create GitHub release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          TAG="${GITHUB_REF_NAME}"
+          if gh release view "$TAG" > /dev/null 2>&1; then
+            echo "Release $TAG already exists"
+          else
+            gh release create "$TAG" --verify-tag --generate-notes
+          fi

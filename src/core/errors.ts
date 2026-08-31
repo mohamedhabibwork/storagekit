@@ -1,7 +1,8 @@
 import type { StorageType } from './primitives';
 
 export interface StorageErrorOptions {
-  provider?: StorageType;
+  /** Builtin type name or a custom driver's registered type. */
+  provider?: StorageType | (string & {});
   operation?: string;
   path?: string;
   code?: string;
@@ -55,7 +56,7 @@ const KNOWN_ERROR_NAMES = new Set([
 ]);
 
 export class StorageError extends Error {
-  readonly provider?: StorageType;
+  readonly provider?: StorageType | (string & {});
   readonly operation?: string;
   readonly path?: string;
   /** Short machine-readable code, either package-level or provider-native. */
@@ -239,7 +240,8 @@ const QUOTA_CODES = new Set([
 const ABORT_CODES = new Set(['AbortError', 'RequestAbortedError', 'CANCELLED']);
 
 export interface NormalizeContext {
-  provider: StorageType;
+  /** Builtin type name or a custom driver's registered type. */
+  provider: StorageType | (string & {});
   operation: string;
   path?: string;
   /** Map a provider-native code that the shared lists do not know about. */

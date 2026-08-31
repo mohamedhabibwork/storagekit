@@ -12,6 +12,7 @@ import type {
   UploadBody,
 } from './primitives';
 import type {
+  MapValueFor,
   NativeClientMap,
   NativeCopyOptionsMap,
   NativeDeleteManyOptionsMap,
@@ -42,30 +43,37 @@ export type {
   UploadBody,
 } from './primitives';
 export type {
+  MapValueFor,
   NativeClientMap,
   NativeOptionsMap,
   StorageConfig,
   StorageConfigMap,
 } from './maps';
 
-export interface UploadOptions<T extends StorageType = StorageType>
+/**
+ * Option/result generics accept ANY string so custom driver types flow
+ * through: builtin types resolve their strong native maps, custom types
+ * fall back to `unknown` (see {@link MapValueFor}).
+ */
+
+export interface UploadOptions<T extends string = StorageType>
   extends BaseUploadOptions {
   multipart?: MultipartOptions;
   /** Provider-native upload options, strongly typed by storage type. */
-  native?: NativeOptionsMap[T];
+  native?: MapValueFor<NativeOptionsMap, T>;
 }
 
-export interface DownloadOptions<T extends StorageType = StorageType> {
+export interface DownloadOptions<T extends string = StorageType> {
   versionId?: string;
   range?: RangeOptions;
   signal?: AbortSignal;
-  native?: NativeDownloadOptionsMap[T];
+  native?: MapValueFor<NativeDownloadOptionsMap, T>;
 }
 
-export interface DeleteOptions<T extends StorageType = StorageType> {
+export interface DeleteOptions<T extends string = StorageType> {
   versionId?: string;
   signal?: AbortSignal;
-  native?: NativeDeleteOptionsMap[T];
+  native?: MapValueFor<NativeDeleteOptionsMap, T>;
 }
 
 export interface DeleteManyResult {
@@ -73,27 +81,27 @@ export interface DeleteManyResult {
   failed: Array<{ path: string; error: StorageErrorAlias }>;
 }
 
-type StorageErrorAlias = import('./errors.js').StorageError;
+type StorageErrorAlias = import('./errors').StorageError;
 
-export interface DeleteManyOptions<T extends StorageType = StorageType> {
+export interface DeleteManyOptions<T extends string = StorageType> {
   signal?: AbortSignal;
-  native?: NativeDeleteManyOptionsMap[T];
+  native?: MapValueFor<NativeDeleteManyOptionsMap, T>;
 }
 
-export interface StatOptions<T extends StorageType = StorageType> {
+export interface StatOptions<T extends string = StorageType> {
   versionId?: string;
   signal?: AbortSignal;
-  native?: NativeStatOptionsAlias[T];
+  native?: MapValueFor<NativeStatOptionsAlias, T>;
 }
 
-type NativeStatOptionsAlias = import('./maps.js').NativeStatOptionsMap;
+type NativeStatOptionsAlias = import('./maps').NativeStatOptionsMap;
 
-export interface ExistsOptions<T extends StorageType = StorageType> {
+export interface ExistsOptions<T extends string = StorageType> {
   signal?: AbortSignal;
-  native?: NativeStatOptionsAlias[T];
+  native?: MapValueFor<NativeStatOptionsAlias, T>;
 }
 
-export interface ListOptions<T extends StorageType = StorageType> {
+export interface ListOptions<T extends string = StorageType> {
   prefix?: string;
   /** Maximum number of entries (files + directories) returned per page. */
   limit?: number;
@@ -106,19 +114,19 @@ export interface ListOptions<T extends StorageType = StorageType> {
    */
   recursive?: boolean;
   signal?: AbortSignal;
-  native?: NativeListOptionsMap[T];
+  native?: MapValueFor<NativeListOptionsMap, T>;
 }
 
-export interface ListResult<T extends StorageType = StorageType> {
+export interface ListResult<T extends string = StorageType> {
   files: StorageFile[];
   directories: string[];
   /** Opaque continuation token; undefined when exhausted. */
   cursor?: string;
   hasMore: boolean;
-  native?: NativeListResultMap[T];
+  native?: MapValueFor<NativeListResultMap, T>;
 }
 
-export interface CopyOptions<T extends StorageType = StorageType> {
+export interface CopyOptions<T extends string = StorageType> {
   overwrite?: boolean;
   contentType?: string;
   metadata?: Record<string, string>;
@@ -126,30 +134,30 @@ export interface CopyOptions<T extends StorageType = StorageType> {
   contentDisposition?: string;
   contentEncoding?: string;
   signal?: AbortSignal;
-  native?: NativeCopyOptionsMap[T];
+  native?: MapValueFor<NativeCopyOptionsMap, T>;
 }
 
-export interface MoveOptions<T extends StorageType = StorageType> {
+export interface MoveOptions<T extends string = StorageType> {
   overwrite?: boolean;
   contentType?: string;
   metadata?: Record<string, string>;
   signal?: AbortSignal;
-  native?: NativeMoveOptionsMap[T];
+  native?: MapValueFor<NativeMoveOptionsMap, T>;
 }
 
-export interface SignedUrlOptions<T extends StorageType = StorageType> {
+export interface SignedUrlOptions<T extends string = StorageType> {
   action?: SignedUrlAction;
   /** Seconds until expiry. Defaults to 3600; capped at 7 days. */
   expiresIn?: number;
   signal?: AbortSignal;
-  native?: NativeSignedUrlOptionsMap[T];
+  native?: MapValueFor<NativeSignedUrlOptionsMap, T>;
 }
 
-export interface UrlOptions<T extends StorageType = StorageType> {
-  native?: NativeUrlOptionsMap[T];
+export interface UrlOptions<T extends string = StorageType> {
+  native?: MapValueFor<NativeUrlOptionsMap, T>;
 }
 
-export interface UploadResult<T extends StorageType = StorageType> {
+export interface UploadResult<T extends string = StorageType> {
   path: string;
   size?: number;
   etag?: string;
@@ -157,10 +165,10 @@ export interface UploadResult<T extends StorageType = StorageType> {
   /** Public URL when derivable without network requests. */
   url?: string;
   provider: T;
-  native?: NativeUploadResultMap[T];
+  native?: MapValueFor<NativeUploadResultMap, T>;
 }
 
-export interface DownloadResult<T extends StorageType = StorageType> {
+export interface DownloadResult<T extends string = StorageType> {
   stream: Readable;
   contentType?: string;
   contentLength?: number;
@@ -170,13 +178,13 @@ export interface DownloadResult<T extends StorageType = StorageType> {
   versionId?: string;
   range?: RangeOptions;
   provider: T;
-  native?: NativeDownloadResultMap[T];
+  native?: MapValueFor<NativeDownloadResultMap, T>;
   buffer(): Promise<Buffer>;
   text(): Promise<string>;
   json<V = unknown>(): Promise<V>;
 }
 
-export interface FileStat<T extends StorageType = StorageType> {
+export interface FileStat<T extends string = StorageType> {
   path: string;
   size: number;
   contentType?: string;
@@ -185,10 +193,10 @@ export interface FileStat<T extends StorageType = StorageType> {
   metadata?: Record<string, string>;
   versionId?: string;
   provider: T;
-  native?: NativeFileStatMap[T];
+  native?: MapValueFor<NativeFileStatMap, T>;
 }
 
-export interface CopyResult<T extends StorageType = StorageType> {
+export interface CopyResult<T extends string = StorageType> {
   source: string;
   destination: string;
   etag?: string;
@@ -197,7 +205,7 @@ export interface CopyResult<T extends StorageType = StorageType> {
   native?: unknown;
 }
 
-export interface MoveResult<T extends StorageType = StorageType> {
+export interface MoveResult<T extends string = StorageType> {
   source: string;
   destination: string;
   etag?: string;
@@ -205,12 +213,12 @@ export interface MoveResult<T extends StorageType = StorageType> {
 }
 
 /**
- * The unified, provider-typed storage interface. `T` drives both the config
- * validation at creation time and which `native` options every method
- * accepts — a `Storage<'s3'>` accepts real AWS options, a `Storage<'azure'>`
- * accepts Azure ones, while all common operations share one API.
+ * The unified, provider-typed storage interface. `T` is inferred from the
+ * config `type` at creation time — builtin types get strongly-typed
+ * `native` option bags and native clients; custom (registered) types get
+ * `unknown` native slots.
  */
-export interface Storage<T extends StorageType = StorageType> {
+export interface Storage<T extends string = StorageType> {
   readonly type: T;
 
   upload(
@@ -265,14 +273,14 @@ export interface Storage<T extends StorageType = StorageType> {
   ): Promise<string>;
 
   /** The underlying native SDK client, typed per provider. */
-  native(): NativeClientMap[T];
+  native(): MapValueFor<NativeClientMap, T>;
 
   /**
    * Escape hatch for SDK operations the package does not wrap.
    * The client passed to `fn` is the native, provider-typed one.
    */
   nativeRequest<R>(
-    fn: (client: NativeClientMap[T]) => Promise<R>,
+    fn: (client: MapValueFor<NativeClientMap, T>) => Promise<R>,
   ): Promise<R>;
 
   capabilities(): StorageCapabilities;

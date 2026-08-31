@@ -1,0 +1,17 @@
+version: 2
+updates:
+  # Runtime/peer SDK updates (aws, azure, minio, oci) + dev tooling
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+    groups:
+      minor-and-patch:
+        update-types:
+          - minor
+          - patch
+  # Keep the actions themselves current
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly

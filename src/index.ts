@@ -7,7 +7,15 @@
  * storages, or use `createStorage()` from here which lazy-loads only the
  * configured driver.
  */
-export { createStorage, type CreateStorageOptions } from './factory';
+export {
+  createStorage,
+  type CreateStorageOptions,
+  registerStorageDriver,
+  unregisterStorageDriver,
+  listStorageTypes,
+  type StorageDriverFactory,
+} from './factory';
+export { defineDriver, type StorageDriver } from './drivers/driver';
 export { createStorageManager } from './manager';
 export type { StorageManager } from './manager';
 export { copyBetween, type CopyBetweenOptions } from './copy-between';
