@@ -6,3 +6,4 @@ dist/
 storage/
 !src/storage.ts
 .DS_Store
+.playwright-mcp/
