@@ -1,0 +1,272 @@
+# storagekit (@mohamedhabibwork/storagekit)
+
+> Unified TypeScript file management across Local filesystem, AWS S3, MinIO, Azure Blob Storage and Oracle OCI Object Storage. One common API for common operations, with strongly-typed **provider-native options** preserved under a `native` key instead of being flattened to a lowest common denominator. Requires Node.js >= 20. Dual ESM/CJS.
+
+## Install
+
+```bash
+npm install @mohamedhabibwork/storagekit
+# Provider SDKs are optional peer dependencies — install only what you use:
+# S3:      npm i @aws-sdk/client-s3 @aws-sdk/lib-storage @aws-sdk/s3-request-presigner
+# MinIO:   npm i minio
+# Azure:   npm i @azure/storage-blob
+# Oracle:  npm i oci-common oci-objectstorage
+# Local:   no extra dependency (Node built-ins only)
+```
+
+**Entrypoints** (import only what you use; the root entry bundles no cloud SDK):
+`@mohamedhabibwork/storagekit` (core + factory + manager + copyBetween),
+`.../local`, `.../s3`, `.../minio`, `.../azure`, `.../oracle` (each also exports
+`createXxxStorage`), `.../testing` (driver contract suite).
+
+Loading a driver without its SDK installed throws `StorageInvalidConfigError`
+with the exact `npm install` command — never a module-not-found crash.
+
+## Core rule
+
+Common options are normalized and identical on every provider. Anything
+provider-specific goes in `native`, strongly typed by the configured storage
+type: `Storage<'s3'>` accepts real AWS fields (`StorageClass`,
+`ServerSideEncryption`, `ACL`, …) while `Storage<'azure'>` accepts Azure
+fields (`tier`, `conditions`, `tags`, …) and REJECTS AWS fields at compile
+time. `native` is merged last and overrides common equivalents.
+
+## Creating a storage (async)
+
+```ts
+import { createStorage } from '@mohamedhabibwork/storagekit';
+
+// Returns Promise<Storage<'s3'>> — the type parameter is inferred from `type`
+const s3 = await createStorage({
+  type: 's3',                    // 'local' | 's3' | 'minio' | 'azure' | 'oracle'
+  bucket: 'uploads',
+  region: 'eu-central-1',
+});
+```
+
+Required config per type:
+- `local`: `root` (required); optional `baseUrl` (powers `getUrl()`), `prefix`, `permissions`, `createDirectories`, `followSymlinks`
+- `s3`: `bucket`; optional `region`, `endpoint`, `credentials`, `forcePathStyle`, `prefix`, `publicUrlBase`, `client` (inject S3Client), `clientOptions`
+- `minio`: `bucket`, `endPoint`; optional `port`, `useSSL`, `accessKey`, `secretKey`, `region`, `prefix`, `publicUrlBase`, `client`, `clientOptions`
+- `azure`: `container` + ONE auth route: `connectionString` | `accountUrl` (+ `credential`: shared key or TokenCredential) | `serviceClient` | `containerClient`; optional `prefix`, `publicUrlBase`
+- `oracle`: `namespaceName`, `bucketName`; optional `region`, `prefix`, `publicUrlBase`, `auth` (`{type:'config-file'|'instance-principals'|'resource-principals'|'provider'}`), `authProvider`, `client`, `clientOptions`
+
+All providers accept an optional `prefix` (e.g. `'production/'`): every
+operation transparently stores/lists under that prefix and strips it from
+results.
+
+Second factory argument (all optional):
+`{ hooks, onOperation, detectContentType }`. `detectContentType` defaults to
+true and is a lightweight extension→MIME map; pass `contentType` explicitly
+when it matters.
+
+## Upload
+
+```ts
+// body: string | Buffer | Uint8Array | ArrayBuffer | Blob | Node Readable
+await storage.upload('users/1/avatar.jpg', buffer, {
+  contentType: 'image/jpeg',          // normalized
+  metadata: { userId: '100' },        // normalized
+  cacheControl: 'public,max-age=31536000',
+  contentDisposition: '…', contentEncoding: '…',
+  overwrite: false,                   // default true; false = HEAD check + StorageConflictError
+  signal: controller.signal,          // cancellation everywhere
+  multipart: { partSize: 10 * 1024 * 1024, concurrency: 4 },
+  native: { StorageClass: 'INTELLIGENT_TIERING' },   // provider-native, typed
+});
+// → { path, size?, etag?, versionId?, url?, provider, native? }
+```
+
+Streams are never buffered into memory. Multipart mapping: S3 → `@aws-sdk/lib-storage`
+(`partSize`, `concurrency` → `queueSize`); Azure → `uploadStream(bufferSize, maxConcurrency)`;
+Oracle → native multipart API (partSize floored at 1 MiB, default 64 MiB);
+MinIO → its internal multipart (size unknown); local → plain stream write.
+
+Provider-native field examples:
+- S3: `StorageClass`, `ServerSideEncryption: 'aws:kms'`, `SSEKMSKeyId`, `ACL`, `Tagging`
+- Azure: `tier: 'Cool'`, `conditions`, `tags`, `blobHTTPHeaders`
+- MinIO: `metaData: { … }` (extra x-amz-meta bag)
+- Oracle: `storageTier: 'Archive'`, `ifMatch`, `opcMeta`, `opcChecksumAlgorithm`
+- Local: `mode: 0o600`
+
+## Download
+
+```ts
+const dl = await storage.download('docs/report.pdf', {
+  versionId: '…',                     // where the provider supports it
+  range: { offset: 100, length: 50 }, // byte range where supported
+  signal,
+});
+dl.stream            // Node Readable — pipe it somewhere
+dl.contentType; dl.contentLength; dl.etag; dl.lastModified; dl.metadata; dl.versionId
+await dl.buffer(); await dl.text(); await dl.json<MyType>();
+```
+
+Always consume the stream (or call `.buffer()/.text()/.json()`). If you abort,
+`stream.destroy()` it.
+
+## Exists / stat / delete
+
+```ts
+await storage.exists('a.txt');                    // HEAD-based, never downloads
+const st = await storage.stat('a.txt');           // { path, size, contentType?, etag?, lastModified?, metadata?, versionId?, provider }
+await storage.delete('a.txt');                    // IDEMPOTENT: deleting a missing object is a no-op
+await storage.deleteMany(['a', 'b', 'c']);        // → { deleted: string[], failed: [{ path, error }] }
+```
+
+Missing file: `download`/`stat` throw `StorageNotFoundError`; `delete`/`deleteMany`
+succeed silently. `exists` returns false.
+
+## List / iterate
+
+```ts
+// default (recursive: false) = ONE level deep, like S3 with delimiter
+const page = await storage.list({ prefix: 'users/100/', limit: 100, cursor });
+page.files;        // StorageFile[]: { path, size?, etag?, lastModified?, metadata? }
+page.directories;  // ['users/100/sub/'] — trailing slash, one level
+page.cursor;       // opaque token — pass back as { cursor } verbatim
+page.hasMore;
+
+// recursive flat scan (all files under prefix, directories empty)
+await storage.list({ prefix: 'uploads/', recursive: true, limit: 1000 });
+
+// async iteration — pagination handled for you, yields files only
+for await (const file of storage.iterate('uploads/')) { file.path; }
+```
+
+`limit` defaults to 1000 and bounds entries per page (files + directories).
+Cursors are opaque driver-specific tokens: only round-trip them, never parse
+or persist across config changes.
+
+## Copy / move / cross-provider copy
+
+```ts
+await storage.copy('temp/a.jpg', 'images/a.jpg');   // server-side copy
+await storage.move('temp/a.pdf', 'docs/a.pdf');     // copy + delete (rename on local)
+
+import { copyBetween } from '@mohamedhabibwork/storagekit';
+await copyBetween(srcStorage, 'docs/f.pdf', dstStorage, 'archive/f.pdf', {
+  concurrency: 4, onProgress: (bytes, total) => {},
+});
+```
+
+`copy` streams server-to-server within a provider. Cross-provider always
+streams through the process (never fully buffered) — use `copyBetween`.
+
+## URLs
+
+```ts
+await storage.getUrl('images/logo.png');      // unsigned; no network call
+await storage.getSignedUrl('private.pdf', { expiresIn: 3600, action: 'read' }); // 'read' | 'write' | 'delete'
+```
+
+`expiresIn` is seconds, default 3600, hard-capped at 604800 (7 days) — out of
+range throws. S3/MinIO: presigned; Azure: SAS via shared key / connection
+string (TokenCredential needs user-delegation via `nativeRequest`); local:
+throws `StorageUnsupportedOperationError` (serve through your app); Oracle:
+throws — it has no presigned URLs. `createOracleStorage()` (subpath import)
+adds `createPreauthenticatedRequest()` for Oracle PARs, whose lifecycle is
+persistent server-side and fundamentally different from presigned URLs.
+
+## Escaping the abstraction
+
+```ts
+const client = storage.native();            // S3Client | ContainerClient | Minio.Client | ObjectStorageClient | {root, resolve}
+await storage.nativeRequest((c) => c.anySdkCall());   // typed native client
+storage.capabilities();                     // { signedUrls, multipartUpload, serverSideCopy, versioning, metadata, directories, bulkDelete }
+```
+
+Check `capabilities()` instead of assuming a feature exists; unsupported
+features throw `StorageUnsupportedOperationError` rather than being silently
+emulated.
+
+## Errors
+
+```ts
+import { StorageNotFoundError, isStorageError } from '@mohamedhabibwork/storagekit';
+try { await storage.download(p); } catch (e) {
+  if (e instanceof StorageNotFoundError) { /* missing */ }
+  e.provider;  e.operation;  e.path;  e.code;  e.cause;  // original SDK error
+}
+```
+
+Classes: `StorageError` (base), `StorageNotFoundError`,
+`StoragePermissionError`, `StorageConflictError`, `StorageInvalidConfigError`,
+`StorageNetworkError`, `StorageQuotaError`,
+`StorageUnsupportedOperationError`, `StorageInvalidPathError`. Use
+`isStorageError(e)` when errors may cross entrypoint copies. Provider errors
+are preserved on `cause` and never leak credentials into messages.
+
+## Multiple disks / manager
+
+```ts
+const disks = createStorageManager({ default: 'uploads', disks: {
+  uploads: { type: 's3', bucket: 'uploads' },
+  temp: { type: 'local', root: './tmp' },
+}});
+await disks.disk('uploads').upload('a.txt', 'x');   // typed per disk config
+await disks.defaultDisk();
+```
+
+## Hooks & events
+
+```ts
+const storage = await createStorage(config, {
+  hooks: { beforeUpload, afterUpload, uploadError, beforeDownload,
+           afterDownload, downloadError, beforeDelete, afterDelete, deleteError },
+  onOperation: (e) => e.provider && e.duration && e.success,
+});
+const off = storage.on('operation', (e) => {}); off();
+// event: { provider, operation, path?, duration, success, error? }
+```
+
+Hook contexts are sanitized: credentials and signed URLs never appear.
+Hook errors in `beforeX` abort nothing silently — `beforeX` errors propagate;
+`xxxError` hooks never mask the original failure.
+
+## Key semantics (do not get these wrong)
+
+- Keys always use `/`. Input is normalized: backslashes, duplicate slashes,
+  leading/trailing slashes, `.` segments. `..` traversal throws
+  `StorageInvalidPathError`; local paths can never escape the configured root.
+- `overwrite` defaults to true everywhere; `overwrite: false` costs one extra
+  metadata round-trip.
+- Deleting missing objects is a no-op on every provider (idempotent).
+- `native` overrides common options when both set the same field.
+- Everything network-bound accepts `signal`.
+- Export maps are dual ESM/CJS with full TypeScript declarations; types work
+  with `moduleResolution: 'bundler'` / `'node16'`.
+
+## Best practices
+
+1. Import provider subpaths (`.../s3`) in bundled apps so only one SDK ships.
+2. `await createStorage(...)` — the factory loads the SDK and builds clients.
+3. Stream large files; never `readFile` then upload the buffer.
+4. Set `contentType` explicitly for user-facing correctness; extension
+   detection is a convenience, not a guarantee.
+5. Pass `signal` on long transfers and wire it to request timeouts.
+6. Scan big buckets with `iterate()` (or `list({recursive:true})` paging), not
+   unpaginated `list()`.
+7. Round-trip `cursor` opaquely; don't persist cursors across restarts of a
+   changed config.
+8. Same-provider copies: `storage.copy()` (server-side). Different providers:
+   `copyBetween()`.
+9. Reach for `native()` / `nativeRequest()` for unsupported SDK features
+   instead of bypassing the package.
+10. Catch specific error subclasses; log `e.cause` for provider-side detail.
+11. For local `getUrl()`, configure `baseUrl` (or use `native: { fileUrl: true }`).
+12. Versioning differs per provider: `versionId` is normalized on
+   download/stat/delete, but semantics (S3 vs Azure vs OCI) are not identical —
+   don't assume one behavior.
+
+## Testing custom drivers
+
+```ts
+import { defineDriverContractTests } from '@mohamedhabibwork/storagekit/testing';
+defineDriverContractTests({ name: 'mine', createStorage: () => make(), capabilities: { signedUrls: true } });
+```
+
+## Links
+
+- npm: https://www.npmjs.com/package/@mohamedhabibwork/storagekit
+- README with full examples: ./README.md (also in the published tarball)

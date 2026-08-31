@@ -68,7 +68,8 @@
   "files": [
     "dist",
     "README.md",
-    "LICENSE"
+    "LICENSE",
+    "llms.txt"
   ],
   "sideEffects": false,
   "engines": {
