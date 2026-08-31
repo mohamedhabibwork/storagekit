@@ -1,5 +1,13 @@
 # storagekit
 
+[![npm version](https://img.shields.io/npm/v/@mohamedhabibwork/storagekit)](https://www.npmjs.com/package/@mohamedhabibwork/storagekit)
+[![npm downloads](https://img.shields.io/npm/dm/@mohamedhabibwork/storagekit)](https://www.npmjs.com/package/@mohamedhabibwork/storagekit)
+[![License: MIT](https://img.shields.io/npm/l/@mohamedhabibwork/storagekit)](./LICENSE)
+[![Node.js >= 20](https://img.shields.io/node/v/@mohamedhabibwork/storagekit)](https://nodejs.org)
+[![TypeScript](https://img.shields.io/badge/TypeScript-strict-3178C6?logo=typescript&logoColor=white)](https://www.typescriptlang.org)
+[![CI](https://github.com/mohamedhabibwork/storagekit/actions/workflows/ci.yml/badge.svg)](https://github.com/mohamedhabibwork/storagekit/actions/workflows/ci.yml)
+[![Socket Badge](https://badge.socket.dev/npm/package/@mohamedhabibwork/storagekit)](https://socket.dev/npm/package/@mohamedhabibwork/storagekit)
+
 Unified TypeScript file management across multiple storage providers — with
 strongly-typed **native provider options** preserved instead of flattened
 into a lowest-common-denominator API.
@@ -46,6 +54,33 @@ command instead of a module crash.
 Requires **Node.js ≥ 20**. Ships dual ESM + CJS with TypeScript
 declarations. Browser usage is not a goal: server-side credentials and
 filesystem access are first-class here.
+
+## Runtime support
+
+| Runtime | Status | Notes |
+| --- | --- | --- |
+| Node.js ≥ 20 | fully supported | primary target; CI matrix on 20 + 22 |
+| Bun ≥ 1.1 | fully supported | smoke-tested on every build (CI job) |
+| Deno ≥ 2.0 | fully supported | via npm compatibility; smoke-tested on every build (CI job) |
+
+The runtime smoke (`scripts/runtime-smoke.mjs`) exercises the local driver,
+streams, listings, error normalization and the custom-driver registry on
+all three runtimes. Browser usage is not a goal: server-side credentials
+and filesystem access are first-class here.
+
+## Documentation
+
+Full per-driver guides live in [`docs/`](docs/) (also shipped in the npm
+tarball):
+
+| Guide | Contents |
+| --- | --- |
+| [docs/local.md](docs/local.md) | config, permissions, traversal protection, symlinks, native options |
+| [docs/s3.md](docs/s3.md) | AWS SDK v3, multipart tuning, storage classes/KMS, presigned URLs, LocalStack testing |
+| [docs/minio.md](docs/minio.md) | native MinIO client, metadata bags, copy preconditions, presigned URLs |
+| [docs/azure.md](docs/azure.md) | auth routes, access tiers, SAS generation, versioning, Azurite testing |
+| [docs/oracle.md](docs/oracle.md) | OCI auth providers, native multipart, PARs, cross-region copy |
+| [docs/custom-drivers.md](docs/custom-drivers.md) | full `StorageDriver` reference, registry semantics, contract testing, correctness checklist |
 
 ## The design rule
 
@@ -404,6 +439,22 @@ opt-in live OCI (`OCI_INTEGRATION_TESTS=true`).
 - Local driver paths are validated against traversal and escape the root
   with `StorageInvalidPathError`.
 - Signed URL lifetimes are bounded (1 s – 7 days).
+- **Zero runtime dependencies**: every provider SDK is an optional peer
+  dependency, so installing storagekit adds nothing to your supply chain
+  beyond what you already chose to install.
+- Releases are published from GitHub Actions with
+  [npm provenance](https://docs.npmjs.com/generating-provenance-statements)
+  — a verifiable, signed link between the published tarball and this
+  repository's build.
+- Continuous supply-chain analysis by [Socket](https://socket.dev/npm/package/@mohamedhabibwork/storagekit):
+  the two informational alerts on the package itself — **Filesystem access**
+  (the local driver is built on `fs`/`fs/promises`) and **URL strings**
+  (hardcoded provider endpoint domains such as `amazonaws.com`,
+  `core.windows.net`, `oraclecloud.com`) — are inherent to what a storage
+  library does, not vulnerabilities. Alerts you may see under the
+  "dependencies" tab belong to the dev-time installs of the optional peer
+  SDKs (mostly Oracle's SDK tree) and are never installed by consumers of
+  this package.
 
 ## License
 

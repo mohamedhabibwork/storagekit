@@ -1,6 +1,6 @@
 # storagekit (@mohamedhabibwork/storagekit)
 
-> Unified TypeScript file management across Local filesystem, AWS S3, MinIO, Azure Blob Storage and Oracle OCI Object Storage. One common API for common operations, with strongly-typed **provider-native options** preserved under a `native` key instead of being flattened to a lowest common denominator. Requires Node.js >= 20. Dual ESM/CJS.
+> Unified TypeScript file management across Local filesystem, AWS S3, MinIO, Azure Blob Storage and Oracle OCI Object Storage. One common API for common operations, with strongly-typed **provider-native options** preserved under a `native` key instead of being flattened to a lowest common denominator. Runs on Node.js >= 20, Bun >= 1.1 and Deno >= 2 (all smoke-tested in CI). Dual ESM/CJS with full TypeScript declarations. Custom drivers can be registered against the same API.
 
 ## Install
 
@@ -303,7 +303,18 @@ import { defineDriverContractTests } from '@mohamedhabibwork/storagekit/testing'
 defineDriverContractTests({ name: 'mine', createStorage: () => make(), capabilities: { signedUrls: true } });
 ```
 
+## Runtime support
+
+- Node.js >= 20 (primary; CI on 20/22), Bun >= 1.1, Deno >= 2 (npm compat).
+- Every build runs `scripts/runtime-smoke.mjs` on all three runtimes in CI:
+  local driver streams/listings/errors + custom-driver registry.
+- Cloud SDKs are regular npm packages and work on all three; the local
+  driver uses only `node:` built-ins that all three runtimes implement.
+
 ## Links
 
 - npm: https://www.npmjs.com/package/@mohamedhabibwork/storagekit
 - README with full examples: ./README.md (also in the published tarball)
+- Per-driver guides: ./docs/local.md, ./docs/s3.md, ./docs/minio.md,
+  ./docs/azure.md, ./docs/oracle.md (shipped in the tarball)
+- Custom driver guide: ./docs/custom-drivers.md

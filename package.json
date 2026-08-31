@@ -4,6 +4,12 @@
   "description": "Unified TypeScript file-management API across Local, S3, MinIO, Azure Blob and Oracle OCI Object Storage — with strongly-typed native provider options.",
   "license": "MIT",
   "author": "Mohamed Habib <mohamedhabibwork@gmail.com>",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mohamedhabibwork/storagekit.git"
+  },
+  "homepage": "https://github.com/mohamedhabibwork/storagekit#readme",
+  "bugs": "https://github.com/mohamedhabibwork/storagekit/issues",
   "keywords": [
     "storage",
     "file",
@@ -69,7 +75,8 @@
     "dist",
     "README.md",
     "LICENSE",
-    "llms.txt"
+    "llms.txt",
+    "docs"
   ],
   "sideEffects": false,
   "engines": {
@@ -83,7 +90,8 @@
     "test:watch": "vitest",
     "test:integration:cloud": "vitest run tests/integrations",
     "lint": "tsc --noEmit",
-    "prepublishOnly": "npm run build"
+    "prepublishOnly": "npm run build",
+    "test:runtime": "npm run build && node scripts/runtime-smoke.mjs"
   },
   "peerDependencies": {
     "@aws-sdk/client-s3": ">=3.400.0",
