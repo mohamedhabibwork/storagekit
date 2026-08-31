@@ -59,14 +59,40 @@ automatically.
 
 ## One-time GitHub setting
 
-The Pages source must be set to **GitHub Actions** once, by an admin,
-under:
+Pages must be **initialized** on the repo exactly once, by an admin,
+before the workflow can deploy anything. The flow:
 
-> `https://github.com/mohamedhabibwork/storagekit/settings/pages`
-> → **Build and deployment** → **Source** = **GitHub Actions**
+1. Open `https://github.com/mohamedhabibwork/storagekit/settings/pages`.
+2. Under **Build and deployment**, set **Source** = **GitHub Actions**.
+3. Save. GitHub provisions the Pages site for the repo — this is the
+   step the workflow cannot perform for you.
+4. Re-run the `docs` workflow (or push a doc change). The first deploy
+   will then succeed.
 
-Without this, the `actions/deploy-pages` step will fail with a clear
-"Pages is not configured" error.
+### How this fails when it isn't done
+
+`actions/deploy-pages@v5` returns **HTTP 404** on its `createPagesDeployment`
+call if the repo doesn't have a Pages site yet. The error in the workflow
+log looks like this — it is the expected signal, not a code bug:
+
+```
+Error: Creating Pages deployment failed
+Error: HttpError: Not Found
+    at createPagesDeployment (…/api-client.js:125:1)
+Error: Error: Failed to create deployment (status: 404) with build version
+<hash>. Request ID … Ensure GitHub Pages has been enabled:
+https://github.com/mohamedhabibwork/storagekit/settings/pages
+```
+
+> The `[DEP0040] punycode` deprecation warning in the same log is from
+> Node 22 itself, not from this repo. It does not affect the deploy and
+> is fixed by GitHub's runners in due course.
+
+### Verify Pages is enabled from the terminal
+
+A `scripts/check-pages-enabled.sh` helper ships with the repo — it
+hits the Pages API and reports the current source so you can confirm
+the setting without opening the web UI.
 
 ## Optional customizations (left for later)
 
