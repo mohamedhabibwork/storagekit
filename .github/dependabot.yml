@@ -1,16 +1,48 @@
 version: 2
+
+# ---------------------------------------------------------------------------
+# Dependabot — version updates + security updates
+#
+# Note on "alerts" / "security updates": GitHub Dependabot alerts and the
+# auto-generated security PRs are repository settings, not file content —
+# enable them at:
+#   https://github.com/mohamedhabibwork/storagekit/settings/security-analysis
+#   https://github.com/mohamedhabibwork/storagekit/settings/code_security_and_analysis
+# The `vulnerability-alerts: true` config below is the in-repo acknowledgement
+# of that setting.
+# ---------------------------------------------------------------------------
+
+# Allow Dependabot to open security update PRs and let reviewers auto-merge
+# them when CI passes. Required for Dependabot to act on GHSA advisories.
+vulnerability-alerts:
+  enabled: true
+
 updates:
-  # Runtime/peer SDK updates (aws, azure, minio, oci) + dev tooling
+  # -------------------------------------------------------------------
+  # Runtime / peer SDK updates (aws, azure, minio, oci) + dev tooling.
+  # Groups minor + patch so PR volume stays low. Security updates bypass
+  # this group and are opened immediately (see `open-pull-requests-limit`
+  # + the separate `security-updates` group below).
+  # -------------------------------------------------------------------
   - package-ecosystem: npm
     directory: /
     schedule:
       interval: weekly
+    open-pull-requests-limit: 10
     groups:
       minor-and-patch:
         update-types:
           - minor
           - patch
-  # Keep the actions themselves current
+      # Security patches: small, fast PR, one per advisory, no batching.
+      security-updates:
+        applies-to: security-updates
+        patterns:
+          - "*"
+
+  # -------------------------------------------------------------------
+  # GitHub Actions — keep the runner image + action versions current.
+  # -------------------------------------------------------------------
   - package-ecosystem: github-actions
     directory: /
     schedule:

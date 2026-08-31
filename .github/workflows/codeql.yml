@@ -1,0 +1,57 @@
+name: CodeQL
+
+# Static security analysis — scans every push to `main`, every PR, and on
+# a weekly schedule. Findings surface under the repository's
+# "Security" tab → "Code scanning alerts".
+#
+# Note: GitHub Dependabot alerts + the CodeQL alerts page must be enabled
+# in repository settings once ("Settings → Code security and analysis").
+# The workflow below cannot turn that on for you — but once it is, the
+# alerts will appear here automatically.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  schedule:
+    # Weekly — Sundays at 06:17 UTC. Offset picks a non-round minute so
+    # GitHub's runners aren't all hammering the same instant.
+    - cron: "17 6 * * 0"
+
+permissions:
+  # The `security-events: write` permission is required so the workflow
+  # can upload SARIF to the code-scanning API.
+  actions: read
+  contents: read
+  security-events: write
+
+jobs:
+  analyze:
+    name: Analyze (${{ matrix.language }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - language: typescript
+            build-mode: none
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v4
+        with:
+          languages: ${{ matrix.language }}
+          build-mode: ${{ matrix.build-mode }}
+          # "security-extended" adds the default `security` queries plus
+          # the extended set (more checks, slightly more noise). For a
+          # published library this is the right default.
+          queries: security-extended
+
+      - name: Perform CodeQL analysis
+        uses: github/codeql-action/analyze@v4
+        with:
+          category: "/language:${{ matrix.language }}"

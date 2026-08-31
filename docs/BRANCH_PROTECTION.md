@@ -14,7 +14,7 @@ This document describes the branch-protection rules that must be applied to
 | **Require review from Code Owners** | ON | A CODEOWNERS-listed reviewer must approve the changed paths. |
 | **Require status checks to pass before merging** | ON | All required checks must be green. |
 | **Require branches to be up to date before merging** | ON | The PR re-runs against the latest `main`. |
-| **Required status checks** | `required-checks / required` *(see below)* | The single gate that fans out to typecheck, unit tests, type tests and build. |
+| **Required status checks** | `required-checks / required` *(see below)* **and** `CodeQL / Analyze (typescript)` | The CI gate **and** the security static-analysis gate must both be green. |
 | **Require conversation resolution** | ON | All review comments must be resolved. |
 | **Require signed commits** | optional | Recommended once the team is comfortable with it. |
 | **Require linear history** | optional | Recommended (squash or rebase merge only). |
@@ -34,7 +34,11 @@ This check runs, in order: `npm ci` → `npm run typecheck` → `npm test` →
 `npm run test:types` → `npm run build`. Until all of those pass, the PR cannot
 merge.
 
-> If you ever rename the job, update the "Required status checks" list in
+The **CodeQL** gate runs the `security-extended` query pack from
+`.github/workflows/codeql.yml`. A new CodeQL finding that introduces a
+regression blocks the merge instead of just being a yellow badge.
+
+> If you ever rename a job, update the "Required status checks" list in
 > branch protection to match. Do **not** rely on individual step names —
 > GitHub can rotate those and break the rule silently.
 
