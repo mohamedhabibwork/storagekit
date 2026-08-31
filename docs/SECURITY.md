@@ -94,5 +94,5 @@ When a CodeQL or Dependabot alert opens:
 
 ## 5. When in doubt
 
-Read [`SECURITY.md`](../SECURITY.md) (top-level) — that's the page external
+Read [`SECURITY.md`](https://github.com/mohamedhabibwork/storagekit/blob/main/SECURITY.md) (top-level) — that's the page external
 researchers and Dependabot see.
