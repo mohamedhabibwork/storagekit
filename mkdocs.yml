@@ -101,7 +101,7 @@ extra:
       name: storagekit on GitHub
     - icon: fontawesome/brands/npm
       link: https://www.npmjs.com/package/@mohamedhabibwork/storagekit
-      name: @mohamedhabibwork/storagekit on npm
+      name: '@mohamedhabibwork/storagekit on npm'
   generator: false
 
 extra_css:
