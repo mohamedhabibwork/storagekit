@@ -1,0 +1,136 @@
+{
+  "name": "storagekit",
+  "version": "0.1.0",
+  "description": "Unified TypeScript file-management API across Local, S3, MinIO, Azure Blob and Oracle OCI Object Storage — with strongly-typed native provider options.",
+  "license": "MIT",
+  "author": "Mohamed Habib <mohamedhabibwork@gmail.com>",
+  "keywords": [
+    "storage",
+    "file",
+    "upload",
+    "download",
+    "s3",
+    "aws",
+    "minio",
+    "azure",
+    "blob",
+    "oracle",
+    "oci",
+    "filesystem",
+    "storage-driver",
+    "multipart",
+    "presigned-url",
+    "sas",
+    "typescript"
+  ],
+  "type": "module",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    },
+    "./local": {
+      "types": "./dist/drivers/local/index.d.ts",
+      "import": "./dist/drivers/local/index.js",
+      "require": "./dist/drivers/local/index.cjs"
+    },
+    "./s3": {
+      "types": "./dist/drivers/s3/index.d.ts",
+      "import": "./dist/drivers/s3/index.js",
+      "require": "./dist/drivers/s3/index.cjs"
+    },
+    "./minio": {
+      "types": "./dist/drivers/minio/index.d.ts",
+      "import": "./dist/drivers/minio/index.js",
+      "require": "./dist/drivers/minio/index.cjs"
+    },
+    "./azure": {
+      "types": "./dist/drivers/azure/index.d.ts",
+      "import": "./dist/drivers/azure/index.js",
+      "require": "./dist/drivers/azure/index.cjs"
+    },
+    "./oracle": {
+      "types": "./dist/drivers/oracle/index.d.ts",
+      "import": "./dist/drivers/oracle/index.js",
+      "require": "./dist/drivers/oracle/index.cjs"
+    },
+    "./testing": {
+      "types": "./dist/testing/driver-contract.d.ts",
+      "import": "./dist/testing/driver-contract.js",
+      "require": "./dist/testing/driver-contract.cjs"
+    },
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "sideEffects": false,
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "build": "tsup",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:types": "vitest run --typecheck.only",
+    "test:watch": "vitest",
+    "test:integration:cloud": "vitest run tests/integrations",
+    "lint": "tsc --noEmit",
+    "prepublishOnly": "npm run build"
+  },
+  "peerDependencies": {
+    "@aws-sdk/client-s3": ">=3.400.0",
+    "@aws-sdk/lib-storage": ">=3.400.0",
+    "@aws-sdk/s3-request-presigner": ">=3.400.0",
+    "@azure/storage-blob": ">=12.17.0",
+    "minio": ">=7.1.0",
+    "oci-common": ">=2.0.0",
+    "oci-objectstorage": ">=2.0.0"
+  },
+  "peerDependenciesMeta": {
+    "@aws-sdk/client-s3": {
+      "optional": true
+    },
+    "@aws-sdk/lib-storage": {
+      "optional": true
+    },
+    "@aws-sdk/s3-request-presigner": {
+      "optional": true
+    },
+    "@azure/storage-blob": {
+      "optional": true
+    },
+    "minio": {
+      "optional": true
+    },
+    "oci-common": {
+      "optional": true
+    },
+    "oci-objectstorage": {
+      "optional": true
+    }
+  },
+  "devDependencies": {
+    "@aws-sdk/client-s3": "^3.700.0",
+    "@aws-sdk/lib-storage": "^3.700.0",
+    "@aws-sdk/s3-request-presigner": "^3.700.0",
+    "@azure/storage-blob": "^12.26.0",
+    "@types/node": "^22.10.0",
+    "minio": "^8.0.2",
+    "oci-common": "^2.107.0",
+    "oci-objectstorage": "^2.107.0",
+    "tsup": "^8.3.0",
+    "typescript": "^5.7.0",
+    "vitest": "^2.1.0"
+  },
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
+  }
+}

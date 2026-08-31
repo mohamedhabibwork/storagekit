@@ -1,0 +1,222 @@
+import type { StorageType } from './primitives';
+import type {
+  LocalNativeClient,
+  LocalNativeDeleteOptions,
+  LocalNativeDownloadOptions,
+  LocalNativeDownloadResult,
+  LocalNativeFileStat,
+  LocalNativeListOptions,
+  LocalNativeListResult,
+  LocalNativeStatOptions,
+  LocalNativeUploadOptions,
+  LocalNativeUploadResult,
+  LocalNativeUrlOptions,
+  LocalStorageConfig,
+} from '../drivers/local/local.types';
+import type {
+  S3NativeClient,
+  S3NativeCopyOptions,
+  S3NativeDeleteManyOptions,
+  S3NativeDeleteOptions,
+  S3NativeDownloadOptions,
+  S3NativeDownloadResult,
+  S3NativeFileStat,
+  S3NativeListOptions,
+  S3NativeListResult,
+  S3NativeSignedUrlOptions,
+  S3NativeUploadOptions,
+  S3NativeUploadResult,
+  S3NativeUrlOptions,
+  S3StorageConfig,
+} from '../drivers/s3/s3.types';
+import type {
+  MinioNativeClient,
+  MinioNativeCopyOptions,
+  MinioNativeDeleteOptions,
+  MinioNativeDownloadOptions,
+  MinioNativeDownloadResult,
+  MinioNativeFileStat,
+  MinioNativeListOptions,
+  MinioNativeListResult,
+  MinioNativeSignedUrlOptions,
+  MinioNativeStatOptions,
+  MinioNativeUploadOptions,
+  MinioNativeUploadResult,
+  MinioNativeUrlOptions,
+  MinioStorageConfig,
+} from '../drivers/minio/minio.types';
+import type {
+  AzureNativeClient,
+  AzureNativeCopyOptions,
+  AzureNativeDeleteManyOptions,
+  AzureNativeDeleteOptions,
+  AzureNativeDownloadOptions,
+  AzureNativeDownloadResult,
+  AzureNativeFileStat,
+  AzureNativeListOptions,
+  AzureNativeListResult,
+  AzureNativeSignedUrlOptions,
+  AzureNativeStatOptions,
+  AzureNativeUploadOptions,
+  AzureNativeUploadResult,
+  AzureNativeUrlOptions,
+  AzureStorageConfig,
+} from '../drivers/azure/azure.types';
+import type {
+  OracleNativeClient,
+  OracleNativeCopyOptions,
+  OracleNativeDeleteOptions,
+  OracleNativeDownloadOptions,
+  OracleNativeDownloadResult,
+  OracleNativeFileStat,
+  OracleNativeListOptions,
+  OracleNativeListResult,
+  OracleNativeSignedUrlOptions,
+  OracleNativeStatOptions,
+  OracleNativeUploadOptions,
+  OracleNativeUploadResult,
+  OracleNativeUrlOptions,
+  OracleStorageConfig,
+} from '../drivers/oracle/oracle.types';
+import type { S3NativeStatOptions } from '../drivers/s3/s3.types';
+
+export type StorageConfig =
+  | LocalStorageConfig
+  | S3StorageConfig
+  | MinioStorageConfig
+  | AzureStorageConfig
+  | OracleStorageConfig;
+
+export type StorageConfigMap = {
+  local: LocalStorageConfig;
+  s3: S3StorageConfig;
+  minio: MinioStorageConfig;
+  azure: AzureStorageConfig;
+  oracle: OracleStorageConfig;
+};
+
+/** Per-provider option bags accepted under the `native` key. */
+export interface NativeOptionsMap {
+  local: LocalNativeUploadOptions;
+  s3: S3NativeUploadOptions;
+  minio: MinioNativeUploadOptions;
+  azure: AzureNativeUploadOptions;
+  oracle: OracleNativeUploadOptions;
+}
+
+export interface NativeDownloadOptionsMap {
+  local: LocalNativeDownloadOptions;
+  s3: S3NativeDownloadOptions;
+  minio: MinioNativeDownloadOptions;
+  azure: AzureNativeDownloadOptions;
+  oracle: OracleNativeDownloadOptions;
+}
+
+export interface NativeStatOptionsMap {
+  local: LocalNativeStatOptions;
+  s3: S3NativeStatOptions;
+  minio: MinioNativeStatOptions;
+  azure: AzureNativeStatOptions;
+  oracle: OracleNativeStatOptions;
+}
+
+export interface NativeDeleteOptionsMap {
+  local: LocalNativeDeleteOptions;
+  s3: S3NativeDeleteOptions;
+  minio: MinioNativeDeleteOptions;
+  azure: AzureNativeDeleteOptions;
+  oracle: OracleNativeDeleteOptions;
+}
+
+export interface NativeDeleteManyOptionsMap {
+  local: Record<string, never>;
+  s3: S3NativeDeleteManyOptions;
+  minio: Record<string, never>;
+  azure: AzureNativeDeleteManyOptions;
+  oracle: Record<string, never>;
+}
+
+export interface NativeListOptionsMap {
+  local: LocalNativeListOptions;
+  s3: S3NativeListOptions;
+  minio: MinioNativeListOptions;
+  azure: AzureNativeListOptions;
+  oracle: OracleNativeListOptions;
+}
+
+export interface NativeCopyOptionsMap {
+  local: Record<string, never>;
+  s3: S3NativeCopyOptions;
+  minio: MinioNativeCopyOptions;
+  azure: AzureNativeCopyOptions;
+  oracle: OracleNativeCopyOptions;
+}
+
+export interface NativeMoveOptionsMap {
+  local: Record<string, never>;
+  s3: S3NativeDeleteOptions;
+  minio: MinioNativeDeleteOptions;
+  azure: AzureNativeDeleteOptions;
+  oracle: OracleNativeDeleteOptions;
+}
+
+export interface NativeSignedUrlOptionsMap {
+  local: Record<string, never>;
+  s3: S3NativeSignedUrlOptions;
+  minio: MinioNativeSignedUrlOptions;
+  azure: AzureNativeSignedUrlOptions;
+  oracle: OracleNativeSignedUrlOptions;
+}
+
+export interface NativeUrlOptionsMap {
+  local: LocalNativeUrlOptions;
+  s3: S3NativeUrlOptions;
+  minio: MinioNativeUrlOptions;
+  azure: AzureNativeUrlOptions;
+  oracle: OracleNativeUrlOptions;
+}
+
+/** Per-provider result passthroughs returned under the `native` key. */
+export interface NativeClientMap {
+  local: LocalNativeClient;
+  s3: S3NativeClient;
+  minio: MinioNativeClient;
+  azure: AzureNativeClient;
+  oracle: OracleNativeClient;
+}
+
+export interface NativeUploadResultMap {
+  local: LocalNativeUploadResult;
+  s3: S3NativeUploadResult;
+  minio: MinioNativeUploadResult;
+  azure: AzureNativeUploadResult;
+  oracle: OracleNativeUploadResult;
+}
+
+export interface NativeDownloadResultMap {
+  local: LocalNativeDownloadResult;
+  s3: S3NativeDownloadResult;
+  minio: MinioNativeDownloadResult;
+  azure: AzureNativeDownloadResult;
+  oracle: OracleNativeDownloadResult;
+}
+
+export interface NativeFileStatMap {
+  local: LocalNativeFileStat;
+  s3: S3NativeFileStat;
+  minio: MinioNativeFileStat;
+  azure: AzureNativeFileStat;
+  oracle: OracleNativeFileStat;
+}
+
+export interface NativeListResultMap {
+  local: LocalNativeListResult;
+  s3: S3NativeListResult;
+  minio: MinioNativeListResult;
+  azure: AzureNativeListResult;
+  oracle: OracleNativeListResult;
+}
+
+export type NativeOptionsFor<T extends StorageType> = NativeOptionsMap[T];
+export type NativeClientFor<T extends StorageType> = NativeClientMap[T];
+export type StorageConfigFor<T extends StorageType> = StorageConfigMap[T];

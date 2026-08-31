@@ -1,0 +1,84 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        node-version: [20, 22]
+    services:
+      minio:
+        image: minio/minio
+        env:
+          MINIO_ROOT_USER: minioadmin
+          MINIO_ROOT_PASSWORD: minioadmin
+        ports:
+          - 9000:9000
+        options: >-
+          --health-cmd "mc ready local || exit 1" --health-interval 5s
+          --health-timeout 5s --health-retries 20
+      azurite:
+        image: mcr.microsoft.com/azure-storage/azurite
+        ports:
+          - 10000:10000
+        options: >-
+          --cmd "azurite-blob --blobHost 127.0.0.1 --inMemoryPersistence"
+      localstack:
+        image: localstack/localstack
+        env:
+          SERVICES: s3
+        ports:
+          - 4566:4566
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+      - run: npm install
+      - name: Typecheck
+        run: npm run typecheck
+      - name: Unit + contract + mocked tests
+        run: npm test
+      - name: Type tests
+        run: npm run test:types
+      - name: Build (ESM + CJS)
+        run: npm run build
+      - name: Prepare LocalStack bucket
+        run: aws --endpoint-url=http://localhost:4566 s3api create-bucket --bucket test-bucket || true
+        env:
+          AWS_ACCESS_KEY_ID: test
+          AWS_SECRET_ACCESS_KEY: test
+          AWS_DEFAULT_REGION: us-east-1
+      - name: S3 integration (LocalStack)
+        env:
+          S3_TEST_BUCKET: test-bucket
+          S3_TEST_ENDPOINT: http://localhost:4566
+          S3_TEST_REGION: us-east-1
+          AWS_ACCESS_KEY_ID: test
+          AWS_SECRET_ACCESS_KEY: test
+        run: npx vitest run tests/integrations/s3.test.ts
+      - name: Prepare MinIO bucket
+        run: |
+          node -e "
+            const { Client } = require('minio');
+            const c = new Client({ endPoint: 'localhost', port: 9000, useSSL: false, accessKey: 'minioadmin', secretKey: 'minioadmin' });
+            c.makeBucket('test-bucket', 'us-east-1').catch((e) => { if (!/BucketAlready/.test(e.message)) { console.error(e); process.exit(1); } });
+          "
+      - name: MinIO integration
+        env:
+          MINIO_TEST_ENDPOINT: localhost
+          MINIO_TEST_PORT: '9000'
+          MINIO_TEST_ACCESS_KEY: minioadmin
+          MINIO_TEST_SECRET_KEY: minioadmin
+          MINIO_TEST_BUCKET: test-bucket
+        run: npx vitest run tests/integrations/minio.test.ts
+      - name: Azure integration (Azurite)
+        env:
+          AZURE_TEST_CONNECTION_STRING: 'DefaultEndpointsProtocol=http;AccountName=devstoreaccount1;AccountKey=Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1OUzFT50uSRZ6IFsuFq2UVErCz4I6tq/K1SZFPTOtr/KBHBeksoGMGw==;BlobEndpoint=http://127.0.0.1:10000/devstoreaccount1;'
+        run: npx vitest run tests/integrations/azure.test.ts

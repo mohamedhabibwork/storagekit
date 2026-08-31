@@ -1,0 +1,8 @@
+node_modules/
+dist/
+*.tsbuildinfo
+.tmp-*
+.tmp/
+storage/
+!src/storage.ts
+.DS_Store
