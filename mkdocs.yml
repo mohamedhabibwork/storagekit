@@ -1,0 +1,118 @@
+site_name: storagekit
+site_description: >-
+  Unified TypeScript file-management API across Local, S3, MinIO, Azure Blob,
+  and Oracle OCI Object Storage — with strongly-typed native provider options.
+site_url: https://mohamedhabibwork.github.io/storagekit/
+repo_url: https://github.com/mohamedhabibwork/storagekit
+repo_name: mohamedhabibwork/storagekit
+edit_uri: edit/main/docs/
+copyright: >-
+  Copyright © Mohamed Habib. Licensed under the
+  <a href="https://github.com/mohamedhabibwork/storagekit/blob/main/LICENSE">MIT License</a>.
+
+docs_dir: docs
+site_dir: site
+use_directory_urls: true
+
+theme:
+  name: material
+  language: en
+  icon:
+    repo: fontawesome/brands/github
+    edit: material/file-edit-outline
+    view: material/eye
+  features:
+    - navigation.tabs
+    - navigation.tabs.sticky
+    - navigation.sections
+    - navigation.indexes
+    - navigation.top
+    - navigation.tracking
+    - search.highlight
+    - search.share
+    - search.suggest
+    - content.code.copy
+    - content.code.annotate
+    - content.tabs.link
+    - toc.follow
+  palette:
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/weather-night
+        name: Switch to dark mode
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/weather-sunny
+        name: Switch to light mode
+
+markdown_extensions:
+  - admonition
+  - attr_list
+  - def_list
+  - footnotes
+  - md_in_html
+  - tables
+  - toc:
+      permalink: true
+  - pymdownx.details
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
+  - pymdownx.tabbed:
+      alternate_style: true
+  - pymdownx.tasklist:
+      custom_checkbox: true
+  - pymdownx.snippets
+  - pymdownx.highlight:
+      anchor_linenums: true
+      line_spans: __span
+      pygments_lang_class: true
+  - pymdownx.inlinehilite
+  - pymdownx.keys
+
+plugins:
+  - search
+
+nav:
+  - Overview: index.md
+  - Getting started:
+      - Local: local.md
+      - AWS S3: s3.md
+      - MinIO: minio.md
+      - Azure Blob: azure.md
+      - Oracle OCI: oracle.md
+      - Custom drivers: custom-drivers.md
+  - Project:
+      - Security setup: SECURITY.md
+      - Branch protection: BRANCH_PROTECTION.md
+
+extra:
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/mohamedhabibwork/storagekit
+      name: storagekit on GitHub
+    - icon: fontawesome/brands/npm
+      link: https://www.npmjs.com/package/@mohamedhabibwork/storagekit
+      name: @mohamedhabibwork/storagekit on npm
+  generator: false
+
+extra_css:
+  - assets/extra.css
+
+validation:
+  nav:
+    omitted_files: ignore
+    not_found: warn
+    absolute_links: warn
+  links:
+    not_found: warn
+    absolute_links: warn
+    unrecognized_links: ignore

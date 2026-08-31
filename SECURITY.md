@@ -8,6 +8,12 @@ Thank you for helping keep `@mohamedhabibwork/storagekit` and its users safe.
 This document explains which versions are supported, how to report a
 vulnerability, and how we handle it.
 
+> The "Report a vulnerability" button in step 2 is powered by GitHub's
+> **Private vulnerability reporting** setting. If you can see a public
+> `Issues` tab but no "Report a vulnerability" button, the setting is
+> off — see [`docs/SECURITY.md`](docs/SECURITY.md) §1 for how the
+> maintainer enables it.
+
 ## 1. Supported Versions
 
 Only the latest released version on the `main` branch receives security

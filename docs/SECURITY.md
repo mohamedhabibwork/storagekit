@@ -22,27 +22,41 @@ Open: `https://github.com/mohamedhabibwork/storagekit/settings/security_analysis
 | **Push protection** | **Enabled** — blocks pushes that contain a known secret pattern. Strongly recommended for any published library. |
 | **Private vulnerability reporting** | **Enabled** — this is what powers the "Report a vulnerability" button linked from `SECURITY.md`. |
 
-CLI equivalent (run from a checkout with admin scope):
+CLI equivalents (run from a checkout with admin scope):
 
 ```bash
+# 1. Dependabot alerts + Secret scanning + Push protection.
+#    Note: dependency_graph, dependabot_alerts, advanced_security and
+#    code_scanning are managed on a different endpoint and are usually
+#    defaulted on — verify in the settings page.
 gh api -X PATCH \
   -H "Accept: application/vnd.github+json" \
   /repos/mohamedhabibwork/storagekit \
   --input - <<'JSON'
 {
   "security_and_analysis": {
-    "dependabot_security_updates": { "enabled": true },
-    "secret_scanning":              { "enabled": true },
-    "secret_scanning_push_protection": { "enabled": true },
-    "private_vulnerability_reporting": { "enabled": true }
+    "dependabot_security_updates":     { "enabled": true },
+    "secret_scanning":                  { "enabled": true },
+    "secret_scanning_push_protection":  { "enabled": true }
   }
 }
 JSON
+
+# 2. Private vulnerability reporting — separate endpoint, empty body,
+#    requires admin role on the repo. Also enables the "Report a
+#    vulnerability" button linked from the top-level SECURITY.md.
+gh api -X PUT \
+  -H "Accept: application/vnd.github+json" \
+  /repos/mohamedhabibwork/storagekit/private-vulnerability-reporting
+
+# 3. Verify the current state.
+gh api -H "Accept: application/vnd.github+json" \
+  /repos/mohamedhabibwork/storagekit/private-vulnerability-reporting
+# -> { "enabled": true }
 ```
 
-`dependency_graph`, `dependabot_alerts`, `advanced_security` and
-`code_scanning` are toggled on a different endpoint and GitHub sometimes
-defaults them to on — check the settings page to be sure.
+A `scripts/enable-private-vuln-reporting.sh` helper that does all of the
+above in one shot ships with the repo; see §4.
 
 ## 2. Required CI (already in this repo)
 

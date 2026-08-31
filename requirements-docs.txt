@@ -1,0 +1,5 @@
+# Pinned for reproducible MkDocs builds in CI.
+# Bump these in a separate PR when upgrading.
+mkdocs==1.6.1
+mkdocs-material==9.6.14
+pymdown-extensions==10.16

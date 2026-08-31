@@ -7,3 +7,9 @@ storage/
 !src/storage.ts
 .DS_Store
 .playwright-mcp/
+
+# MkDocs build output (rendered GitHub Pages site).
+site/
+
+# Local MkDocs preview environment.
+.venv-docs/

@@ -1,0 +1,86 @@
+name: docs
+
+# Build the MkDocs site and deploy it to GitHub Pages.
+# Source: docs/ + mkdocs.yml at the repo root.
+# Live at: https://mohamedhabibwork.github.io/storagekit/
+#
+# Setup (one time, repo admin only):
+#   Settings → Pages → Build and deployment → Source: "GitHub Actions"
+# That's it. This workflow handles the rest.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "docs/**"
+      - "mkdocs.yml"
+      - ".github/workflows/docs.yml"
+  pull_request:
+    branches: [main]
+    paths:
+      - "docs/**"
+      - "mkdocs.yml"
+      - ".github/workflows/docs.yml"
+  workflow_dispatch:
+
+# Allow only the minimum scopes for building and uploading.
+permissions:
+  contents: read
+
+# Two jobs:
+#   1. build  — runs on every PR + push, validates the docs build (read-only)
+#   2. deploy — only on push to main, requires the build to succeed
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    name: Build site
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+
+      - name: Cache pip
+        uses: actions/cache@v5
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-mkdocs-${{ hashFiles('requirements-docs.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-mkdocs-
+
+      - name: Install MkDocs + Material
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements-docs.txt
+
+      - name: Build (strict)
+        run: |
+          mkdocs build --strict --clean
+
+      - name: Upload Pages artifact
+        if: github.event_name != 'pull_request'
+        uses: actions/upload-pages-artifact@v4
+        with:
+          path: site
+
+  deploy:
+    name: Deploy to GitHub Pages
+    if: github.event_name != 'pull_request'
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    permissions:
+      pages: write        # required to deploy to GitHub Pages
+      id-token: write     # required for OIDC verification of the deploy
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v5

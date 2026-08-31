@@ -6,6 +6,7 @@
 [![Node.js >= 20](https://img.shields.io/node/v/@mohamedhabibwork/storagekit)](https://nodejs.org)
 [![TypeScript](https://img.shields.io/badge/TypeScript-strict-3178C6?logo=typescript&logoColor=white)](https://www.typescriptlang.org)
 [![CI](https://github.com/mohamedhabibwork/storagekit/actions/workflows/ci.yml/badge.svg)](https://github.com/mohamedhabibwork/storagekit/actions/workflows/ci.yml)
+[![Docs](https://github.com/mohamedhabibwork/storagekit/actions/workflows/docs.yml/badge.svg)](https://mohamedhabibwork.github.io/storagekit/)
 [![Socket Badge](https://badge.socket.dev/npm/package/@mohamedhabibwork/storagekit)](https://socket.dev/npm/package/@mohamedhabibwork/storagekit)
 
 Unified TypeScript file management across multiple storage providers — with
@@ -70,11 +71,15 @@ and filesystem access are first-class here.
 
 ## Documentation
 
+**Rendered site: [mohamedhabibwork.github.io/storagekit](https://mohamedhabibwork.github.io/storagekit/)** —
+auto-deployed from [`docs/`](docs/) on every push to `main`.
+
 Full per-driver guides live in [`docs/`](docs/) (also shipped in the npm
 tarball):
 
 | Guide | Contents |
 | --- | --- |
+| **Site**: [mohamedhabibwork.github.io/storagekit](https://mohamedhabibwork.github.io/storagekit/) | rendered MkDocs + Material site (search, dark mode, copy-button) |
 | [docs/local.md](docs/local.md) | config, permissions, traversal protection, symlinks, native options |
 | [docs/s3.md](docs/s3.md) | AWS SDK v3, multipart tuning, storage classes/KMS, presigned URLs, LocalStack testing |
 | [docs/minio.md](docs/minio.md) | native MinIO client, metadata bags, copy preconditions, presigned URLs |
