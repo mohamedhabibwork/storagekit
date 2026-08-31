@@ -5,7 +5,7 @@ strongly-typed **native provider options** preserved instead of flattened
 into a lowest-common-denominator API.
 
 ```ts
-import { createStorage } from 'storagekit';
+import { createStorage } from '@mohamedhabibwork/storagekit';
 
 const storage = await createStorage({
   type: 's3',
@@ -78,7 +78,7 @@ given.
 ## Quick start (every provider)
 
 ```ts
-import { createStorage } from 'storagekit';
+import { createStorage } from '@mohamedhabibwork/storagekit';
 
 // Local
 const local = await createStorage({
@@ -328,7 +328,7 @@ The shared contract suite is published so custom drivers can prove they
 behave like the built-ins:
 
 ```ts
-import { defineDriverContractTests } from 'storagekit/testing';
+import { defineDriverContractTests } from '@mohamedhabibwork/storagekit/testing';
 
 defineDriverContractTests({
   name: 'my-driver',
