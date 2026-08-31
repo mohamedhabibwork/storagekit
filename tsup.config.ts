@@ -3,7 +3,10 @@ import { defineConfig } from 'tsup';
 const shared = {
   format: ['esm', 'cjs'] as const,
   target: 'es2022',
-  dts: true,
+  // Declarations are emitted by `tsc -p tsconfig.build.json` (build script)
+  // instead of rollup-plugin-dts, whose tsup-embedded copy crashes under
+  // TypeScript 7 (ts.sys is no longer exposed).
+  dts: false,
   sourcemap: true,
   treeshake: true,
   splitting: false,

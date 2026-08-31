@@ -83,7 +83,7 @@
     "node": ">=20"
   },
   "scripts": {
-    "build": "tsup",
+    "build": "tsup && tsc -p tsconfig.build.json && node scripts/fix-dts.mjs",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "test:types": "vitest run --typecheck.only",
@@ -134,7 +134,7 @@
     "minio": "^8.0.2",
     "oci-common": "^2.107.0",
     "oci-objectstorage": "^2.107.0",
-    "tsup": "^8.3.0",
+    "tsup": "^8.5.1",
     "typescript": "^7.0.2",
     "vitest": "^4.1.11"
   },
