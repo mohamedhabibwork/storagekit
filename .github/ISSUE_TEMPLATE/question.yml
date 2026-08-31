@@ -1,0 +1,28 @@
+name: Question
+description: Ask a usage question about @mohamedhabibwork/storagekit.
+title: "[question]: "
+labels: ["question"]
+assignees: []
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        For usage questions. For bugs, use **Bug Report**. For new ideas,
+        use **Feature Request**.
+
+  - type: textarea
+    id: question
+    attributes:
+      label: Your question
+      description: Be as specific as possible — include a code snippet, the driver, and what you expected to happen.
+    validations:
+      required: true
+
+  - type: textarea
+    id: whatTried
+    attributes:
+      label: What you've already tried
+      description: Links to docs you read, workarounds, etc.
+    validations:
+      required: false

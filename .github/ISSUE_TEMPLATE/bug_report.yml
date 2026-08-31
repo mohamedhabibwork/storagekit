@@ -1,0 +1,78 @@
+name: Bug Report
+description: Report something broken in @mohamedhabibwork/storagekit.
+title: "[bug]: "
+labels: ["bug", "needs-triage"]
+assignees: []
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to file a bug. Please fill in every section
+        below — incomplete reports will be auto-closed after 7 days.
+
+  - type: input
+    id: version
+    attributes:
+      label: storagekit version
+      description: Output of `npm ls @mohamedhabibwork/storagekit` (or the version you installed).
+      placeholder: "0.2.0"
+    validations:
+      required: true
+
+  - type: input
+    id: runtime
+    attributes:
+      label: Runtime + version
+      description: Node / Bun / Deno and version.
+      placeholder: "Node 22.5.0"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: driver
+    attributes:
+      label: Driver affected
+      description: Which storage driver exhibits the bug?
+      options:
+        - Local
+        - S3 / AWS
+        - MinIO
+        - Azure Blob
+        - Oracle OCI Object Storage
+        - Core / shared
+        - Not sure
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: Steps to reproduce
+      description: Minimal, copy-pasteable code or commands.
+      placeholder: |
+        import { ... } from '@mohamedhabibwork/storagekit';
+        // ...
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+    validations:
+      required: true
+
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual behavior
+      description: Include the error message / stack trace verbatim.
+    validations:
+      required: true
+
+  - type: textarea
+    id: notes
+    attributes:
+      label: Notes / logs
+      description: Anything else that might help — environment, flags, timing.

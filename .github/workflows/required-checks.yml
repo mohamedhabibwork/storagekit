@@ -1,0 +1,34 @@
+name: required-checks
+
+# Aggregator for the checks that branch protection on `main` requires.
+# Branch protection rules only need to point at this single
+# "required-checks" status check, instead of tracking every individual
+# step name. We run the same gates as `.github/workflows/ci.yml`.
+
+on:
+  pull_request:
+    branches: [main]
+  workflow_call:
+
+permissions:
+  contents: read
+
+jobs:
+  required:
+    name: required
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Typecheck
+        run: npm run typecheck
+      - name: Unit + contract + mocked tests
+        run: npm test
+      - name: Type tests
+        run: npm run test:types
+      - name: Build (ESM + CJS)
+        run: npm run build

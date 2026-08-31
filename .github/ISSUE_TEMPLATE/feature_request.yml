@@ -1,0 +1,75 @@
+name: Feature Request
+description: Propose a new driver, API, or improvement to storagekit.
+title: "[feat]: "
+labels: ["enhancement", "needs-triage"]
+assignees: []
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Use this template to suggest a new feature. For bug reports,
+        use the **Bug Report** template instead.
+
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      options:
+        - New driver
+        - New API on existing driver
+        - Core / shared
+        - DX / typings
+        - Docs
+        - Build / CI / release
+        - Other
+    validations:
+      required: true
+
+  - type: dropdown
+    id: driver
+    attributes:
+      label: Driver (if applicable)
+      description: Leave "N/A" if this is not driver-specific.
+      options:
+        - N/A
+        - Local
+        - S3 / AWS
+        - MinIO
+        - Azure Blob
+        - Oracle OCI Object Storage
+    validations:
+      required: true
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem / motivation
+      description: What pain point does this address? What can you not do today?
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed solution
+      description: Sketch the API, signature, or behavior you would like to see.
+      placeholder: |
+        storage.put(key, body, { /* new option */ });
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+    validations:
+      required: false
+
+  - type: textarea
+    id: context
+    attributes:
+      label: Additional context
+      description: Links, prior art, workarounds you are using today.
+    validations:
+      required: false

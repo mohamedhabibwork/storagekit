@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: storagekit documentation
+    url: https://github.com/mohamedhabibwork/storagekit#readme
+    about: Read the README and docs/ folder before filing an issue.
+  - name: Discussions
+    url: https://github.com/mohamedhabibwork/storagekit/discussions
+    about: For open-ended questions and ideas, prefer Discussions over Issues.

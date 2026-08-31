@@ -1,0 +1,20 @@
+# CODEOWNERS — required reviewers for the storagekit repository.
+# A PR cannot merge until the owners listed for the files it touches
+# have approved. Lines starting with `#` are comments.
+
+# Default owner: every file matches unless overridden below.
+*                           @mohamedhabibwork
+
+# Publish / release workflow touches the npm token and registry
+# — require the project owner explicitly.
+/.github/workflows/publish.yml   @mohamedhabibwork
+
+# Public API surface (drivers, core types, public entry points).
+/src/drivers/                 @mohamedhabibwork
+/src/core/                    @mohamedhabibwork
+/src/index.ts                 @mohamedhabibwork
+
+# Docs that are part of the public package or README surface.
+/README.md                    @mohamedhabibwork
+/llms.txt                     @mohamedhabibwork
+/docs/                        @mohamedhabibwork
