@@ -2,12 +2,15 @@
 
 [![npm version](https://img.shields.io/npm/v/@mohamedhabibwork/storagekit)](https://www.npmjs.com/package/@mohamedhabibwork/storagekit)
 [![npm downloads](https://img.shields.io/npm/dm/@mohamedhabibwork/storagekit)](https://www.npmjs.com/package/@mohamedhabibwork/storagekit)
+[![Latest Release](https://img.shields.io/github/v/release/mohamedhabibwork/storagekit)](https://github.com/mohamedhabibwork/storagekit/releases/latest)
 [![License: MIT](https://img.shields.io/npm/l/@mohamedhabibwork/storagekit)](./LICENSE)
+[![GitHub: @mohamedhabibwork](https://img.shields.io/badge/GitHub-@mohamedhabibwork-181717?logo=github&logoColor=white)](https://github.com/mohamedhabibwork)
 [![Node.js >= 20](https://img.shields.io/node/v/@mohamedhabibwork/storagekit)](https://nodejs.org)
 [![TypeScript](https://img.shields.io/badge/TypeScript-strict-3178C6?logo=typescript&logoColor=white)](https://www.typescriptlang.org)
 [![CI](https://github.com/mohamedhabibwork/storagekit/actions/workflows/ci.yml/badge.svg)](https://github.com/mohamedhabibwork/storagekit/actions/workflows/ci.yml)
 [![Docs](https://github.com/mohamedhabibwork/storagekit/actions/workflows/docs.yml/badge.svg)](https://mohamedhabibwork.github.io/storagekit/)
-[![Socket Badge](https://badge.socket.dev/npm/package/@mohamedhabibwork/storagekit)](https://socket.dev/npm/package/@mohamedhabibwork/storagekit)
+[![CodeQL](https://github.com/mohamedhabibwork/storagekit/actions/workflows/codeql.yml/badge.svg)](https://github.com/mohamedhabibwork/storagekit/security/code-scanning)
+[![Socket](https://badge.socket.dev/npm/package/@mohamedhabibwork/storagekit)](https://socket.dev/npm/package/@mohamedhabibwork/storagekit)
 
 Unified TypeScript file management across multiple storage providers — with
 strongly-typed **native provider options** preserved instead of flattened
@@ -95,7 +98,7 @@ tarball):
 | [docs/oracle.md](docs/oracle.md) | OCI auth providers, native multipart, PARs, cross-region copy |
 | [docs/rustfs.md](docs/rustfs.md) | RustFS endpoints, defaults (`us-east-1`, path-style), AWS SDK v3 mapping, local dev server |
 | [docs/custom-drivers.md](docs/custom-drivers.md) | full `StorageDriver` reference, registry semantics, contract testing, correctness checklist |
-| [docs/uploads.md](docs/uploads.md) | framework upload recipes: multer/Express/NestJS, Fastify, Hono, Next.js, formidable, web `File` |
+| [docs/uploads.md](docs/uploads.md) | framework upload recipes: multer/Express/NestJS/Koa, Fastify, Hono, Next.js, Elysia, Bun/Deno, formidable, busboy, GraphQL Upload, validation & serving back |
 
 ## The design rule
 
