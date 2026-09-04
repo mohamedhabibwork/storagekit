@@ -43,7 +43,13 @@ describe('hooks', () => {
     );
 
     await storage.upload('hooked.txt', 'data');
-    await storage.download('hooked.txt');
+    {
+      // Drain the download stream before deleting the file — otherwise the
+      // local driver's createReadStream emits an unhandled ENOENT on Linux
+      // runners when the source disappears mid-flight.
+      const dl = await storage.download('hooked.txt');
+      await dl.buffer();
+    }
     await storage.delete('hooked.txt');
     await expect(storage.download('missing.txt')).rejects.toThrow();
 
