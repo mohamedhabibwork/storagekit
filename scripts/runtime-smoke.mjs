@@ -78,9 +78,20 @@ if ((await storage.getUrl('greet/世界.txt')) !== 'https://cdn.example.test/gre
   throw new Error('getUrl mismatch');
 }
 
+// 7. upload intake — web File/Blob path (the shape Bun/Deno/Hono handlers produce)
+const { saveWebFile, sanitizeFilename, randomKey } = await import('../dist/uploads/index.js');
+if (sanitizeFilename('../../etc/hosts') !== 'hosts') throw new Error('sanitizeFilename failed');
+const webKey = randomKey('uploads-smoke', 'photo.JPG');
+if (!/^uploads-smoke\/[0-9a-f-]{36}\.jpg$/.test(webKey)) throw new Error(`randomKey unexpected: ${webKey}`);
+const saved = await saveWebFile(storage, new File([new TextEncoder().encode('web upload')], 'photo.JPG', { type: 'image/jpeg' }), { directory: 'uploads-smoke' });
+if (saved.originalName !== 'photo.JPG' || saved.mimeType !== 'image/jpeg') throw new Error('saveWebFile metadata mismatch');
+const webText = await (await storage.download(saved.key)).text();
+if (webText !== 'web upload') throw new Error('saveWebFile roundtrip mismatch');
+
 // cleanup
 await storage.delete('greet/世界.txt');
 await storage.delete('big.bin');
+await storage.delete(saved.key);
 
-console.log(`[${runtime}] smoke passed: upload/download/stream/list/iterate/errors/custom-driver`);
+console.log(`[${runtime}] smoke passed: upload/download/stream/list/iterate/errors/custom-driver/upload-intake`);
 process.exit(0);

@@ -86,6 +86,7 @@ tarball):
 | [docs/azure.md](docs/azure.md) | auth routes, access tiers, SAS generation, versioning, Azurite testing |
 | [docs/oracle.md](docs/oracle.md) | OCI auth providers, native multipart, PARs, cross-region copy |
 | [docs/custom-drivers.md](docs/custom-drivers.md) | full `StorageDriver` reference, registry semantics, contract testing, correctness checklist |
+| [docs/uploads.md](docs/uploads.md) | framework upload recipes: multer/Express/NestJS, Fastify, Hono, Next.js, formidable, web `File` |
 
 ## The design rule
 
@@ -210,6 +211,33 @@ for await (const file of storage.iterate('uploads/')) {
 await storage.copy('temp/image.jpg', 'images/image.jpg');
 await storage.move('temp/file.pdf', 'documents/file.pdf');
 ```
+
+## Framework uploads (multer, Fastify, Hono, formidable, …)
+
+storagekit plugs straight into the upload middleware of any framework — the
+file streams from the request into your storage, with safe UUID keys derived
+from the client filename. No adapter imports its framework, so multer, fastify,
+hono and formidable all stay optional peers.
+
+```ts
+// Express / NestJS / koa-multer — a real multer storage engine
+import multer from 'multer';
+import { createMulterStorage } from '@mohamedhabibwork/storagekit/adapters/express';
+
+const upload = multer({ storage: createMulterStorage(storage, { directory: 'uploads' }) });
+app.post('/upload', upload.single('avatar'), (req, res) => {
+  res.json({ key: req.file!.key, etag: req.file!.etag, name: req.file!.originalname });
+});
+
+// Fastify (@fastify/multipart), Hono / Next.js / Bun / Deno (web File),
+// formidable — see docs/uploads.md for each recipe.
+import { saveFastifyFile } from '@mohamedhabibwork/storagekit/adapters/fastify';
+import { saveWebFile } from '@mohamedhabibwork/storagekit/uploads';
+```
+
+`saveUpload()` is the universal intake: give it `{ body, originalName,
+mimeType }` from any middleware and it resolves a traversal-safe key, derives
+contentType + metadata and streams the body to any driver.
 
 ## URLs
 

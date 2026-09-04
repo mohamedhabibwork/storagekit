@@ -90,9 +90,9 @@ nav:
       - Azure Blob: azure.md
       - Oracle OCI: oracle.md
       - Custom drivers: custom-drivers.md
+      - Framework uploads: uploads.md
   - Project:
       - Security setup: SECURITY.md
-      - Branch protection: BRANCH_PROTECTION.md
 
 extra:
   social:

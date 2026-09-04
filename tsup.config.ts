@@ -34,6 +34,13 @@ export default defineConfig([
       'drivers/minio/index': 'src/drivers/minio/index.ts',
       'drivers/azure/index': 'src/drivers/azure/index.ts',
       'drivers/oracle/index': 'src/drivers/oracle/index.ts',
+      // Upload intake: framework-agnostic core + framework adapters.
+      // Adapters never import their framework (structural types only), so
+      // nothing extra needs to be external.
+      'uploads/index': 'src/uploads/index.ts',
+      'adapters/express': 'src/adapters/express.ts',
+      'adapters/fastify': 'src/adapters/fastify.ts',
+      'adapters/formidable': 'src/adapters/formidable.ts',
     },
   },
   {

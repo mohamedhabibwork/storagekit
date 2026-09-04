@@ -76,6 +76,7 @@ AWS ones.
 | Talk to Azure Blob | [Azure Blob driver](azure.md) |
 | Talk to Oracle OCI Object Storage | [Oracle OCI driver](oracle.md) |
 | Add your own backend | [Custom drivers](custom-drivers.md) |
+| Handle multipart uploads from Express, Fastify, Hono, Next.js, … | [Framework uploads](uploads.md) |
 
 The full API surface — normalized options, `native` per-driver overrides,
 streaming, signed URLs — is described in each driver's page.

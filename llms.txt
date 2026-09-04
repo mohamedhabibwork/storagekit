@@ -15,9 +15,11 @@ npm install @mohamedhabibwork/storagekit
 ```
 
 **Entrypoints** (import only what you use; the root entry bundles no cloud SDK):
-`@mohamedhabibwork/storagekit` (core + factory + manager + copyBetween),
+`@mohamedhabibwork/storagekit` (core + factory + manager + copyBetween + upload intake),
 `.../local`, `.../s3`, `.../minio`, `.../azure`, `.../oracle` (each also exports
-`createXxxStorage`), `.../testing` (driver contract suite).
+`createXxxStorage`), `.../testing` (driver contract suite), `.../uploads`
+(upload intake helpers), `.../adapters/express`, `.../adapters/fastify`,
+`.../adapters/formidable` (framework upload adapters).
 
 Loading a driver without its SDK installed throws `StorageInvalidConfigError`
 with the exact `npm install` command — never a module-not-found crash.
@@ -88,6 +90,53 @@ Provider-native field examples:
 - MinIO: `metaData: { … }` (extra x-amz-meta bag)
 - Oracle: `storageTier: 'Archive'`, `ifMatch`, `opcMeta`, `opcChecksumAlgorithm`
 - Local: `mode: 0o600`
+
+## Framework uploads (multer, @fastify/multipart, formidable, web File)
+
+```ts
+// Core intake — works with ANY upload middleware. Import from 'storagekit/uploads'
+// (also re-exported from the root entry).
+import { saveUpload, sanitizeFilename, randomKey } from '@mohamedhabibwork/storagekit/uploads';
+const saved = await saveUpload(storage, {
+  body: file.stream,              // stream | Buffer | Blob
+  fieldname: file.fieldname,
+  originalName: file.originalname, // untrusted: used only for key EXTENSION + metadata
+  mimeType: file.mimetype,
+}, { directory: 'uploads' });      // → uploads/<uuid>.<ext from original name>
+// saved: { key, originalName?, mimeType?, result }  (result = UploadResult)
+// Auto metadata: originalname/fieldname/mimetype (merge via `metadata: {...}`,
+// disable with `metadata: false`). `key` accepts a string or async resolver —
+// both traversal-checked. `native`, `signal`, `overwrite`, `contentType` pass through.
+
+// Express / NestJS / koa-multer — multer storage engine ('storagekit/adapters/express'):
+import multer from 'multer';
+import { createMulterStorage } from '@mohamedhabibwork/storagekit/adapters/express';
+const upload = multer({ storage: createMulterStorage(storage, { directory: 'uploads' }) });
+app.post('/u', upload.single('avatar'), (req, res) =>
+  res.json({ key: req.file!.key, etag: req.file!.etag, storagekit: req.file!.storagekit }));
+// NestJS: FileInterceptor('avatar', { storage: createMulterStorage(storage) })
+// Request aborted / handler error → stored object is deleted (_removeFile).
+
+// Fastify 4/5 ('storagekit/adapters/fastify'):
+import { saveFastifyFile } from '@mohamedhabibwork/storagekit/adapters/fastify';
+app.post('/u', async (req) => {
+  const part = await req.file();
+  return saveFastifyFile(storage, part!, { directory: 'uploads' }); // consumes the stream
+});
+
+// Hono / Next.js / Remix / Nuxt / Elysia / Bun.serve / Deno.serve — web File:
+import { saveWebFile } from '@mohamedhabibwork/storagekit/uploads';
+const saved = await saveWebFile(storage, fileFromFormData, { directory: 'uploads' });
+
+// formidable v2/v3 ('storagekit/adapters/formidable'):
+import { saveFormidableFile } from '@mohamedhabibwork/storagekit/adapters/formidable';
+const saved = await saveFormidableFile(storage, files.file, { directory: 'uploads' });
+```
+
+Adapters import NOTHING from the frameworks (structural types only) — every
+framework package stays an optional peer. Client filenames never control the
+key stem: `randomKey()` uses a UUID; `sanitizeFilename()` keeps only a safe
+basename/extension.
 
 ## Download
 

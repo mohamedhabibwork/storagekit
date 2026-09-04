@@ -21,6 +21,18 @@ export type { StorageManager } from './manager';
 export { copyBetween, type CopyBetweenOptions } from './copy-between';
 export { StorageInstance } from './storage';
 
+// Upload intake (framework-agnostic); framework-specific adapters live in
+// `storagekit/adapters/*` subpath entries.
+export {
+  saveUpload,
+  saveWebFile,
+  sanitizeFilename,
+  randomKey,
+  type UploadFileInput,
+  type SaveUploadOptions,
+  type SavedUpload,
+} from './uploads';
+
 // Core types
 export type {
   Storage,
