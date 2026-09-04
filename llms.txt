@@ -132,6 +132,11 @@ const saved = await saveWebFile(storage, fileFromFormData, { directory: 'uploads
 // formidable v2/v3 ('storagekit/adapters/formidable'):
 import { saveFormidableFile } from '@mohamedhabibwork/storagekit/adapters/formidable';
 const saved = await saveFormidableFile(storage, files.file, { directory: 'uploads' });
+// Koa (@koa/multer) uses the same multer engine; busboy / GraphQL Upload →
+// wrap the part into UploadFileInput and call saveUpload(). Serve files back
+// via getUrl() (local needs baseUrl), getSignedUrl() (Oracle: PARs, not
+// presigned), or download() + stream. Validate client MIME/size yourself
+// (multer fileFilter + limits run before the engine).
 ```
 
 Adapters import NOTHING from the frameworks (structural types only) — every
