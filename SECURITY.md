@@ -96,7 +96,7 @@ This repository also runs:
 - **GitHub Dependabot** — version + security updates (`/security/dependabot`).
 - **GitHub Code Scanning (CodeQL)** — static analysis on every push and PR
   to `main` (`/security/code-scanning`).
-- **Branch protection** — see [`docs/BRANCH_PROTECTION.md`](docs/BRANCH_PROTECTION.md).
+- **Branch protection** — see [`.github/BRANCH_PROTECTION.md`](.github/BRANCH_PROTECTION.md).
 
 If you spot anything else we should be doing here, please open an issue.
 

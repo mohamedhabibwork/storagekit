@@ -78,7 +78,7 @@ CodeQL alert that introduces a regression will block the merge, not just
 be a yellow badge.
 
 The exact branch-protection settings table is in
-[`docs/BRANCH_PROTECTION.md`](BRANCH_PROTECTION.md).
+[`.github/BRANCH_PROTECTION.md`](https://github.com/mohamedhabibwork/storagekit/blob/main/.github/BRANCH_PROTECTION.md).
 
 ## 4. Triage loop
 
