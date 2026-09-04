@@ -1,25 +1,25 @@
 # storagekit (@mohamedhabibwork/storagekit)
 
-> Unified TypeScript file management across Local filesystem, AWS S3, MinIO, Azure Blob Storage and Oracle OCI Object Storage. One common API for common operations, with strongly-typed **provider-native options** preserved under a `native` key instead of being flattened to a lowest common denominator. Runs on Node.js >= 20, Bun >= 1.1 and Deno >= 2 (all smoke-tested in CI). Dual ESM/CJS with full TypeScript declarations. Custom drivers can be registered against the same API.
+> Unified TypeScript file management across Local filesystem, AWS S3, MinIO, Azure Blob Storage, Oracle OCI Object Storage and RustFS. One common API for common operations, with strongly-typed **provider-native options** preserved under a `native` key instead of being flattened to a lowest common denominator. Runs on Node.js >= 20, Bun >= 1.1 and Deno >= 2 (all smoke-tested in CI). Dual ESM/CJS with full TypeScript declarations. Custom drivers can be registered against the same API.
 
 ## Install
 
 ```bash
 npm install @mohamedhabibwork/storagekit
 # Provider SDKs are optional peer dependencies — install only what you use:
-# S3:      npm i @aws-sdk/client-s3 @aws-sdk/lib-storage @aws-sdk/s3-request-presigner
-# MinIO:   npm i minio
-# Azure:   npm i @azure/storage-blob
-# Oracle:  npm i oci-common oci-objectstorage
-# Local:   no extra dependency (Node built-ins only)
+# S3 / RustFS: npm i @aws-sdk/client-s3 @aws-sdk/lib-storage @aws-sdk/s3-request-presigner
+# MinIO:       npm i minio
+# Azure:       npm i @azure/storage-blob
+# Oracle:      npm i oci-common oci-objectstorage
+# Local:       no extra dependency (Node built-ins only)
 ```
 
 **Entrypoints** (import only what you use; the root entry bundles no cloud SDK):
 `@mohamedhabibwork/storagekit` (core + factory + manager + copyBetween + upload intake),
-`.../local`, `.../s3`, `.../minio`, `.../azure`, `.../oracle` (each also exports
-`createXxxStorage`), `.../testing` (driver contract suite), `.../uploads`
-(upload intake helpers), `.../adapters/express`, `.../adapters/fastify`,
-`.../adapters/formidable` (framework upload adapters).
+`.../local`, `.../s3`, `.../minio`, `.../azure`, `.../oracle`, `.../rustfs`
+(each also exports `createXxxStorage`), `.../testing` (driver contract suite),
+`.../uploads` (upload intake helpers), `.../adapters/express`,
+`.../adapters/fastify`, `.../adapters/formidable` (framework upload adapters).
 
 Loading a driver without its SDK installed throws `StorageInvalidConfigError`
 with the exact `npm install` command — never a module-not-found crash.
@@ -52,6 +52,7 @@ Required config per type:
 - `minio`: `bucket`, `endPoint`; optional `port`, `useSSL`, `accessKey`, `secretKey`, `region`, `prefix`, `publicUrlBase`, `client`, `clientOptions`
 - `azure`: `container` + ONE auth route: `connectionString` | `accountUrl` (+ `credential`: shared key or TokenCredential) | `serviceClient` | `containerClient`; optional `prefix`, `publicUrlBase`
 - `oracle`: `namespaceName`, `bucketName`; optional `region`, `prefix`, `publicUrlBase`, `auth` (`{type:'config-file'|'instance-principals'|'resource-principals'|'provider'}`), `authProvider`, `client`, `clientOptions`
+- `rustfs`: `bucket` + `endpoint` (required); optional `region` (default `us-east-1`), `credentials`, `forcePathStyle` (default `true`), `prefix`, `publicUrlBase`, `client`, `clientOptions`. RustFS is S3-compatible but ships no first-party JS SDK — `native()` returns `S3Client` and every `native` option accepts the AWS SDK input fields.
 
 All providers accept an optional `prefix` (e.g. `'production/'`): every
 operation transparently stores/lists under that prefix and strips it from
@@ -210,7 +211,7 @@ await storage.getSignedUrl('private.pdf', { expiresIn: 3600, action: 'read' }); 
 ```
 
 `expiresIn` is seconds, default 3600, hard-capped at 604800 (7 days) — out of
-range throws. S3/MinIO: presigned; Azure: SAS via shared key / connection
+range throws. S3/MinIO/RustFS: presigned; Azure: SAS via shared key / connection
 string (TokenCredential needs user-delegation via `nativeRequest`); local:
 throws `StorageUnsupportedOperationError` (serve through your app); Oracle:
 throws — it has no presigned URLs. `createOracleStorage()` (subpath import)
@@ -365,5 +366,5 @@ defineDriverContractTests({ name: 'mine', createStorage: () => make(), capabilit
 - npm: https://www.npmjs.com/package/@mohamedhabibwork/storagekit
 - README with full examples: ./README.md (also in the published tarball)
 - Per-driver guides: ./docs/local.md, ./docs/s3.md, ./docs/minio.md,
-  ./docs/azure.md, ./docs/oracle.md (shipped in the tarball)
+  ./docs/azure.md, ./docs/oracle.md, ./docs/rustfs.md (shipped in the tarball)
 - Custom driver guide: ./docs/custom-drivers.md

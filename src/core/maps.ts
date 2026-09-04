@@ -78,6 +78,7 @@ import type {
   OracleNativeUrlOptions,
   OracleStorageConfig,
 } from '../drivers/oracle/oracle.types';
+import type { RustfsStorageConfig } from '../drivers/rustfs/rustfs.types';
 import type { S3NativeStatOptions } from '../drivers/s3/s3.types';
 
 export type StorageConfig =
@@ -85,7 +86,8 @@ export type StorageConfig =
   | S3StorageConfig
   | MinioStorageConfig
   | AzureStorageConfig
-  | OracleStorageConfig;
+  | OracleStorageConfig
+  | RustfsStorageConfig;
 
 export type StorageConfigMap = {
   local: LocalStorageConfig;
@@ -93,6 +95,7 @@ export type StorageConfigMap = {
   minio: MinioStorageConfig;
   azure: AzureStorageConfig;
   oracle: OracleStorageConfig;
+  rustfs: RustfsStorageConfig;
 };
 
 /** Per-provider option bags accepted under the `native` key. */
@@ -102,6 +105,10 @@ export interface NativeOptionsMap {
   minio: MinioNativeUploadOptions;
   azure: AzureNativeUploadOptions;
   oracle: OracleNativeUploadOptions;
+  // RustFS is S3-compatible and ships no first-party JS SDK — it speaks the
+  // AWS SDK v3 wire protocol exactly, so its native option bag is the same
+  // shape as S3.
+  rustfs: S3NativeUploadOptions;
 }
 
 export interface NativeDownloadOptionsMap {
@@ -110,6 +117,7 @@ export interface NativeDownloadOptionsMap {
   minio: MinioNativeDownloadOptions;
   azure: AzureNativeDownloadOptions;
   oracle: OracleNativeDownloadOptions;
+  rustfs: S3NativeDownloadOptions;
 }
 
 export interface NativeStatOptionsMap {
@@ -118,6 +126,7 @@ export interface NativeStatOptionsMap {
   minio: MinioNativeStatOptions;
   azure: AzureNativeStatOptions;
   oracle: OracleNativeStatOptions;
+  rustfs: S3NativeStatOptions;
 }
 
 export interface NativeDeleteOptionsMap {
@@ -126,6 +135,7 @@ export interface NativeDeleteOptionsMap {
   minio: MinioNativeDeleteOptions;
   azure: AzureNativeDeleteOptions;
   oracle: OracleNativeDeleteOptions;
+  rustfs: S3NativeDeleteOptions;
 }
 
 export interface NativeDeleteManyOptionsMap {
@@ -134,6 +144,7 @@ export interface NativeDeleteManyOptionsMap {
   minio: Record<string, never>;
   azure: AzureNativeDeleteManyOptions;
   oracle: Record<string, never>;
+  rustfs: S3NativeDeleteManyOptions;
 }
 
 export interface NativeListOptionsMap {
@@ -142,6 +153,7 @@ export interface NativeListOptionsMap {
   minio: MinioNativeListOptions;
   azure: AzureNativeListOptions;
   oracle: OracleNativeListOptions;
+  rustfs: S3NativeListOptions;
 }
 
 export interface NativeCopyOptionsMap {
@@ -150,6 +162,7 @@ export interface NativeCopyOptionsMap {
   minio: MinioNativeCopyOptions;
   azure: AzureNativeCopyOptions;
   oracle: OracleNativeCopyOptions;
+  rustfs: S3NativeCopyOptions;
 }
 
 export interface NativeMoveOptionsMap {
@@ -158,6 +171,7 @@ export interface NativeMoveOptionsMap {
   minio: MinioNativeDeleteOptions;
   azure: AzureNativeDeleteOptions;
   oracle: OracleNativeDeleteOptions;
+  rustfs: S3NativeDeleteOptions;
 }
 
 export interface NativeSignedUrlOptionsMap {
@@ -166,6 +180,7 @@ export interface NativeSignedUrlOptionsMap {
   minio: MinioNativeSignedUrlOptions;
   azure: AzureNativeSignedUrlOptions;
   oracle: OracleNativeSignedUrlOptions;
+  rustfs: S3NativeSignedUrlOptions;
 }
 
 export interface NativeUrlOptionsMap {
@@ -174,6 +189,7 @@ export interface NativeUrlOptionsMap {
   minio: MinioNativeUrlOptions;
   azure: AzureNativeUrlOptions;
   oracle: OracleNativeUrlOptions;
+  rustfs: S3NativeUrlOptions;
 }
 
 /** Per-provider result passthroughs returned under the `native` key. */
@@ -183,6 +199,7 @@ export interface NativeClientMap {
   minio: MinioNativeClient;
   azure: AzureNativeClient;
   oracle: OracleNativeClient;
+  rustfs: S3NativeClient;
 }
 
 export interface NativeUploadResultMap {
@@ -191,6 +208,7 @@ export interface NativeUploadResultMap {
   minio: MinioNativeUploadResult;
   azure: AzureNativeUploadResult;
   oracle: OracleNativeUploadResult;
+  rustfs: S3NativeUploadResult;
 }
 
 export interface NativeDownloadResultMap {
@@ -199,6 +217,7 @@ export interface NativeDownloadResultMap {
   minio: MinioNativeDownloadResult;
   azure: AzureNativeDownloadResult;
   oracle: OracleNativeDownloadResult;
+  rustfs: S3NativeDownloadResult;
 }
 
 export interface NativeFileStatMap {
@@ -207,6 +226,7 @@ export interface NativeFileStatMap {
   minio: MinioNativeFileStat;
   azure: AzureNativeFileStat;
   oracle: OracleNativeFileStat;
+  rustfs: S3NativeFileStat;
 }
 
 export interface NativeListResultMap {
@@ -215,6 +235,7 @@ export interface NativeListResultMap {
   minio: MinioNativeListResult;
   azure: AzureNativeListResult;
   oracle: OracleNativeListResult;
+  rustfs: S3NativeListResult;
 }
 
 /**

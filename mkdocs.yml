@@ -89,6 +89,7 @@ nav:
       - MinIO: minio.md
       - Azure Blob: azure.md
       - Oracle OCI: oracle.md
+      - RustFS: rustfs.md
       - Custom drivers: custom-drivers.md
       - Framework uploads: uploads.md
   - Project:

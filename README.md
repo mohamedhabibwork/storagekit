@@ -46,11 +46,19 @@ options (`tier: 'Cool'`, SAS conditions, …) — and **rejects** AWS ones.
 | MinIO | `storagekit/minio` | `minio` |
 | Azure Blob Storage | `storagekit/azure` | `@azure/storage-blob` |
 | Oracle OCI Object Storage | `storagekit/oracle` | `oci-objectstorage`, `oci-common` |
+| RustFS (S3-compatible, Rust) | `storagekit/rustfs` | `@aws-sdk/client-s3`, `@aws-sdk/lib-storage`, `@aws-sdk/s3-request-presigner` |
 
 All provider SDKs are **optional peer dependencies**. Import only the
 entrypoint you use; when a driver is loaded without its SDK installed you
 get a clear `StorageInvalidConfigError` with the exact `npm install`
 command instead of a module crash.
+
+RustFS ships no first-party JS SDK — it speaks the AWS S3 API, so the
+storagekit/rustfs driver talks to it with the official AWS SDK v3 and
+bakes in RustFS' server defaults (`region: 'us-east-1'`,
+`forcePathStyle: true`). `native()` returns the same `S3Client` as the S3
+driver; the `provider` field on results is `'rustfs'`. See
+[`docs/rustfs.md`](docs/rustfs.md).
 
 Requires **Node.js ≥ 20**. Ships dual ESM + CJS with TypeScript
 declarations. Browser usage is not a goal: server-side credentials and
@@ -85,6 +93,7 @@ tarball):
 | [docs/minio.md](docs/minio.md) | native MinIO client, metadata bags, copy preconditions, presigned URLs |
 | [docs/azure.md](docs/azure.md) | auth routes, access tiers, SAS generation, versioning, Azurite testing |
 | [docs/oracle.md](docs/oracle.md) | OCI auth providers, native multipart, PARs, cross-region copy |
+| [docs/rustfs.md](docs/rustfs.md) | RustFS endpoints, defaults (`us-east-1`, path-style), AWS SDK v3 mapping, local dev server |
 | [docs/custom-drivers.md](docs/custom-drivers.md) | full `StorageDriver` reference, registry semantics, contract testing, correctness checklist |
 | [docs/uploads.md](docs/uploads.md) | framework upload recipes: multer/Express/NestJS, Fastify, Hono, Next.js, formidable, web `File` |
 

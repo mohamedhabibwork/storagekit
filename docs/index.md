@@ -75,6 +75,7 @@ AWS ones.
 | Talk to MinIO | [MinIO driver](minio.md) |
 | Talk to Azure Blob | [Azure Blob driver](azure.md) |
 | Talk to Oracle OCI Object Storage | [Oracle OCI driver](oracle.md) |
+| Talk to RustFS (S3-compatible, Rust) | [RustFS driver](rustfs.md) |
 | Add your own backend | [Custom drivers](custom-drivers.md) |
 | Handle multipart uploads from Express, Fastify, Hono, Next.js, … | [Framework uploads](uploads.md) |
 

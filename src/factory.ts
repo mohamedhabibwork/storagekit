@@ -17,7 +17,7 @@ export interface CreateStorageOptions {
   detectContentType?: boolean;
 }
 
-const BUILTIN_TYPES = new Set<string>(['local', 's3', 'minio', 'azure', 'oracle']);
+const BUILTIN_TYPES = new Set<string>(['local', 's3', 'minio', 'azure', 'oracle', 'rustfs']);
 
 /* ------------------------------------------------------------------ *
  * Custom driver registry
@@ -44,7 +44,8 @@ const DRIVER_REGISTRY: Map<string, StorageDriverFactory> = ((globalThis as Recor
 
 /**
  * Register a custom driver under a storage type. The type must not collide
- * with the builtin types (`local`, `s3`, `minio`, `azure`, `oracle`) or an
+ * with the builtin types (`local`, `s3`, `minio`, `azure`, `oracle`,
+ * `rustfs`) or an
  * existing registration.
  *
  * ```ts
@@ -142,6 +143,15 @@ function assertValidConfig(config: StorageConfig): void {
       }
       if (config.prefix !== undefined) normalizeKey(config.prefix);
       break;
+    case 'rustfs':
+      if (typeof config.bucket !== 'string' || config.bucket.length === 0) {
+        throw new StorageInvalidConfigError('rustfs storage requires a non-empty `bucket`');
+      }
+      if (typeof config.endpoint !== 'string' || config.endpoint.length === 0) {
+        throw new StorageInvalidConfigError('rustfs storage requires a non-empty `endpoint`');
+      }
+      if (config.prefix !== undefined) normalizeKey(config.prefix);
+      break;
   }
 }
 
@@ -236,6 +246,12 @@ export async function createStorage(
       case 'oracle': {
         const { OracleDriver } = await import('./drivers/oracle/oracle.driver');
         driver = new OracleDriver(config as never, runtime) as never;
+        await (driver as unknown as { ready(): Promise<unknown> }).ready();
+        break;
+      }
+      case 'rustfs': {
+        const { RustfsDriver } = await import('./drivers/rustfs/rustfs.driver');
+        driver = new RustfsDriver(config as never, runtime) as never;
         await (driver as unknown as { ready(): Promise<unknown> }).ready();
         break;
       }
