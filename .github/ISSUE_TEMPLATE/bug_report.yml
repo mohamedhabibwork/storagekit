@@ -16,7 +16,7 @@ body:
     attributes:
       label: storagekit version
       description: Output of `npm ls @mohamedhabibwork/storagekit` (or the version you installed).
-      placeholder: "0.2.0"
+      placeholder: "0.3.0"
     validations:
       required: true
 

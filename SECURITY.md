@@ -22,9 +22,9 @@ maintainer has the bandwidth.
 
 | Version line | Supported |
 | --- | --- |
-| `0.2.x` (latest) | ✅ |
-| `0.1.x` | ⚠️ Critical fixes only, until 6 months after `0.2.0` release |
-| `< 0.1` | ❌ No longer supported |
+| `0.3.x` (latest) | ✅ |
+| `0.2.x` | ⚠️ Critical fixes only, until 6 months after `0.3.0` release |
+| `< 0.2` | ❌ No longer supported |
 
 The published version is `npm view @mohamedhabibwork/storagekit version` or
 <https://github.com/mohamedhabibwork/storagekit/releases>.
