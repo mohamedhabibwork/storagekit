@@ -281,7 +281,7 @@ afterAll(() => {
 
 describe('custom driver registry', () => {
   it('registers a custom driver and lists it alongside builtins', () => {
-    expect(listStorageTypes()).toEqual(['local', 's3', 'minio', 'azure', 'oracle', 'rustfs']);
+    expect(listStorageTypes()).toEqual(['local', 's3', 'minio', 'azure', 'oracle', 'rustfs', 'gcs']);
     registerStorageDriver('memory', (config) => new MemoryDriver(config as MemoryConfig));
     expect(listStorageTypes()).toContain('memory');
     expect(() =>
