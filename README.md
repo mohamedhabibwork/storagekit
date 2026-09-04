@@ -2,12 +2,15 @@
 
 [![npm version](https://img.shields.io/npm/v/@mohamedhabibwork/storagekit)](https://www.npmjs.com/package/@mohamedhabibwork/storagekit)
 [![npm downloads](https://img.shields.io/npm/dm/@mohamedhabibwork/storagekit)](https://www.npmjs.com/package/@mohamedhabibwork/storagekit)
+[![Latest Release](https://img.shields.io/github/v/release/mohamedhabibwork/storagekit)](https://github.com/mohamedhabibwork/storagekit/releases/latest)
 [![License: MIT](https://img.shields.io/npm/l/@mohamedhabibwork/storagekit)](./LICENSE)
+[![GitHub: @mohamedhabibwork](https://img.shields.io/badge/GitHub-@mohamedhabibwork-181717?logo=github&logoColor=white)](https://github.com/mohamedhabibwork)
 [![Node.js >= 20](https://img.shields.io/node/v/@mohamedhabibwork/storagekit)](https://nodejs.org)
 [![TypeScript](https://img.shields.io/badge/TypeScript-strict-3178C6?logo=typescript&logoColor=white)](https://www.typescriptlang.org)
 [![CI](https://github.com/mohamedhabibwork/storagekit/actions/workflows/ci.yml/badge.svg)](https://github.com/mohamedhabibwork/storagekit/actions/workflows/ci.yml)
 [![Docs](https://github.com/mohamedhabibwork/storagekit/actions/workflows/docs.yml/badge.svg)](https://mohamedhabibwork.github.io/storagekit/)
-[![Socket Badge](https://badge.socket.dev/npm/package/@mohamedhabibwork/storagekit)](https://socket.dev/npm/package/@mohamedhabibwork/storagekit)
+[![CodeQL](https://github.com/mohamedhabibwork/storagekit/actions/workflows/codeql.yml/badge.svg)](https://github.com/mohamedhabibwork/storagekit/security/code-scanning)
+[![Socket](https://badge.socket.dev/npm/package/@mohamedhabibwork/storagekit)](https://socket.dev/npm/package/@mohamedhabibwork/storagekit)
 
 Unified TypeScript file management across multiple storage providers — with
 strongly-typed **native provider options** preserved instead of flattened
@@ -46,11 +49,19 @@ options (`tier: 'Cool'`, SAS conditions, …) — and **rejects** AWS ones.
 | MinIO | `storagekit/minio` | `minio` |
 | Azure Blob Storage | `storagekit/azure` | `@azure/storage-blob` |
 | Oracle OCI Object Storage | `storagekit/oracle` | `oci-objectstorage`, `oci-common` |
+| RustFS (S3-compatible, Rust) | `storagekit/rustfs` | `@aws-sdk/client-s3`, `@aws-sdk/lib-storage`, `@aws-sdk/s3-request-presigner` |
 
 All provider SDKs are **optional peer dependencies**. Import only the
 entrypoint you use; when a driver is loaded without its SDK installed you
 get a clear `StorageInvalidConfigError` with the exact `npm install`
 command instead of a module crash.
+
+RustFS ships no first-party JS SDK — it speaks the AWS S3 API, so the
+storagekit/rustfs driver talks to it with the official AWS SDK v3 and
+bakes in RustFS' server defaults (`region: 'us-east-1'`,
+`forcePathStyle: true`). `native()` returns the same `S3Client` as the S3
+driver; the `provider` field on results is `'rustfs'`. See
+[`docs/rustfs.md`](docs/rustfs.md).
 
 Requires **Node.js ≥ 20**. Ships dual ESM + CJS with TypeScript
 declarations. Browser usage is not a goal: server-side credentials and
@@ -85,8 +96,9 @@ tarball):
 | [docs/minio.md](docs/minio.md) | native MinIO client, metadata bags, copy preconditions, presigned URLs |
 | [docs/azure.md](docs/azure.md) | auth routes, access tiers, SAS generation, versioning, Azurite testing |
 | [docs/oracle.md](docs/oracle.md) | OCI auth providers, native multipart, PARs, cross-region copy |
+| [docs/rustfs.md](docs/rustfs.md) | RustFS endpoints, defaults (`us-east-1`, path-style), AWS SDK v3 mapping, local dev server |
 | [docs/custom-drivers.md](docs/custom-drivers.md) | full `StorageDriver` reference, registry semantics, contract testing, correctness checklist |
-| [docs/uploads.md](docs/uploads.md) | framework upload recipes: multer/Express/NestJS, Fastify, Hono, Next.js, formidable, web `File` |
+| [docs/uploads.md](docs/uploads.md) | framework upload recipes: multer/Express/NestJS/Koa, Fastify, Hono, Next.js, Elysia, Bun/Deno, formidable, busboy, GraphQL Upload, validation & serving back |
 
 ## The design rule
 

@@ -22,6 +22,7 @@
     "blob",
     "oracle",
     "oci",
+    "rustfs",
     "filesystem",
     "storage-driver",
     "multipart",
@@ -34,6 +35,7 @@
     "file-upload",
     "presigned-url",
     "sas",
+    "s3-compatible",
     "typescript"
   ],
   "type": "module",
@@ -70,6 +72,11 @@
       "types": "./dist/drivers/oracle/index.d.ts",
       "import": "./dist/drivers/oracle/index.js",
       "require": "./dist/drivers/oracle/index.cjs"
+    },
+    "./rustfs": {
+      "types": "./dist/drivers/rustfs/index.d.ts",
+      "import": "./dist/drivers/rustfs/index.js",
+      "require": "./dist/drivers/rustfs/index.cjs"
     },
     "./testing": {
       "types": "./dist/testing/driver-contract.d.ts",
