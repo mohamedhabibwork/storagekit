@@ -23,6 +23,8 @@
     "oracle",
     "oci",
     "rustfs",
+    "gcs",
+    "google-cloud-storage",
     "filesystem",
     "storage-driver",
     "multipart",
@@ -77,6 +79,11 @@
       "types": "./dist/drivers/rustfs/index.d.ts",
       "import": "./dist/drivers/rustfs/index.js",
       "require": "./dist/drivers/rustfs/index.cjs"
+    },
+    "./gcs": {
+      "types": "./dist/drivers/gcs/index.d.ts",
+      "import": "./dist/drivers/gcs/index.js",
+      "require": "./dist/drivers/gcs/index.cjs"
     },
     "./testing": {
       "types": "./dist/testing/driver-contract.d.ts",
@@ -133,6 +140,7 @@
     "@aws-sdk/s3-request-presigner": ">=3.400.0",
     "@azure/storage-blob": ">=12.17.0",
     "@fastify/multipart": ">=8.0.0",
+    "@google-cloud/storage": ">=7.0.0",
     "formidable": ">=2.0.0",
     "hono": ">=4.0.0",
     "minio": ">=7.1.0",
@@ -154,6 +162,9 @@
       "optional": true
     },
     "@fastify/multipart": {
+      "optional": true
+    },
+    "@google-cloud/storage": {
       "optional": true
     },
     "formidable": {
@@ -181,6 +192,7 @@
     "@aws-sdk/s3-request-presigner": "^3.700.0",
     "@azure/storage-blob": "^12.26.0",
     "@fastify/multipart": "^10.1.1",
+    "@google-cloud/storage": "^7.22.0",
     "@types/express": "^5.0.6",
     "@types/formidable": "^3.5.1",
     "@types/multer": "^2.2.0",

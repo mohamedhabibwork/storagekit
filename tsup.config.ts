@@ -13,6 +13,7 @@ const shared = {
   external: [
     /^@aws-sdk\//,
     /^@azure\//,
+    /^@google-cloud\//,
     /^minio($|\/)/,
     /^oci-(common|objectstorage)/,
   ],
@@ -35,6 +36,7 @@ export default defineConfig([
       'drivers/azure/index': 'src/drivers/azure/index.ts',
       'drivers/oracle/index': 'src/drivers/oracle/index.ts',
       'drivers/rustfs/index': 'src/drivers/rustfs/index.ts',
+      'drivers/gcs/index': 'src/drivers/gcs/index.ts',
       // Upload intake: framework-agnostic core + framework adapters.
       // Adapters never import their framework (structural types only), so
       // nothing extra needs to be external.

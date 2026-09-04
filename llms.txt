@@ -1,6 +1,6 @@
 # storagekit (@mohamedhabibwork/storagekit)
 
-> Unified TypeScript file management across Local filesystem, AWS S3, MinIO, Azure Blob Storage, Oracle OCI Object Storage and RustFS. One common API for common operations, with strongly-typed **provider-native options** preserved under a `native` key instead of being flattened to a lowest common denominator. Runs on Node.js >= 20, Bun >= 1.1 and Deno >= 2 (all smoke-tested in CI). Dual ESM/CJS with full TypeScript declarations. Custom drivers can be registered against the same API.
+> Unified TypeScript file management across Local filesystem, AWS S3, MinIO, Azure Blob Storage, Oracle OCI Object Storage, RustFS and Google Cloud Storage. One common API for common operations, with strongly-typed **provider-native options** preserved under a `native` key instead of being flattened to a lowest common denominator. Runs on Node.js >= 20, Bun >= 1.1 and Deno >= 2 (all smoke-tested in CI). Dual ESM/CJS with full TypeScript declarations. Custom drivers can be registered against the same API.
 
 ## Install
 
@@ -11,13 +11,14 @@ npm install @mohamedhabibwork/storagekit
 # MinIO:       npm i minio
 # Azure:       npm i @azure/storage-blob
 # Oracle:      npm i oci-common oci-objectstorage
+# GCS:         npm i @google-cloud/storage
 # Local:       no extra dependency (Node built-ins only)
 ```
 
 **Entrypoints** (import only what you use; the root entry bundles no cloud SDK):
 `@mohamedhabibwork/storagekit` (core + factory + manager + copyBetween + upload intake),
-`.../local`, `.../s3`, `.../minio`, `.../azure`, `.../oracle`, `.../rustfs`
-(each also exports `createXxxStorage`), `.../testing` (driver contract suite),
+`.../local`, `.../s3`, `.../minio`, `.../azure`, `.../oracle`, `.../rustfs`,
+`.../gcs` (each also exports `createXxxStorage`), `.../testing` (driver contract suite),
 `.../uploads` (upload intake helpers), `.../adapters/express`,
 `.../adapters/fastify`, `.../adapters/formidable` (framework upload adapters).
 
@@ -53,6 +54,7 @@ Required config per type:
 - `azure`: `container` + ONE auth route: `connectionString` | `accountUrl` (+ `credential`: shared key or TokenCredential) | `serviceClient` | `containerClient`; optional `prefix`, `publicUrlBase`
 - `oracle`: `namespaceName`, `bucketName`; optional `region`, `prefix`, `publicUrlBase`, `auth` (`{type:'config-file'|'instance-principals'|'resource-principals'|'provider'}`), `authProvider`, `client`, `clientOptions`
 - `rustfs`: `bucket` + `endpoint` (required); optional `region` (default `us-east-1`), `credentials`, `forcePathStyle` (default `true`), `prefix`, `publicUrlBase`, `client`, `clientOptions`. RustFS is S3-compatible but ships no first-party JS SDK — `native()` returns `S3Client` and every `native` option accepts the AWS SDK input fields.
+- `gcs`: `bucket` (required); optional `projectId` (auto from Application Default Credentials), `keyFilename`, `credentials`, `apiEndpoint` (for emulators), `retryOptions`, `prefix`, `publicUrlBase`, `client`, `clientOptions`. Backed by `@google-cloud/storage` — uses GCS resumable uploads, V4 signed URLs, full `FileMetadata` on every operation. `native()` returns the SDK `Storage` instance.
 
 All providers accept an optional `prefix` (e.g. `'production/'`): every
 operation transparently stores/lists under that prefix and strips it from
@@ -371,5 +373,6 @@ defineDriverContractTests({ name: 'mine', createStorage: () => make(), capabilit
 - npm: https://www.npmjs.com/package/@mohamedhabibwork/storagekit
 - README with full examples: ./README.md (also in the published tarball)
 - Per-driver guides: ./docs/local.md, ./docs/s3.md, ./docs/minio.md,
-  ./docs/azure.md, ./docs/oracle.md, ./docs/rustfs.md (shipped in the tarball)
+  ./docs/azure.md, ./docs/oracle.md, ./docs/rustfs.md, ./docs/gcs.md
+  (shipped in the tarball)
 - Custom driver guide: ./docs/custom-drivers.md

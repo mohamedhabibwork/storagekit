@@ -90,6 +90,7 @@ nav:
       - Azure Blob: azure.md
       - Oracle OCI: oracle.md
       - RustFS: rustfs.md
+      - Google Cloud Storage: gcs.md
       - Custom drivers: custom-drivers.md
       - Framework uploads: uploads.md
   - Project:
