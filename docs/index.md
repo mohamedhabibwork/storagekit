@@ -46,7 +46,8 @@ AWS ones.
     ---
 
     Per-driver docs in the sidebar: **Local**, **S3**, **MinIO**,
-    **Azure Blob**, **Oracle OCI**, plus a guide for **Custom drivers**.
+    **Azure Blob**, **Cloudflare R2**, **Oracle OCI**, plus a guide for
+    **Custom drivers**.
 
 -   :fontawesome-brands-github:{ .lg .middle } **Source**
 
@@ -76,6 +77,7 @@ AWS ones.
 | Talk to Azure Blob | [Azure Blob driver](azure.md) |
 | Talk to Oracle OCI Object Storage | [Oracle OCI driver](oracle.md) |
 | Talk to RustFS (S3-compatible, Rust) | [RustFS driver](rustfs.md) |
+| Talk to Cloudflare R2 | [Cloudflare R2 driver](r2.md) |
 | Talk to Google Cloud Storage | [GCS driver](gcs.md) |
 | Add your own backend | [Custom drivers](custom-drivers.md) |
 | Handle multipart uploads from Express, Fastify, Hono, Next.js, … | [Framework uploads](uploads.md) |

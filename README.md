@@ -50,6 +50,7 @@ options (`tier: 'Cool'`, SAS conditions, …) — and **rejects** AWS ones.
 | Azure Blob Storage | `storagekit/azure` | `@azure/storage-blob` |
 | Oracle OCI Object Storage | `storagekit/oracle` | `oci-objectstorage`, `oci-common` |
 | RustFS (S3-compatible, Rust) | `storagekit/rustfs` | `@aws-sdk/client-s3`, `@aws-sdk/lib-storage`, `@aws-sdk/s3-request-presigner` |
+| Cloudflare R2 | `storagekit/r2` | `@aws-sdk/client-s3`, `@aws-sdk/lib-storage`, `@aws-sdk/s3-request-presigner` |
 | Google Cloud Storage | `storagekit/gcs` | `@google-cloud/storage` |
 
 All provider SDKs are **optional peer dependencies**. Import only the
@@ -63,6 +64,11 @@ bakes in RustFS' server defaults (`region: 'us-east-1'`,
 `forcePathStyle: true`). `native()` returns the same `S3Client` as the S3
 driver; the `provider` field on results is `'rustfs'`. See
 [`docs/rustfs.md`](docs/rustfs.md).
+
+Cloudflare R2 uses the same AWS SDK v3 packages through its S3-compatible API.
+The dedicated `storagekit/r2` driver derives R2's standard account endpoint
+from `accountId`, defaults its region to `'auto'`, and reports `versioning: false`.
+See [`docs/r2.md`](docs/r2.md).
 
 Google Cloud Storage is driven through the official
 `@google-cloud/storage` SDK. Authentication uses Application Default
@@ -105,6 +111,7 @@ tarball):
 | [docs/azure.md](docs/azure.md) | auth routes, access tiers, SAS generation, versioning, Azurite testing |
 | [docs/oracle.md](docs/oracle.md) | OCI auth providers, native multipart, PARs, cross-region copy |
 | [docs/rustfs.md](docs/rustfs.md) | RustFS endpoints, defaults (`us-east-1`, path-style), AWS SDK v3 mapping, local dev server |
+| [docs/r2.md](docs/r2.md) | Cloudflare R2 account/jurisdiction endpoints, `auto` region, S3-native options, presigned URLs |
 | [docs/gcs.md](docs/gcs.md) | Google Cloud Storage driver, ADC auth, fake-gcs-server emulator, V4 signed URLs, CMEK |
 | [docs/custom-drivers.md](docs/custom-drivers.md) | full `StorageDriver` reference, registry semantics, contract testing, correctness checklist |
 | [docs/uploads.md](docs/uploads.md) | framework upload recipes: multer/Express/NestJS/Koa, Fastify, Hono, Next.js, Elysia, Bun/Deno, formidable, busboy, GraphQL Upload, validation & serving back |

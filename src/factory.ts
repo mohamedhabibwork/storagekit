@@ -17,7 +17,7 @@ export interface CreateStorageOptions {
   detectContentType?: boolean;
 }
 
-const BUILTIN_TYPES = new Set<string>(['local', 's3', 'minio', 'azure', 'oracle', 'rustfs', 'gcs']);
+const BUILTIN_TYPES = new Set<string>(['local', 's3', 'minio', 'azure', 'oracle', 'rustfs', 'r2', 'gcs']);
 
 /* ------------------------------------------------------------------ *
  * Custom driver registry
@@ -45,7 +45,7 @@ const DRIVER_REGISTRY: Map<string, StorageDriverFactory> = ((globalThis as Recor
 /**
  * Register a custom driver under a storage type. The type must not collide
  * with the builtin types (`local`, `s3`, `minio`, `azure`, `oracle`,
- * `rustfs`, `gcs`) or an
+ * `rustfs`, `r2`, `gcs`) or an
  * existing registration.
  *
  * ```ts
@@ -149,6 +149,17 @@ function assertValidConfig(config: StorageConfig): void {
       }
       if (typeof config.endpoint !== 'string' || config.endpoint.length === 0) {
         throw new StorageInvalidConfigError('rustfs storage requires a non-empty `endpoint`');
+      }
+      if (config.prefix !== undefined) normalizeKey(config.prefix);
+      break;
+    case 'r2':
+      if (typeof config.bucket !== 'string' || config.bucket.length === 0) {
+        throw new StorageInvalidConfigError('r2 storage requires a non-empty `bucket`');
+      }
+      if (!config.accountId && !config.endpoint && !config.client) {
+        throw new StorageInvalidConfigError(
+          'r2 storage requires an `accountId`, `endpoint`, or injected `client`',
+        );
       }
       if (config.prefix !== undefined) normalizeKey(config.prefix);
       break;
@@ -258,6 +269,12 @@ export async function createStorage(
       case 'rustfs': {
         const { RustfsDriver } = await import('./drivers/rustfs/rustfs.driver');
         driver = new RustfsDriver(config as never, runtime) as never;
+        await (driver as unknown as { ready(): Promise<unknown> }).ready();
+        break;
+      }
+      case 'r2': {
+        const { R2Driver } = await import('./drivers/r2/r2.driver');
+        driver = new R2Driver(config as never, runtime) as never;
         await (driver as unknown as { ready(): Promise<unknown> }).ready();
         break;
       }

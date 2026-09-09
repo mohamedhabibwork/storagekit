@@ -1,7 +1,7 @@
 {
   "name": "@mohamedhabibwork/storagekit",
-  "version": "0.3.0",
-  "description": "Unified TypeScript file-management API across Local, S3, MinIO, Azure Blob and Oracle OCI Object Storage — with strongly-typed native provider options.",
+  "version": "0.4.0",
+  "description": "Unified TypeScript file-management API across Local, S3, Cloudflare R2, MinIO, Azure Blob and Oracle OCI Object Storage — with strongly-typed native provider options.",
   "license": "MIT",
   "author": "Mohamed Habib <mohamedhabibwork@gmail.com>",
   "repository": {
@@ -38,6 +38,8 @@
     "presigned-url",
     "sas",
     "s3-compatible",
+    "cloudflare",
+    "r2",
     "typescript"
   ],
   "type": "module",
@@ -79,6 +81,11 @@
       "types": "./dist/drivers/rustfs/index.d.ts",
       "import": "./dist/drivers/rustfs/index.js",
       "require": "./dist/drivers/rustfs/index.cjs"
+    },
+    "./r2": {
+      "types": "./dist/drivers/r2/index.d.ts",
+      "import": "./dist/drivers/r2/index.js",
+      "require": "./dist/drivers/r2/index.cjs"
     },
     "./gcs": {
       "types": "./dist/drivers/gcs/index.d.ts",
@@ -192,7 +199,7 @@
     "@aws-sdk/s3-request-presigner": "^3.700.0",
     "@azure/storage-blob": "^12.26.0",
     "@fastify/multipart": "^10.1.1",
-    "@google-cloud/storage": "^7.22.0",
+    "@google-cloud/storage": "^8.0.1",
     "@types/express": "^5.0.6",
     "@types/formidable": "^3.5.1",
     "@types/multer": "^2.2.0",

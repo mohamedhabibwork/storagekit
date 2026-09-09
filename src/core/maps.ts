@@ -96,6 +96,7 @@ import type {
   GcsStorageConfig,
 } from '../drivers/gcs/gcs.types';
 import type { RustfsStorageConfig } from '../drivers/rustfs/rustfs.types';
+import type { R2StorageConfig } from '../drivers/r2/r2.types';
 import type { S3NativeStatOptions } from '../drivers/s3/s3.types';
 
 export type StorageConfig =
@@ -105,6 +106,7 @@ export type StorageConfig =
   | AzureStorageConfig
   | OracleStorageConfig
   | RustfsStorageConfig
+  | R2StorageConfig
   | GcsStorageConfig;
 
 export type StorageConfigMap = {
@@ -114,6 +116,7 @@ export type StorageConfigMap = {
   azure: AzureStorageConfig;
   oracle: OracleStorageConfig;
   rustfs: RustfsStorageConfig;
+  r2: R2StorageConfig;
   gcs: GcsStorageConfig;
 };
 
@@ -128,6 +131,7 @@ export interface NativeOptionsMap {
   // AWS SDK v3 wire protocol exactly, so its native option bag is the same
   // shape as S3.
   rustfs: S3NativeUploadOptions;
+  r2: S3NativeUploadOptions;
   gcs: GcsNativeUploadOptions;
 }
 
@@ -138,6 +142,7 @@ export interface NativeDownloadOptionsMap {
   azure: AzureNativeDownloadOptions;
   oracle: OracleNativeDownloadOptions;
   rustfs: S3NativeDownloadOptions;
+  r2: S3NativeDownloadOptions;
   gcs: GcsNativeDownloadOptions;
 }
 
@@ -148,6 +153,7 @@ export interface NativeStatOptionsMap {
   azure: AzureNativeStatOptions;
   oracle: OracleNativeStatOptions;
   rustfs: S3NativeStatOptions;
+  r2: S3NativeStatOptions;
   gcs: GcsNativeStatOptions;
 }
 
@@ -158,6 +164,7 @@ export interface NativeDeleteOptionsMap {
   azure: AzureNativeDeleteOptions;
   oracle: OracleNativeDeleteOptions;
   rustfs: S3NativeDeleteOptions;
+  r2: S3NativeDeleteOptions;
   gcs: GcsNativeDeleteOptions;
 }
 
@@ -168,6 +175,7 @@ export interface NativeDeleteManyOptionsMap {
   azure: AzureNativeDeleteManyOptions;
   oracle: Record<string, never>;
   rustfs: S3NativeDeleteManyOptions;
+  r2: S3NativeDeleteManyOptions;
   gcs: Record<string, never>;
 }
 
@@ -178,6 +186,7 @@ export interface NativeListOptionsMap {
   azure: AzureNativeListOptions;
   oracle: OracleNativeListOptions;
   rustfs: S3NativeListOptions;
+  r2: S3NativeListOptions;
   gcs: GcsNativeListOptions;
 }
 
@@ -188,6 +197,7 @@ export interface NativeCopyOptionsMap {
   azure: AzureNativeCopyOptions;
   oracle: OracleNativeCopyOptions;
   rustfs: S3NativeCopyOptions;
+  r2: S3NativeCopyOptions;
   gcs: GcsNativeCopyOptions;
 }
 
@@ -198,6 +208,7 @@ export interface NativeMoveOptionsMap {
   azure: AzureNativeDeleteOptions;
   oracle: OracleNativeDeleteOptions;
   rustfs: S3NativeDeleteOptions;
+  r2: S3NativeDeleteOptions;
   gcs: GcsNativeMoveOptions;
 }
 
@@ -208,6 +219,7 @@ export interface NativeSignedUrlOptionsMap {
   azure: AzureNativeSignedUrlOptions;
   oracle: OracleNativeSignedUrlOptions;
   rustfs: S3NativeSignedUrlOptions;
+  r2: S3NativeSignedUrlOptions;
   gcs: GcsNativeSignedUrlOptions;
 }
 
@@ -218,6 +230,7 @@ export interface NativeUrlOptionsMap {
   azure: AzureNativeUrlOptions;
   oracle: OracleNativeUrlOptions;
   rustfs: S3NativeUrlOptions;
+  r2: S3NativeUrlOptions;
   gcs: GcsNativeUrlOptions;
 }
 
@@ -229,6 +242,7 @@ export interface NativeClientMap {
   azure: AzureNativeClient;
   oracle: OracleNativeClient;
   rustfs: S3NativeClient;
+  r2: S3NativeClient;
   gcs: GcsNativeClient;
 }
 
@@ -239,6 +253,7 @@ export interface NativeUploadResultMap {
   azure: AzureNativeUploadResult;
   oracle: OracleNativeUploadResult;
   rustfs: S3NativeUploadResult;
+  r2: S3NativeUploadResult;
   gcs: GcsNativeUploadResult;
 }
 
@@ -249,6 +264,7 @@ export interface NativeDownloadResultMap {
   azure: AzureNativeDownloadResult;
   oracle: OracleNativeDownloadResult;
   rustfs: S3NativeDownloadResult;
+  r2: S3NativeDownloadResult;
   gcs: GcsNativeDownloadResult;
 }
 
@@ -259,6 +275,7 @@ export interface NativeFileStatMap {
   azure: AzureNativeFileStat;
   oracle: OracleNativeFileStat;
   rustfs: S3NativeFileStat;
+  r2: S3NativeFileStat;
   gcs: GcsNativeFileStat;
 }
 
@@ -269,6 +286,7 @@ export interface NativeListResultMap {
   azure: AzureNativeListResult;
   oracle: OracleNativeListResult;
   rustfs: S3NativeListResult;
+  r2: S3NativeListResult;
   gcs: GcsNativeListResult;
 }
 
