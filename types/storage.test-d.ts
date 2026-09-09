@@ -6,6 +6,7 @@ import type { ObjectStorageClient } from 'oci-objectstorage';
 
 import { createStorage, createStorageManager } from '../src/index';
 import { createS3Storage } from '../src/drivers/s3/index';
+import { createR2Storage } from '../src/drivers/r2/index';
 import { createAzureStorage } from '../src/drivers/azure/index';
 import { createMinioStorage } from '../src/drivers/minio/index';
 import { createLocalStorage } from '../src/drivers/local/index';
@@ -30,6 +31,9 @@ describe('factory typing', () => {
     expectTypeOf(
       createStorage({ type: 'oracle', namespaceName: 'ns', bucketName: 'b' }),
     ).toEqualTypeOf<Promise<Storage<'oracle'>>>();
+    expectTypeOf(createStorage({ type: 'r2', bucket: 'b', accountId: 'account' })).toEqualTypeOf<
+      Promise<Storage<'r2'>>
+    >();
   });
 
   it('rejects cross-provider config fields', () => {
@@ -113,6 +117,9 @@ describe('provider entrypoints', () => {
     expectTypeOf(
       createOracleStorage({ type: 'oracle', namespaceName: 'n', bucketName: 'b' }),
     ).resolves.toMatchTypeOf<OracleStorage>();
+    expectTypeOf(createR2Storage({ type: 'r2', bucket: 'b', accountId: 'account' })).toEqualTypeOf<
+      Promise<Storage<'r2'>>
+    >();
   });
 });
 

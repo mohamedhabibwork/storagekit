@@ -3,7 +3,7 @@ import { Readable } from 'node:stream';
 /**
  * All storage backends supported by the package.
  */
-export type StorageType = 'local' | 's3' | 'minio' | 'azure' | 'oracle' | 'rustfs' | 'gcs';
+export type StorageType = 'local' | 's3' | 'minio' | 'azure' | 'oracle' | 'rustfs' | 'r2' | 'gcs';
 
 /**
  * Accepted bodies for uploads. Streams are always preferred so large files

@@ -1,7 +1,7 @@
 {
   "name": "@mohamedhabibwork/storagekit",
   "version": "0.3.0",
-  "description": "Unified TypeScript file-management API across Local, S3, MinIO, Azure Blob and Oracle OCI Object Storage — with strongly-typed native provider options.",
+  "description": "Unified TypeScript file-management API across Local, S3, Cloudflare R2, MinIO, Azure Blob and Oracle OCI Object Storage — with strongly-typed native provider options.",
   "license": "MIT",
   "author": "Mohamed Habib <mohamedhabibwork@gmail.com>",
   "repository": {
@@ -38,6 +38,8 @@
     "presigned-url",
     "sas",
     "s3-compatible",
+    "cloudflare",
+    "r2",
     "typescript"
   ],
   "type": "module",
@@ -79,6 +81,11 @@
       "types": "./dist/drivers/rustfs/index.d.ts",
       "import": "./dist/drivers/rustfs/index.js",
       "require": "./dist/drivers/rustfs/index.cjs"
+    },
+    "./r2": {
+      "types": "./dist/drivers/r2/index.d.ts",
+      "import": "./dist/drivers/r2/index.js",
+      "require": "./dist/drivers/r2/index.cjs"
     },
     "./gcs": {
       "types": "./dist/drivers/gcs/index.d.ts",
