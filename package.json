@@ -148,7 +148,8 @@
     "test:integration:cloud": "vitest run tests/integrations",
     "lint": "tsc --noEmit",
     "prepublishOnly": "npm run build",
-    "test:runtime": "npm run build && node scripts/runtime-smoke.mjs"
+    "test:runtime": "npm run build && node scripts/runtime-smoke.mjs",
+    "changelog": "conventional-changelog -p conventionalcommits -i CHANGELOG.md -s -r 0"
   },
   "peerDependencies": {
     "@aws-sdk/client-s3": ">=3.400.0",
@@ -213,6 +214,7 @@
     "@types/formidable": "^3.5.1",
     "@types/multer": "^2.2.0",
     "@types/node": "^26.4.0",
+    "conventional-changelog-cli": "^5.0.0",
     "express": "^5.2.1",
     "fastify": "^5.12.3",
     "formidable": "^3.5.4",
