@@ -84,7 +84,8 @@ jobs:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
   github-release:
-    # Ensure a GitHub release exists for the published tag (with notes).
+    # Ensure a GitHub release exists for every published tag (with generated
+    # changelog notes).
     # Uses the workflow's built-in GITHUB_TOKEN (covered by `contents: write`
     # above) instead of a custom PAT — a PAT without release permissions
     # cannot create releases on the same repo and was the source of the
@@ -111,3 +112,30 @@ jobs:
           else
             gh release create "$TAG" --verify-tag --generate-notes
           fi
+
+  release-changelog:
+    # A release can also be published manually in GitHub. Regenerate its
+    # notes so that path receives the same changelog as tag-driven releases.
+    needs: [quality]
+    if: >-
+      ${{
+        !cancelled() &&
+        needs.quality.result == 'success' &&
+        github.event_name == 'release'
+      }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Generate GitHub release changelog
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ github.event.release.tag_name }}
+          TARGET: ${{ github.event.release.target_commitish }}
+        run: |
+          gh api --method POST \
+            "repos/$GITHUB_REPOSITORY/releases/generate-notes" \
+            -f tag_name="$TAG" \
+            -f target_commitish="$TARGET" \
+            --jq .body > RELEASE_NOTES.md
+          gh release edit "$TAG" --notes-file RELEASE_NOTES.md
