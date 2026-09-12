@@ -19,6 +19,7 @@ npm install @mohamedhabibwork/storagekit
 `@mohamedhabibwork/storagekit` (core + factory + manager + copyBetween + upload intake),
 `.../local`, `.../s3`, `.../minio`, `.../azure`, `.../oracle`, `.../rustfs`,
 `.../gcs` (each also exports `createXxxStorage`), `.../testing` (driver contract suite),
+`.../testing/fake` (in-memory fake driver + createFakeStorage() for tests, no vitest dep),
 `.../uploads` (upload intake helpers), `.../adapters/express`,
 `.../adapters/fastify`, `.../adapters/formidable` (framework upload adapters).
 
@@ -358,6 +359,17 @@ are rejected at registration/use with `StorageInvalidConfigError`.
 ```ts
 import { defineDriverContractTests } from '@mohamedhabibwork/storagekit/testing';
 defineDriverContractTests({ name: 'mine', createStorage: () => make(), capabilities: { signedUrls: true } });
+```
+
+## Fake driver for tests
+
+`.../testing/fake` exports an in-memory driver with no vitest dependency:
+
+```ts
+import { createFakeStorage, FakeStorageDriver } from '@mohamedhabibwork/storagekit/testing/fake';
+const storage = await createFakeStorage({ baseUrl, signedUrls: true, initialFiles, latencyMs });
+// driver extras: seed(), reset(), failOnce(operation, error?), clearFailures(), files map
+// registry path: registerStorageDriver('fake', (config) => new FakeStorageDriver(config as never));
 ```
 
 ## Runtime support

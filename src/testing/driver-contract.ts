@@ -271,7 +271,7 @@ export function defineDriverContractTests(options: DriverContractOptions): void 
         const url = await storage.getSignedUrl(path, { expiresIn: 60 });
         expect(url).toContain(path.split('/').pop()!);
 
-        expect(
+        await expect(
           storage.getSignedUrl(path, { expiresIn: 8 * 24 * 60 * 60 }),
         ).rejects.toBeInstanceOf(StorageError);
       });

@@ -51,6 +51,9 @@ export default defineConfig([
     ...shared,
     entry: {
       'testing/driver-contract': 'src/testing/driver-contract.ts',
+      // The fake driver must not depend on vitest, so it gets its own
+      // entrypoint (`storagekit/testing/fake`) usable outside test runners.
+      'testing/fake': 'src/testing/fake.ts',
     },
     external: [...shared.external, 'vitest'],
   },

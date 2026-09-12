@@ -113,7 +113,7 @@ tarball):
 | [docs/rustfs.md](docs/rustfs.md) | RustFS endpoints, defaults (`us-east-1`, path-style), AWS SDK v3 mapping, local dev server |
 | [docs/r2.md](docs/r2.md) | Cloudflare R2 account/jurisdiction endpoints, `auto` region, S3-native options, presigned URLs |
 | [docs/gcs.md](docs/gcs.md) | Google Cloud Storage driver, ADC auth, fake-gcs-server emulator, V4 signed URLs, CMEK |
-| [docs/custom-drivers.md](docs/custom-drivers.md) | full `StorageDriver` reference, registry semantics, contract testing, correctness checklist |
+| [docs/custom-drivers.md](docs/custom-drivers.md) | full `StorageDriver` reference, registry semantics, contract testing, built-in fake driver for tests, correctness checklist |
 | [docs/uploads.md](docs/uploads.md) | framework upload recipes: multer/Express/NestJS/Koa, Fastify, Hono, Next.js, Elysia, Bun/Deno, formidable, busboy, GraphQL Upload, validation & serving back |
 
 ## The design rule
@@ -478,6 +478,53 @@ defineDriverContractTests({
   capabilities: { signedUrls: true },
 });
 ```
+
+## Fake storage for your tests
+
+`storagekit/testing/fake` ships an in-memory driver (`FakeStorageDriver`,
+type `'fake'`) that implements the full unified API — buffers, strings and
+stream uploads, downloads with `buffer()`/`text()`/`json()`, listing with
+pagination, copy/move, capabilities, URLs — with no SDKs, no network and
+no I/O. It even passes the same contract suite as the real providers, so
+swapping it in doesn't change what your code may assume:
+
+```ts
+import { createFakeStorage } from '@mohamedhabibwork/storagekit/testing/fake';
+
+const storage = await createFakeStorage({
+  baseUrl: 'https://cdn.test',                  // powers getUrl() + fake signed URLs
+  signedUrls: true,                             // advertise + serve deterministic fake signed URLs
+  initialFiles: { 'seeded/a.txt': 'seed text' }, // preload the store
+  latencyMs: 25,                                // simulate provider latency
+});
+
+await storage.upload('uploads/a.txt', 'hello');
+await (await storage.download('uploads/a.txt')).text(); // 'hello'
+```
+
+Extras for driving test scenarios (on the driver — construct
+`FakeStorageDriver` directly or reach it via `storage.native()`):
+
+- `seed(entries)` — preload files after construction (any upload body).
+- `reset()` — drop every file and queued failure between tests.
+- `failOnce(operation, error?)` — make the next `upload` / `download` /
+  `delete` / `deleteMany` / `exists` / `stat` / `list` / `copy` / `move`
+  throw, once; `clearFailures()` cancels queued failures.
+- `files` — the live `Map<path, { data, contentType, metadata, lastModified }>`
+
+The module has no vitest dependency, so it works in any runner (vitest,
+node:test, Bun, Deno). To resolve the fake through config-driven code
+paths, register it like a custom driver:
+
+```ts
+import { registerStorageDriver } from '@mohamedhabibwork/storagekit';
+import { FakeStorageDriver } from '@mohamedhabibwork/storagekit/testing/fake';
+
+registerStorageDriver('fake', (config) => new FakeStorageDriver(config as never));
+const storage = await createStorage({ type: 'fake' });
+```
+
+See [docs/custom-drivers.md](docs/custom-drivers.md#5-fake-driver-for-your-apps-tests) for details.
 
 ## Development
 

@@ -175,6 +175,52 @@ copy, move, overwrite conflict, empty files, unicode keys, capabilities,
 native client access — and signed-URL tests when
 `capabilities.signedUrls` is true.
 
+## 5. Fake driver for your app's tests
+
+`storagekit/testing/fake` ships an in-memory driver (`FakeStorageDriver`,
+type `'fake'`) that passes the full contract above — usable with zero
+setup, no SDKs and no I/O, in any test runner:
+
+```ts
+import { createFakeStorage } from '@mohamedhabibwork/storagekit/testing/fake';
+
+const storage = await createFakeStorage({
+  baseUrl: 'https://cdn.test',        // getUrl() + fake signed URLs
+  signedUrls: true,                   // advertise + serve fake signed URLs
+  initialFiles: { 'seeded/a.txt': 'seed text' },
+  latencyMs: 25,                      // simulate provider latency
+});
+
+await storage.upload('uploads/a.txt', 'hello');
+await (await storage.download('uploads/a.txt')).text(); // → 'hello'
+```
+
+Test-support extras on the driver (reachable via
+`storage.native() as { files }`, or by constructing `FakeStorageDriver`
+directly and wrapping it yourself):
+
+- `seed(entries)` — preload files after construction (any `UploadBody`).
+- `reset()` — drop every file and queued failure between tests.
+- `failOnce(operation, error?)` — make the next `upload`/`download`/
+  `delete`/`deleteMany`/`exists`/`stat`/`list`/`copy`/`move` throw;
+  one-shot, so the following call succeeds again. `clearFailures()` cancels.
+- `files` — the live `Map<path, { data, contentType, metadata, lastModified }>`
+  for direct assertions.
+
+To flow the fake through config-driven code paths, register it as a custom
+driver:
+
+```ts
+import { registerStorageDriver } from '@mohamedhabibwork/storagekit';
+import { FakeStorageDriver } from '@mohamedhabibwork/storagekit/testing/fake';
+
+registerStorageDriver('fake', (config) => new FakeStorageDriver(config as never));
+const storage = await createStorage({ type: 'fake' });
+```
+
+Unlike `storagekit/testing` (the contract suite), `testing/fake` has no
+vitest dependency and works in Bun/Deno/node:test setups.
+
 ## Semantics checklist (what makes a driver "correct")
 
 - [ ] `delete` of a missing object resolves (idempotent)

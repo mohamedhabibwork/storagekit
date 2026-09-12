@@ -40,7 +40,11 @@
     "s3-compatible",
     "cloudflare",
     "r2",
-    "typescript"
+    "typescript",
+    "testing",
+    "fake",
+    "in-memory",
+    "mock"
   ],
   "type": "module",
   "main": "./dist/index.cjs",
@@ -96,6 +100,11 @@
       "types": "./dist/testing/driver-contract.d.ts",
       "import": "./dist/testing/driver-contract.js",
       "require": "./dist/testing/driver-contract.cjs"
+    },
+    "./testing/fake": {
+      "types": "./dist/testing/fake.d.ts",
+      "import": "./dist/testing/fake.js",
+      "require": "./dist/testing/fake.cjs"
     },
     "./uploads": {
       "types": "./dist/uploads/index.d.ts",
