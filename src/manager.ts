@@ -1,6 +1,7 @@
-import type { StorageConfig } from './core/maps';
-import type { Storage, StorageType } from './core/types';
-import { createStorage, type CreateStorageOptions } from './factory';
+import type { StorageConfig } from "./core/maps";
+import type { Storage, StorageType } from "./core/types";
+import { createStorage, type CreateStorageOptions } from "./factory";
+import { noopLogger, toError, type KitLogger } from "./core/logger";
 
 export interface StorageManagerOptions extends CreateStorageOptions {}
 
@@ -20,34 +21,33 @@ export interface StorageManagerOptions extends CreateStorageOptions {}
  * await disks.disk('temp').delete('a.txt');
  * ```
  */
-export interface StorageManager<
-  TDisks extends Record<string, StorageConfig>,
-> {
+export interface StorageManager<TDisks extends Record<string, StorageConfig>> {
   /** Get (and lazily create) a named disk. */
-  disk<K extends keyof TDisks & string>(name: K): Promise<Storage<TDisks[K]['type']>>;
+  disk<K extends keyof TDisks & string>(name: K): Promise<Storage<TDisks[K]["type"]>>;
   /** The default disk. */
   defaultDisk(): Promise<Storage<StorageType>>;
   /** Names of the configured disks. */
   diskNames(): Array<keyof TDisks & string>;
   /** The default disk name. */
   defaultDiskName(): keyof TDisks & string;
+  /** Create every configured disk up front. */
+  warmup(): Promise<void>;
 }
 
-export function createStorageManager<
-  TDisks extends Record<string, StorageConfig>,
->(config: {
+export function createStorageManager<TDisks extends Record<string, StorageConfig>>(config: {
   default: keyof TDisks & string;
   disks: TDisks;
+  /** Optional logger (e.g. a loggerkit `Logger`) for lifecycle events. */
+  logger?: KitLogger;
 }): StorageManager<TDisks> {
-  if (!config || !config.disks || typeof config.disks !== 'object') {
-    throw new Error('createStorageManager requires a `disks` map');
+  if (!config || !config.disks || typeof config.disks !== "object") {
+    throw new Error("createStorageManager requires a `disks` map");
   }
   if (!(config.default in config.disks)) {
-    throw new Error(
-      `Default disk "${String(config.default)}" is not present in the disks map`,
-    );
+    throw new Error(`Default disk "${String(config.default)}" is not present in the disks map`);
   }
 
+  const logger = config.logger ?? noopLogger;
   const cache = new Map<string, Promise<Storage<StorageType>>>();
 
   const get = (name: keyof TDisks & string): Promise<Storage<StorageType>> => {
@@ -56,13 +56,22 @@ export function createStorageManager<
     const diskConfig = config.disks[name];
     if (!diskConfig) {
       return Promise.reject(
-        new Error(`Unknown storage disk "${String(name)}". Configured disks: ${Object.keys(config.disks).join(', ')}`),
+        new Error(
+          `Unknown storage disk "${String(name)}". Configured disks: ${Object.keys(config.disks).join(", ")}`,
+        ),
       );
     }
-    const promise = createStorage(diskConfig).catch((error: unknown) => {
-      cache.delete(name);
-      throw error;
-    });
+    const promise = createStorage(diskConfig).then(
+      (disk) => {
+        logger.debug("storagekit: disk created", { disk: name, type: diskConfig.type });
+        return disk;
+      },
+      (error: unknown) => {
+        cache.delete(name);
+        logger.error(`storagekit: failed to create disk "${name}"`, toError(error));
+        throw error;
+      },
+    );
     cache.set(name, promise);
     return promise;
   };
@@ -72,5 +81,10 @@ export function createStorageManager<
     defaultDisk: () => get(config.default),
     diskNames: () => Object.keys(config.disks) as Array<keyof TDisks & string>,
     defaultDiskName: () => config.default,
+    warmup: async () => {
+      await Promise.all(
+        (Object.keys(config.disks) as Array<keyof TDisks & string>).map((name) => get(name)),
+      );
+    },
   };
 }

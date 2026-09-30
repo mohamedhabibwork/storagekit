@@ -14,24 +14,29 @@ export {
   unregisterStorageDriver,
   listStorageTypes,
   type StorageDriverFactory,
-} from './factory';
-export { defineDriver, type StorageDriver } from './drivers/driver';
-export { createStorageManager } from './manager';
-export type { StorageManager } from './manager';
-export { copyBetween, type CopyBetweenOptions } from './copy-between';
-export { StorageInstance } from './storage';
+} from "./factory";
+export { defineDriver, type StorageDriver } from "./drivers/driver";
+export { createStorageManager } from "./manager";
+export type { StorageManager } from "./manager";
+export { noopLogger, type KitLogger } from "./core/logger";
+export { copyBetween, type CopyBetweenOptions } from "./copy-between";
+export { StorageInstance } from "./storage";
 
 // Upload intake (framework-agnostic); framework-specific adapters live in
 // `storagekit/adapters/*` subpath entries.
 export {
   saveUpload,
+  saveUploadIntent,
   saveWebFile,
+  defineUploadIntent,
   sanitizeFilename,
   randomKey,
   type UploadFileInput,
   type SaveUploadOptions,
   type SavedUpload,
-} from './uploads';
+  type UploadIntent,
+  type UploadIntentSource,
+} from "./uploads";
 
 // Core types
 export type {
@@ -64,12 +69,8 @@ export type {
   StorageCapabilities,
   StorageHooks,
   StorageOperationEvent,
-} from './core/types';
-export type {
-  NativeOptionsMap,
-  NativeClientMap,
-  StorageConfigMap,
-} from './core/maps';
+} from "./core/types";
+export type { NativeOptionsMap, NativeClientMap, StorageConfigMap } from "./core/maps";
 
 // Errors
 export {
@@ -83,7 +84,7 @@ export {
   StorageUnsupportedOperationError,
   StorageInvalidPathError,
   isStorageError,
-} from './core/errors';
+} from "./core/errors";
 
 // Path utilities (useful for building application-level keys)
-export { normalizeKey, joinKey, encodeKeyPath } from './core/paths';
+export { normalizeKey, joinKey, encodeKeyPath } from "./core/paths";
