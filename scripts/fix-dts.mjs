@@ -7,10 +7,10 @@
  * Source imports are extensionless (formatter convention); the declaration
  * emitter preserves them verbatim, so we normalize the output here.
  */
-import { readdirSync, readFileSync, statSync, writeFileSync } from 'node:fs';
-import { join } from 'node:path';
+import { readdirSync, readFileSync, statSync, writeFileSync } from "node:fs";
+import { join } from "node:path";
 
-const root = new URL('../dist', import.meta.url).pathname;
+const root = new URL("../dist", import.meta.url).pathname;
 
 let files = 0;
 let rewritten = 0;
@@ -26,7 +26,7 @@ function walk(dir) {
 
 function process(file) {
   files += 1;
-  const source = readFileSync(file, 'utf8');
+  const source = readFileSync(file, "utf8");
   const rewriteFrom = (match, prefix, quote, specifier) => {
     if (/\.(js|cjs|mjs|json|d\.ts|ts)$/.test(specifier)) return match;
     rewritten += 1;

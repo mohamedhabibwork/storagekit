@@ -95,6 +95,8 @@ nav:
       - Custom drivers: custom-drivers.md
       - Framework uploads: uploads.md
   - Project:
+      - Examples: examples.md
+      - Architecture: architecture.md
       - Security setup: SECURITY.md
 
 extra:
@@ -104,7 +106,7 @@ extra:
       name: storagekit on GitHub
     - icon: fontawesome/brands/npm
       link: https://www.npmjs.com/package/@mohamedhabibwork/storagekit
-      name: '@mohamedhabibwork/storagekit on npm'
+      name: "@mohamedhabibwork/storagekit on npm"
   generator: false
 
 extra_css:
