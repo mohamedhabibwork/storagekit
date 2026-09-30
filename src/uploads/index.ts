@@ -2,21 +2,17 @@
  * Upload intake: turn the shapes produced by upload middleware (multer,
  * @fastify/multipart, formidable, busboy, web `File`/`Blob`, ...) into
  * `storage.upload()` calls with safe, provider-agnostic object keys.
+ * {@link UploadIntent} bundles the same intake into one declarative object
+ * that can be built anywhere and run with {@link saveUploadIntent}.
  *
  * Everything here is dependency-free: framework adapters define structural
  * types instead of importing the framework, so no peer install is required
  * and every storage driver works with every framework.
  */
-import { randomUUID } from 'node:crypto';
-import { Readable } from 'node:stream';
-import type {
-  Storage,
-  StorageType,
-  UploadBody,
-  UploadOptions,
-  UploadResult,
-} from '../core/types';
-import { joinKey, normalizeKey } from '../core/paths';
+import { randomUUID } from "node:crypto";
+import { Readable } from "node:stream";
+import type { Storage, StorageType, UploadBody, UploadOptions, UploadResult } from "../core/types";
+import { joinKey, normalizeKey } from "../core/paths";
 
 /**
  * A single uploaded file, normalized across upload middleware.
@@ -56,7 +52,7 @@ export interface SaveUploadOptions<T extends string = StorageType> {
   /** Forwarded to `upload()`. Defaults to the driver default (true). */
   overwrite?: boolean;
   /** Provider-native upload options, strongly typed per storage type. */
-  native?: UploadOptions<T>['native'];
+  native?: UploadOptions<T>["native"];
   /** Abort the upload. */
   signal?: AbortSignal;
 }
@@ -70,6 +66,8 @@ export interface SavedUpload<T extends string = StorageType> {
   result: UploadResult<T>;
 }
 
+// Sanitizing control characters is the purpose of this pattern.
+// oxlint-disable-next-line eslint/no-control-regex
 const CONTROL_CHARS = /[\u0000-\u001f\u007f]/g;
 const UNSAFE_NAME_CHARS = /[<>:"|?*]/g;
 const TRAILING_NAME_CHARS = /[. ]+$/;
@@ -82,17 +80,17 @@ const MAX_FILENAME_LENGTH = 255;
  * length while preserving the extension, and fall back when nothing is left.
  * `.gitignore`-style dotfiles are preserved; `..`-style names are not.
  */
-export function sanitizeFilename(name: string | undefined, fallback = 'file'): string {
-  if (typeof name !== 'string') return fallback;
-  let base = name.split(/[\\/]/).pop() ?? '';
-  base = base.replace(CONTROL_CHARS, '').replace(UNSAFE_NAME_CHARS, '').trim();
-  if (base === '' || /^\.{1,}$/.test(base)) return fallback;
+export function sanitizeFilename(name: string | undefined, fallback = "file"): string {
+  if (typeof name !== "string") return fallback;
+  let base = name.split(/[\\/]/).pop() ?? "";
+  base = base.replace(CONTROL_CHARS, "").replace(UNSAFE_NAME_CHARS, "").trim();
+  if (base === "" || /^\.{1,}$/.test(base)) return fallback;
   if (base.length > MAX_FILENAME_LENGTH) {
-    const extension = NAME_EXTENSION.exec(base)?.[0] ?? '';
+    const extension = NAME_EXTENSION.exec(base)?.[0] ?? "";
     base = base.slice(0, MAX_FILENAME_LENGTH - extension.length) + extension;
   }
-  base = base.replace(TRAILING_NAME_CHARS, '');
-  return base === '' ? fallback : base;
+  base = base.replace(TRAILING_NAME_CHARS, "");
+  return base === "" ? fallback : base;
 }
 
 /**
@@ -103,13 +101,13 @@ export function sanitizeFilename(name: string | undefined, fallback = 'file'): s
  */
 export function randomKey(directory?: string, originalName?: string): string {
   const clean = sanitizeFilename(originalName);
-  const extension = NAME_EXTENSION.exec(clean)?.[0]?.toLowerCase() ?? '';
+  const extension = NAME_EXTENSION.exec(clean)?.[0]?.toLowerCase() ?? "";
   const key = `${randomUUID()}${extension}`;
   return directory === undefined ? key : normalizeKey(joinKey(directory, key));
 }
 
 function stripControlChars(value: string): string {
-  return value.replace(CONTROL_CHARS, '');
+  return value.replace(CONTROL_CHARS, "");
 }
 
 /**
@@ -130,7 +128,7 @@ async function resolveKey<T extends string>(
   options: SaveUploadOptions<T>,
   file: UploadFileInput,
 ): Promise<string> {
-  if (typeof options.key === 'function') return normalizeKey(await options.key(file));
+  if (typeof options.key === "function") return normalizeKey(await options.key(file));
   if (options.key !== undefined) return normalizeKey(options.key);
   return randomKey(options.directory, file.originalName);
 }
@@ -150,14 +148,12 @@ export async function saveUpload<T extends string = StorageType>(
   options: SaveUploadOptions<T> = {},
 ): Promise<SavedUpload<T>> {
   if (file.body === undefined) {
-    throw new TypeError('saveUpload requires a file body (stream, buffer or blob)');
+    throw new TypeError("saveUpload requires a file body (stream, buffer or blob)");
   }
   const key = await resolveKey(options, file);
   const contentType = options.contentType ?? file.mimeType;
   const metadata =
-    options.metadata === false
-      ? undefined
-      : { ...autoMetadata(file), ...options.metadata };
+    options.metadata === false ? undefined : { ...autoMetadata(file), ...options.metadata };
   const isStream = file.body instanceof Readable;
   const result = await storage.upload(key, file.body, {
     ...(contentType !== undefined ? { contentType } : {}),
@@ -186,13 +182,111 @@ export async function saveWebFile<T extends string = StorageType>(
   file: Blob & { name?: string },
   options: SaveUploadOptions<T> = {},
 ): Promise<SavedUpload<T>> {
-  const name = typeof (file as { name?: unknown }).name === 'string'
-    ? (file as { name: string }).name
-    : undefined;
-  return saveUpload(storage, {
-    body: file,
-    ...(name !== undefined ? { originalName: name } : {}),
-    ...(typeof file.type === 'string' && file.type !== '' ? { mimeType: file.type } : {}),
-    ...(typeof file.size === 'number' ? { size: file.size } : {}),
-  }, options);
+  const name =
+    typeof (file as { name?: unknown }).name === "string"
+      ? (file as { name: string }).name
+      : undefined;
+  return saveUpload(
+    storage,
+    {
+      body: file,
+      ...(name !== undefined ? { originalName: name } : {}),
+      ...(typeof file.type === "string" && file.type !== "" ? { mimeType: file.type } : {}),
+      ...(typeof file.size === "number" ? { size: file.size } : {}),
+    },
+    options,
+  );
+}
+
+/**
+ * Where an intent's bytes come from: a middleware-shaped file, a web
+ * `File`/`Blob` (name, type and size are picked up when present), or bare
+ * bytes — anything `Storage.upload()` accepts.
+ */
+export type UploadIntentSource = UploadFileInput | (Blob & { name?: string }) | UploadBody;
+
+/**
+ * A declarative description of one upload: where the bytes come from and how
+ * they should be stored. Intents are plain objects — build them in an HTTP
+ * handler, a queue consumer, a CLI, or a test, pass them around, and run
+ * them against any storage with {@link saveUploadIntent}. Running an intent
+ * is exactly {@link saveUpload} under the hood.
+ */
+export interface UploadIntent<T extends string = StorageType> {
+  /** The file content, in any of the supported shapes. */
+  source: UploadIntentSource;
+  /** Directory prefix for generated keys, e.g. `"uploads"`. */
+  directory?: string;
+  /** Same contract as {@link SaveUploadOptions.key}. */
+  key?: SaveUploadOptions<T>["key"];
+  /** Override the client-reported MIME type. */
+  contentType?: string;
+  /** Same contract as {@link SaveUploadOptions.metadata}. */
+  metadata?: Record<string, string> | false;
+  /** Forwarded to `upload()`. Defaults to the driver default (true). */
+  overwrite?: boolean;
+  /** Provider-native upload options, strongly typed per storage type. */
+  native?: UploadOptions<T>["native"];
+  /** Abort the upload. */
+  signal?: AbortSignal;
+}
+
+/**
+ * Identity helper that pins the storage type on an intent literal, the same
+ * role `defineDriver` plays for drivers.
+ */
+export function defineUploadIntent<T extends string = StorageType>(
+  intent: UploadIntent<T>,
+): UploadIntent<T> {
+  return intent;
+}
+
+function normalizeIntentSource(source: UploadIntentSource): UploadFileInput {
+  if (source instanceof Blob) {
+    const name =
+      typeof (source as { name?: unknown }).name === "string"
+        ? (source as { name: string }).name
+        : undefined;
+    return {
+      body: source,
+      ...(name !== undefined ? { originalName: name } : {}),
+      ...(typeof source.type === "string" && source.type !== "" ? { mimeType: source.type } : {}),
+      ...(typeof source.size === "number" ? { size: source.size } : {}),
+    };
+  }
+  if (typeof source === "object" && "body" in source) {
+    return source;
+  }
+  return { body: source };
+}
+
+/**
+ * Run a declarative upload intent against any storage. Accepts the same
+ * sources as the rest of the intake — web `File`/`Blob`, middleware-shaped
+ * files, or bare bytes — so one intent shape works no matter where the file
+ * came from.
+ *
+ * ```ts
+ * const intent = defineUploadIntent({
+ *   source: fileFromRequest,
+ *   directory: "uploads",
+ *   metadata: { tenantId: "tenant-1" },
+ * });
+ * const saved = await saveUploadIntent(storage, intent);
+ * ```
+ */
+export async function saveUploadIntent<T extends string = StorageType>(
+  storage: Storage<T>,
+  intent: UploadIntent<T>,
+): Promise<SavedUpload<T>> {
+  const file = normalizeIntentSource(intent.source);
+  return saveUpload(storage, file, {
+    ...(intent.key !== undefined ? { key: intent.key } : {}),
+    ...(intent.directory !== undefined ? { directory: intent.directory } : {}),
+    ...(intent.contentType !== undefined ? { contentType: intent.contentType } : {}),
+    ...(intent.metadata !== undefined ? { metadata: intent.metadata } : {}),
+    ...(intent.overwrite !== undefined ? { overwrite: intent.overwrite } : {}),
+    ...(intent.signal !== undefined ? { signal: intent.signal } : {}),
+    ...(intent.native !== undefined ? { native: intent.native } : {}),
+  });
 }

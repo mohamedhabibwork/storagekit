@@ -1,4 +1,4 @@
-import type { S3StorageConfig } from '../s3/s3.types';
+import type { S3StorageConfig } from "../s3/s3.types";
 
 /**
  * Cloudflare R2 storage configuration.
@@ -8,7 +8,7 @@ import type { S3StorageConfig } from '../s3/s3.types';
  * for jurisdictional endpoints and other advanced setups.
  */
 export interface R2StorageConfig {
-  type: 'r2';
+  type: "r2";
   bucket: string;
   /** Cloudflare account ID used to derive `https://<id>.r2.cloudflarestorage.com`. */
   accountId?: string;
@@ -16,7 +16,7 @@ export interface R2StorageConfig {
   endpoint?: string;
   /** Defaults to `auto`, the region required by R2's S3 API. */
   region?: string;
-  credentials?: S3StorageConfig['credentials'];
+  credentials?: S3StorageConfig["credentials"];
   /** Use path-style requests. Defaults to false, matching R2's SDK examples. */
   forcePathStyle?: boolean;
   /** Virtual prefix every key is stored under, e.g. `production/`. */
@@ -24,9 +24,9 @@ export interface R2StorageConfig {
   /** Public bucket or custom-domain base URL used by `getUrl()`. */
   publicUrlBase?: string;
   /** Inject an existing `S3Client` instead of constructing one. */
-  client?: S3StorageConfig['client'];
+  client?: S3StorageConfig["client"];
   /** Extra options forwarded to `new S3Client(options)`. */
-  clientOptions?: S3StorageConfig['clientOptions'];
+  clientOptions?: S3StorageConfig["clientOptions"];
 }
 
 export type { S3StorageConfig };

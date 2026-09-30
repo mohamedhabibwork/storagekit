@@ -1,6 +1,6 @@
-import type * as AwsS3 from '@aws-sdk/client-s3';
-import type * as AwsLibStorage from '@aws-sdk/lib-storage';
-import type * as AwsPresigner from '@aws-sdk/s3-request-presigner';
+import type * as AwsS3 from "@aws-sdk/client-s3";
+import type * as AwsLibStorage from "@aws-sdk/lib-storage";
+import type * as AwsPresigner from "@aws-sdk/s3-request-presigner";
 
 import {
   StorageConflictError,
@@ -8,21 +8,11 @@ import {
   StorageInvalidConfigError,
   StorageUnsupportedOperationError,
   normalizeError,
-} from '../../core/errors';
-import { detectContentTypeFromPath } from '../../core/mime';
-import {
-  bodyLength,
-  cleanEtag,
-  streamToBuffer,
-  toReadable,
-} from '../../core/streams';
-import {
-  encodeKeyPath,
-  joinKey,
-  normalizeKey,
-  stripKey,
-} from '../../core/paths';
-import type { UploadBody } from '../../core/primitives';
+} from "../../core/errors";
+import { detectContentTypeFromPath } from "../../core/mime";
+import { bodyLength, cleanEtag, streamToBuffer, toReadable } from "../../core/streams";
+import { encodeKeyPath, joinKey, normalizeKey, stripKey } from "../../core/paths";
+import type { UploadBody } from "../../core/primitives";
 import type {
   CopyOptions,
   DeleteManyOptions,
@@ -42,9 +32,9 @@ import type {
   UploadOptions,
   UploadResult,
   UrlOptions,
-} from '../../core/types';
-import type { S3StorageConfig } from './s3.types';
-import type { StorageDriver } from '../driver';
+} from "../../core/types";
+import type { S3StorageConfig } from "./s3.types";
+import type { StorageDriver } from "../driver";
 
 type AwsSdkBundle = {
   client: typeof AwsS3;
@@ -59,9 +49,9 @@ async function loadAwsSdk(): Promise<AwsSdkBundle> {
     sdkPromise = (async () => {
       try {
         const [client, libStorage, presigner] = await Promise.all([
-          import('@aws-sdk/client-s3'),
-          import('@aws-sdk/lib-storage'),
-          import('@aws-sdk/s3-request-presigner'),
+          import("@aws-sdk/client-s3"),
+          import("@aws-sdk/lib-storage"),
+          import("@aws-sdk/s3-request-presigner"),
         ]);
         return {
           client: client as unknown as typeof AwsS3,
@@ -71,8 +61,8 @@ async function loadAwsSdk(): Promise<AwsSdkBundle> {
       } catch (error) {
         sdkPromise = undefined;
         throw new StorageInvalidConfigError(
-          'The S3 driver requires the AWS SDK v3 packages. Install them with:\n' +
-            'npm install @aws-sdk/client-s3 @aws-sdk/lib-storage @aws-sdk/s3-request-presigner',
+          "The S3 driver requires the AWS SDK v3 packages. Install them with:\n" +
+            "npm install @aws-sdk/client-s3 @aws-sdk/lib-storage @aws-sdk/s3-request-presigner",
           { cause: error },
         );
       }
@@ -87,8 +77,8 @@ export interface S3DriverRuntimeOptions {
 
 export const MAX_SIGNED_URL_SECONDS = 7 * 24 * 60 * 60;
 
-export class S3Driver implements StorageDriver<'s3'> {
-  readonly type = 's3' as const;
+export class S3Driver implements StorageDriver<"s3"> {
+  readonly type = "s3" as const;
 
   private readonly config: S3StorageConfig;
   private readonly runtime: S3DriverRuntimeOptions;
@@ -99,7 +89,7 @@ export class S3Driver implements StorageDriver<'s3'> {
   constructor(config: S3StorageConfig, runtime: S3DriverRuntimeOptions = {}) {
     this.config = config;
     this.runtime = runtime;
-    this.prefix = config.prefix?.replace(/\/+$/, '') || undefined;
+    this.prefix = config.prefix?.replace(/\/+$/, "") || undefined;
     if (this.prefix) normalizeKey(this.prefix);
   }
 
@@ -128,7 +118,7 @@ export class S3Driver implements StorageDriver<'s3'> {
   private requireClient(): AwsS3.S3Client {
     if (!this.client || !this.sdk) {
       throw new StorageInvalidConfigError(
-        'S3 driver is not initialized; await driver.ready() or use createStorage()',
+        "S3 driver is not initialized; await driver.ready() or use createStorage()",
       );
     }
     return this.client;
@@ -159,24 +149,21 @@ export class S3Driver implements StorageDriver<'s3'> {
   }
 
   private fail(error: unknown, operation: string, path?: string): never {
-    throw normalizeError(error, { provider: 's3', operation, path });
+    throw normalizeError(error, { provider: "s3", operation, path });
   }
 
-  private contentTypeFor(
-    key: string,
-    explicit: string | undefined,
-  ): string | undefined {
-    return explicit ??
-      (this.runtime.detectContentType !== false
-        ? detectContentTypeFromPath(key)
-        : undefined);
+  private contentTypeFor(key: string, explicit: string | undefined): string | undefined {
+    return (
+      explicit ??
+      (this.runtime.detectContentType !== false ? detectContentTypeFromPath(key) : undefined)
+    );
   }
 
   async upload(
     path: string,
     body: UploadBody,
-    options: UploadOptions<'s3'> = {},
-  ): Promise<UploadResult<'s3'>> {
+    options: UploadOptions<"s3"> = {},
+  ): Promise<UploadResult<"s3">> {
     const normalized = normalizeKey(path);
     const key = this.key(normalized);
     try {
@@ -201,15 +188,14 @@ export class S3Driver implements StorageDriver<'s3'> {
       if (options.cacheControl !== undefined) input.CacheControl = options.cacheControl;
       if (options.contentDisposition !== undefined)
         input.ContentDisposition = options.contentDisposition;
-      if (options.contentEncoding !== undefined)
-        input.ContentEncoding = options.contentEncoding;
+      if (options.contentEncoding !== undefined) input.ContentEncoding = options.contentEncoding;
 
       let abortController: AbortController | undefined;
       if (options.signal) {
         abortController = new AbortController();
         const relay = () => abortController?.abort(options.signal?.reason);
         if (options.signal.aborted) relay();
-        else options.signal.addEventListener('abort', relay, { once: true });
+        else options.signal.addEventListener("abort", relay, { once: true });
       }
 
       const upload = new sdk.libStorage.Upload({
@@ -240,20 +226,16 @@ export class S3Driver implements StorageDriver<'s3'> {
         etag: cleanEtag(result.ETag),
         versionId: result.VersionId,
         url,
-        provider: 's3',
+        provider: "s3",
         native: result,
       };
     } catch (error) {
       if (error instanceof StorageError) throw error;
-      this.fail(error, 'upload', normalized);
+      this.fail(error, "upload", normalized);
     }
   }
 
-  private async assertAbsent(
-    normalized: string,
-    key: string,
-    signal?: AbortSignal,
-  ): Promise<void> {
+  private async assertAbsent(normalized: string, key: string, signal?: AbortSignal): Promise<void> {
     try {
       await this.requireClient().send(
         new this.sdk!.client.HeadObjectCommand({
@@ -266,18 +248,15 @@ export class S3Driver implements StorageDriver<'s3'> {
       const status = (error as { $metadata?: { httpStatusCode?: number } }).$metadata
         ?.httpStatusCode;
       if (status === 404 || status === 400) return; // object absent
-      this.fail(error, 'upload', normalized);
+      this.fail(error, "upload", normalized);
     }
-    throw new StorageConflictError(
-      `"${normalized}" already exists and overwrite is disabled`,
-      { provider: 's3', path: normalized },
-    );
+    throw new StorageConflictError(`"${normalized}" already exists and overwrite is disabled`, {
+      provider: "s3",
+      path: normalized,
+    });
   }
 
-  async download(
-    path: string,
-    options: DownloadOptions<'s3'> = {},
-  ): Promise<DownloadResult<'s3'>> {
+  async download(path: string, options: DownloadOptions<"s3"> = {}): Promise<DownloadResult<"s3">> {
     const normalized = normalizeKey(path);
     try {
       await this.ready();
@@ -310,19 +289,19 @@ export class S3Driver implements StorageDriver<'s3'> {
         lastModified: response.LastModified,
         metadata: response.Metadata,
         versionId: response.VersionId,
-        provider: 's3',
-        native: rest as unknown as NonNullable<DownloadResult<'s3'>['native']>,
+        provider: "s3",
+        native: rest as unknown as NonNullable<DownloadResult<"s3">["native"]>,
         buffer: () => streamToBuffer(stream),
-        text: () => streamToBuffer(stream).then((b) => b.toString('utf8')),
-        json: <V,>() => streamToBuffer(stream).then((b) => JSON.parse(b.toString('utf8')) as V),
-      } as unknown as DownloadResult<'s3'>;
+        text: () => streamToBuffer(stream).then((b) => b.toString("utf8")),
+        json: <V>() => streamToBuffer(stream).then((b) => JSON.parse(b.toString("utf8")) as V),
+      } as unknown as DownloadResult<"s3">;
     } catch (error) {
       if (error instanceof StorageError) throw error;
-      this.fail(error, 'download', normalized);
+      this.fail(error, "download", normalized);
     }
   }
 
-  async delete(path: string, options: DeleteOptions<'s3'> = {}): Promise<void> {
+  async delete(path: string, options: DeleteOptions<"s3"> = {}): Promise<void> {
     const normalized = normalizeKey(path);
     try {
       await this.ready();
@@ -337,18 +316,18 @@ export class S3Driver implements StorageDriver<'s3'> {
       });
     } catch (error) {
       if (error instanceof StorageError) throw error;
-      this.fail(error, 'delete', normalized);
+      this.fail(error, "delete", normalized);
     }
   }
 
   async deleteMany(
     paths: string[],
-    options: DeleteManyOptions<'s3'> = {},
+    options: DeleteManyOptions<"s3"> = {},
   ): Promise<DeleteManyResult> {
     await this.ready();
     const client = this.requireClient();
     const deleted: string[] = [];
-    const failed: DeleteManyResult['failed'] = [];
+    const failed: DeleteManyResult["failed"] = [];
     const internalKeys = paths.map((p) => ({
       key: this.key(normalizeKey(p)),
       original: normalizeKey(p),
@@ -368,7 +347,7 @@ export class S3Driver implements StorageDriver<'s3'> {
               Objects: chunk.map((entry) => ({ Key: entry.key })),
               Quiet: true,
             },
-            ...(options.native ?? {}),
+            ...options.native,
           }),
           { abortSignal: options.signal },
         );
@@ -381,9 +360,9 @@ export class S3Driver implements StorageDriver<'s3'> {
               path: entry.original,
               error: normalizeError(
                 new Error(
-                  `${nativeError.Code ?? 'Error'}: ${nativeError.Message ?? 'delete failed'}`,
+                  `${nativeError.Code ?? "Error"}: ${nativeError.Message ?? "delete failed"}`,
                 ),
-                { provider: 's3', operation: 'deleteMany', path: entry.original },
+                { provider: "s3", operation: "deleteMany", path: entry.original },
               ),
             });
           } else {
@@ -396,8 +375,8 @@ export class S3Driver implements StorageDriver<'s3'> {
           failed.push({
             path: entry.original,
             error: normalizeError(error, {
-              provider: 's3',
-              operation: 'deleteMany',
+              provider: "s3",
+              operation: "deleteMany",
               path: entry.original,
             }),
           });
@@ -407,7 +386,7 @@ export class S3Driver implements StorageDriver<'s3'> {
     return { deleted, failed };
   }
 
-  async exists(path: string, options: ExistsOptions<'s3'> = {}): Promise<boolean> {
+  async exists(path: string, options: ExistsOptions<"s3"> = {}): Promise<boolean> {
     const normalized = normalizeKey(path);
     try {
       await this.ready();
@@ -425,11 +404,11 @@ export class S3Driver implements StorageDriver<'s3'> {
         ?.httpStatusCode;
       if (status === 404) return false;
       if (error instanceof StorageError) throw error;
-      this.fail(error, 'exists', normalized);
+      this.fail(error, "exists", normalized);
     }
   }
 
-  async stat(path: string, options: StatOptions<'s3'> = {}): Promise<FileStat<'s3'>> {
+  async stat(path: string, options: StatOptions<"s3"> = {}): Promise<FileStat<"s3">> {
     const normalized = normalizeKey(path);
     try {
       await this.ready();
@@ -451,24 +430,24 @@ export class S3Driver implements StorageDriver<'s3'> {
         lastModified: response.LastModified,
         metadata: response.Metadata,
         versionId: response.VersionId,
-        provider: 's3',
+        provider: "s3",
         native: response,
       };
     } catch (error) {
       if (error instanceof StorageError) throw error;
-      this.fail(error, 'stat', normalized);
+      this.fail(error, "stat", normalized);
     }
   }
 
-  async list(options: ListOptions<'s3'> = {}): Promise<ListResult<'s3'>> {
+  async list(options: ListOptions<"s3"> = {}): Promise<ListResult<"s3">> {
     try {
       await this.ready();
       const response = await this.requireClient().send(
         new this.sdk!.client.ListObjectsV2Command({
           Bucket: this.config.bucket,
-          Prefix: joinKey(this.prefix, options.prefix ?? '') || undefined,
+          Prefix: joinKey(this.prefix, options.prefix ?? "") || undefined,
           MaxKeys: options.limit ?? 1000,
-          Delimiter: options.recursive ? undefined : '/',
+          Delimiter: options.recursive ? undefined : "/",
           ...(options.cursor ? { ContinuationToken: options.cursor } : {}),
           ...options.native,
         }),
@@ -476,13 +455,13 @@ export class S3Driver implements StorageDriver<'s3'> {
       );
 
       const files: StorageFile[] = (response.Contents ?? []).map((object) => ({
-        path: stripKey(this.prefix, object.Key ?? ''),
+        path: stripKey(this.prefix, object.Key ?? ""),
         size: object.Size,
         etag: cleanEtag(object.ETag),
         lastModified: object.LastModified,
       }));
       const directories = (response.CommonPrefixes ?? [])
-        .map((cp) => stripKey(this.prefix, cp.Prefix ?? ''))
+        .map((cp) => stripKey(this.prefix, cp.Prefix ?? ""))
         .filter((p) => p.length > 0);
 
       return {
@@ -494,14 +473,14 @@ export class S3Driver implements StorageDriver<'s3'> {
       };
     } catch (error) {
       if (error instanceof StorageError) throw error;
-      this.fail(error, 'list');
+      this.fail(error, "list");
     }
   }
 
   async copy(
     source: string,
     destination: string,
-    options: CopyOptions<'s3'> = {},
+    options: CopyOptions<"s3"> = {},
   ): Promise<{ source: string; destination: string; etag?: string; lastModified?: Date }> {
     const src = normalizeKey(source);
     const dest = normalizeKey(destination);
@@ -524,15 +503,14 @@ export class S3Driver implements StorageDriver<'s3'> {
         options.contentDisposition !== undefined ||
         options.contentEncoding !== undefined;
       if (hasOverrides) {
-        input.MetadataDirective = 'REPLACE';
+        input.MetadataDirective = "REPLACE";
         const contentType = this.contentTypeFor(dest, options.contentType);
         if (contentType !== undefined) input.ContentType = contentType;
         if (options.metadata !== undefined) input.Metadata = options.metadata;
         if (options.cacheControl !== undefined) input.CacheControl = options.cacheControl;
         if (options.contentDisposition !== undefined)
           input.ContentDisposition = options.contentDisposition;
-        if (options.contentEncoding !== undefined)
-          input.ContentEncoding = options.contentEncoding;
+        if (options.contentEncoding !== undefined) input.ContentEncoding = options.contentEncoding;
       }
 
       const response = await this.requireClient().send(
@@ -547,16 +525,16 @@ export class S3Driver implements StorageDriver<'s3'> {
       };
     } catch (error) {
       if (error instanceof StorageError) throw error;
-      this.fail(error, 'copy', src);
+      this.fail(error, "copy", src);
     }
   }
 
   async move(
     source: string,
     destination: string,
-    options: MoveOptions<'s3'> = {},
+    options: MoveOptions<"s3"> = {},
   ): Promise<{ source: string; destination: string; etag?: string }> {
-    const copied = await this.copy(source, destination, options as CopyOptions<'s3'>);
+    const copied = await this.copy(source, destination, options as CopyOptions<"s3">);
     await this.delete(source, { signal: options.signal });
     return {
       source: normalizeKey(source),
@@ -565,15 +543,15 @@ export class S3Driver implements StorageDriver<'s3'> {
     };
   }
 
-  async getUrl(path: string, _options: UrlOptions<'s3'> = {}): Promise<string> {
+  async getUrl(path: string, _options: UrlOptions<"s3"> = {}): Promise<string> {
     const key = this.key(normalizeKey(path));
     if (this.config.publicUrlBase) {
-      const base = this.config.publicUrlBase.replace(/\/+$/, '');
+      const base = this.config.publicUrlBase.replace(/\/+$/, "");
       return `${base}/${encodeKeyPath(key)}`;
     }
     const encoded = encodeKeyPath(key);
     if (this.config.endpoint) {
-      const base = this.config.endpoint.replace(/\/+$/, '');
+      const base = this.config.endpoint.replace(/\/+$/, "");
       return `${base}/${this.config.bucket}/${encoded}`;
     }
     const host = this.config.region
@@ -582,10 +560,7 @@ export class S3Driver implements StorageDriver<'s3'> {
     return `https://${host}/${encoded}`;
   }
 
-  async getSignedUrl(
-    path: string,
-    options: SignedUrlOptions<'s3'> = {},
-  ): Promise<string> {
+  async getSignedUrl(path: string, options: SignedUrlOptions<"s3"> = {}): Promise<string> {
     const normalized = normalizeKey(path);
     try {
       await this.ready();
@@ -596,9 +571,9 @@ export class S3Driver implements StorageDriver<'s3'> {
         ...options.native,
       } as AwsS3.GetObjectCommandInput & AwsS3.PutObjectCommandInput;
       const command =
-        options.action === 'write'
+        options.action === "write"
           ? new this.sdk!.client.PutObjectCommand(input)
-          : options.action === 'delete'
+          : options.action === "delete"
             ? new this.sdk!.client.DeleteObjectCommand(input)
             : new this.sdk!.client.GetObjectCommand(input);
       return await this.sdk!.presigner.getSignedUrl(this.requireClient(), command, {
@@ -606,7 +581,7 @@ export class S3Driver implements StorageDriver<'s3'> {
       });
     } catch (error) {
       if (error instanceof StorageError) throw error;
-      this.fail(error, 'getSignedUrl', normalized);
+      this.fail(error, "getSignedUrl", normalized);
     }
   }
 }
@@ -616,7 +591,7 @@ function validateExpiry(expiresIn: number | undefined): number {
   if (!Number.isFinite(value) || value < 1 || value > MAX_SIGNED_URL_SECONDS) {
     throw new StorageUnsupportedOperationError(
       `expiresIn must be between 1 and ${MAX_SIGNED_URL_SECONDS} seconds (7 days), got ${expiresIn}`,
-      { code: 'INVALID_SIGNED_URL_EXPIRY' },
+      { code: "INVALID_SIGNED_URL_EXPIRY" },
     );
   }
   return Math.floor(value);

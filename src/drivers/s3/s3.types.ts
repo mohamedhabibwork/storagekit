@@ -13,15 +13,15 @@ import type {
   DeleteObjectCommandInput,
   DeleteObjectsCommandInput,
   HeadObjectCommandInput,
-} from '@aws-sdk/client-s3';
-import type { AwsCredentialIdentityProvider } from '@aws-sdk/types';
+} from "@aws-sdk/client-s3";
+import type { AwsCredentialIdentityProvider } from "@aws-sdk/types";
 
 /**
  * AWS S3 storage configuration, backed by the official SDK v3
  * (`@aws-sdk/client-s3`, `@aws-sdk/lib-storage`, `@aws-sdk/s3-request-presigner`).
  */
 export interface S3StorageConfig {
-  type: 's3';
+  type: "s3";
   bucket: string;
   region?: string;
   endpoint?: string;
@@ -51,36 +51,27 @@ export interface S3StorageConfig {
  */
 export type S3NativeUploadOptions = Omit<
   PutObjectCommandInput,
-  | 'Bucket'
-  | 'Key'
-  | 'Body'
-  | 'ContentType'
-  | 'ContentLength'
-  | 'Metadata'
-  | 'CacheControl'
-  | 'ContentDisposition'
-  | 'ContentEncoding'
+  | "Bucket"
+  | "Key"
+  | "Body"
+  | "ContentType"
+  | "ContentLength"
+  | "Metadata"
+  | "CacheControl"
+  | "ContentDisposition"
+  | "ContentEncoding"
 > & { ACL?: ObjectCannedACL };
 
 export type S3NativeDownloadOptions = Omit<
   GetObjectCommandInput,
-  'Bucket' | 'Key' | 'Range' | 'VersionId'
+  "Bucket" | "Key" | "Range" | "VersionId"
 >;
 
-export type S3NativeStatOptions = Omit<
-  HeadObjectCommandInput,
-  'Bucket' | 'Key' | 'VersionId'
->;
+export type S3NativeStatOptions = Omit<HeadObjectCommandInput, "Bucket" | "Key" | "VersionId">;
 
-export type S3NativeDeleteOptions = Omit<
-  DeleteObjectCommandInput,
-  'Bucket' | 'Key' | 'VersionId'
->;
+export type S3NativeDeleteOptions = Omit<DeleteObjectCommandInput, "Bucket" | "Key" | "VersionId">;
 
-export type S3NativeDeleteManyOptions = Omit<
-  DeleteObjectsCommandInput,
-  'Bucket' | 'Delete'
->;
+export type S3NativeDeleteManyOptions = Omit<DeleteObjectsCommandInput, "Bucket" | "Delete">;
 
 /**
  * Extra fields for `ListObjectsV2`: `ExpectedBucketOwner`, `RequestPayer`,
@@ -88,7 +79,7 @@ export type S3NativeDeleteManyOptions = Omit<
  */
 export type S3NativeListOptions = Omit<
   ListObjectsV2CommandInput,
-  'Bucket' | 'Prefix' | 'MaxKeys' | 'ContinuationToken' | 'Delimiter' | 'StartAfter'
+  "Bucket" | "Prefix" | "MaxKeys" | "ContinuationToken" | "Delimiter" | "StartAfter"
 >;
 
 /**
@@ -97,15 +88,15 @@ export type S3NativeListOptions = Omit<
  */
 export type S3NativeCopyOptions = Omit<
   CopyObjectCommandInput,
-  | 'Bucket'
-  | 'Key'
-  | 'CopySource'
-  | 'ContentType'
-  | 'Metadata'
-  | 'CacheControl'
-  | 'ContentDisposition'
-  | 'ContentEncoding'
-  | 'MetadataDirective'
+  | "Bucket"
+  | "Key"
+  | "CopySource"
+  | "ContentType"
+  | "Metadata"
+  | "CacheControl"
+  | "ContentDisposition"
+  | "ContentEncoding"
+  | "MetadataDirective"
 >;
 
 /**
@@ -115,7 +106,7 @@ export type S3NativeCopyOptions = Omit<
  */
 export type S3NativeSignedUrlOptions = Omit<
   GetObjectCommandInput & PutObjectCommandInput & DeleteObjectCommandInput,
-  'Bucket' | 'Key'
+  "Bucket" | "Key"
 >;
 
 export interface S3NativeUrlOptions {
@@ -126,5 +117,5 @@ export interface S3NativeUrlOptions {
 export type S3NativeClient = S3Client;
 export type S3NativeFileStat = HeadObjectCommandOutput;
 export type S3NativeUploadResult = CompleteMultipartUploadOutput;
-export type S3NativeDownloadResult = Omit<GetObjectCommandOutput, 'Body'>;
+export type S3NativeDownloadResult = Omit<GetObjectCommandOutput, "Body">;
 export type S3NativeListResult = ListObjectsV2CommandOutput;

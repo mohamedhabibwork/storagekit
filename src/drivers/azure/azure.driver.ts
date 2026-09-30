@@ -1,6 +1,6 @@
-import { Readable } from 'node:stream';
+import { Readable } from "node:stream";
 
-import type * as Azure from '@azure/storage-blob';
+import type * as Azure from "@azure/storage-blob";
 
 import {
   StorageConflictError,
@@ -8,16 +8,18 @@ import {
   StorageInvalidConfigError,
   StorageUnsupportedOperationError,
   normalizeError,
-} from '../../core/errors';
-import { detectContentTypeFromPath } from '../../core/mime';
-import {
-  encodeKeyPath,
-  joinKey,
-  normalizeKey,
-  stripKey,
-} from '../../core/paths';
-import { streamToBuffer } from '../../core/streams';
-import type { UploadBody } from '../../core/primitives';
+} from "../../core/errors";
+import { detectContentTypeFromPath } from "../../core/mime";
+import { encodeKeyPath, joinKey, normalizeKey, stripKey } from "../../core/paths";
+import { streamToBuffer } from "../../core/streams";
+import type { UploadBody } from "../../core/primitives";
+
+function uploadBodySize(body: UploadBody): number | undefined {
+  if (typeof body === "string") return Buffer.byteLength(body, "utf8");
+  if (Buffer.isBuffer(body)) return body.length;
+  if (body instanceof Uint8Array || body instanceof ArrayBuffer) return body.byteLength;
+  return undefined;
+}
 import type {
   CopyOptions,
   DeleteManyOptions,
@@ -37,9 +39,9 @@ import type {
   UploadOptions,
   UploadResult,
   UrlOptions,
-} from '../../core/types';
-import type { AzureStorageConfig } from './azure.types';
-import type { StorageDriver } from '../driver';
+} from "../../core/types";
+import type { AzureStorageConfig } from "./azure.types";
+import type { StorageDriver } from "../driver";
 
 type AzureSdk = typeof Azure;
 
@@ -49,13 +51,13 @@ async function loadAzureSdk(): Promise<AzureSdk> {
   if (!sdkPromise) {
     sdkPromise = (async () => {
       try {
-        const mod = await import('@azure/storage-blob');
+        const mod = await import("@azure/storage-blob");
         return mod as unknown as AzureSdk;
       } catch (error) {
         sdkPromise = undefined;
         throw new StorageInvalidConfigError(
-          'The Azure driver requires @azure/storage-blob. Install it with:\n' +
-            'npm install @azure/storage-blob',
+          "The Azure driver requires @azure/storage-blob. Install it with:\n" +
+            "npm install @azure/storage-blob",
           { cause: error },
         );
       }
@@ -71,10 +73,12 @@ export interface AzureDriverRuntimeOptions {
 /** Minimal shape of a connection string we need for SAS generation. */
 function parseConnectionString(
   connectionString: string,
-): { accountName: string; accountKey: string; endpointSuffix?: string; blobEndpoint?: string } | undefined {
+):
+  | { accountName: string; accountKey: string; endpointSuffix?: string; blobEndpoint?: string }
+  | undefined {
   const parts: Record<string, string> = {};
-  for (const pair of connectionString.split(';')) {
-    const eq = pair.indexOf('=');
+  for (const pair of connectionString.split(";")) {
+    const eq = pair.indexOf("=");
     if (eq === -1) continue;
     parts[pair.slice(0, eq).toLowerCase()] = pair.slice(eq + 1);
   }
@@ -89,8 +93,8 @@ function parseConnectionString(
 
 export const MAX_SIGNED_URL_SECONDS = 7 * 24 * 60 * 60;
 
-export class AzureDriver implements StorageDriver<'azure'> {
-  readonly type = 'azure' as const;
+export class AzureDriver implements StorageDriver<"azure"> {
+  readonly type = "azure" as const;
 
   private readonly config: AzureStorageConfig;
   private readonly runtime: AzureDriverRuntimeOptions;
@@ -102,7 +106,7 @@ export class AzureDriver implements StorageDriver<'azure'> {
   constructor(config: AzureStorageConfig, runtime: AzureDriverRuntimeOptions = {}) {
     this.config = config;
     this.runtime = runtime;
-    this.prefix = config.prefix?.replace(/\/+$/, '') || undefined;
+    this.prefix = config.prefix?.replace(/\/+$/, "") || undefined;
     if (this.prefix) normalizeKey(this.prefix);
   }
 
@@ -122,7 +126,7 @@ export class AzureDriver implements StorageDriver<'azure'> {
         const parsed = parseConnectionString(this.config.connectionString);
         if (!parsed) {
           throw new StorageInvalidConfigError(
-            'The provided Azure connection string does not contain AccountName/AccountKey',
+            "The provided Azure connection string does not contain AccountName/AccountKey",
           );
         }
         this.sharedKeyCredential = new sdk.StorageSharedKeyCredential(
@@ -131,13 +135,13 @@ export class AzureDriver implements StorageDriver<'azure'> {
         );
         const blobEndpoint =
           parsed.blobEndpoint ??
-          `https://${parsed.accountName}.blob.${parsed.endpointSuffix ?? 'core.windows.net'}`;
+          `https://${parsed.accountName}.blob.${parsed.endpointSuffix ?? "core.windows.net"}`;
         serviceClient = new sdk.BlobServiceClient(blobEndpoint, this.sharedKeyCredential);
       } else if (this.config.accountUrl) {
         serviceClient = new sdk.BlobServiceClient(this.config.accountUrl, this.config.credential);
       } else {
         throw new StorageInvalidConfigError(
-          'Azure storage config requires one of: connectionString, accountUrl (+ credential), serviceClient, or containerClient',
+          "Azure storage config requires one of: connectionString, accountUrl (+ credential), serviceClient, or containerClient",
         );
       }
     }
@@ -149,7 +153,7 @@ export class AzureDriver implements StorageDriver<'azure'> {
   private requireClient(): Azure.ContainerClient {
     if (!this.containerClient) {
       throw new StorageInvalidConfigError(
-        'Azure driver is not initialized; await driver.ready() or use createStorage()',
+        "Azure driver is not initialized; await driver.ready() or use createStorage()",
       );
     }
     return this.containerClient;
@@ -180,7 +184,7 @@ export class AzureDriver implements StorageDriver<'azure'> {
   }
 
   private fail(error: unknown, operation: string, path?: string): never {
-    throw normalizeError(error, { provider: 'azure', operation, path });
+    throw normalizeError(error, { provider: "azure", operation, path });
   }
 
   private blobHTTPHeadersFrom(options: {
@@ -199,21 +203,18 @@ export class AzureDriver implements StorageDriver<'azure'> {
     return Object.keys(headers).length > 0 ? headers : undefined;
   }
 
-  private contentTypeFor(
-    key: string,
-    explicit: string | undefined,
-  ): string | undefined {
-    return explicit ??
-      (this.runtime.detectContentType !== false
-        ? detectContentTypeFromPath(key)
-        : undefined);
+  private contentTypeFor(key: string, explicit: string | undefined): string | undefined {
+    return (
+      explicit ??
+      (this.runtime.detectContentType !== false ? detectContentTypeFromPath(key) : undefined)
+    );
   }
 
   async upload(
     path: string,
     body: UploadBody,
-    options: UploadOptions<'azure'> = {},
-  ): Promise<UploadResult<'azure'>> {
+    options: UploadOptions<"azure"> = {},
+  ): Promise<UploadResult<"azure">> {
     const normalized = normalizeKey(path);
     const key = this.key(normalized);
     try {
@@ -260,10 +261,10 @@ export class AzureDriver implements StorageDriver<'azure'> {
         versionId = response.versionId;
       } else {
         let data: Buffer | Uint8Array | Blob | ArrayBuffer;
-        if (typeof body === 'string') data = Buffer.from(body, 'utf8');
+        if (typeof body === "string") data = Buffer.from(body, "utf8");
         else if (body instanceof ArrayBuffer) data = body;
         else if (Buffer.isBuffer(body) || body instanceof Uint8Array) data = body;
-        else if (typeof Blob !== 'undefined' && body instanceof Blob) data = body;
+        else if (typeof Blob !== "undefined" && body instanceof Blob) data = body;
         else {
           throw new StorageUnsupportedOperationError(
             `Unsupported upload body for the Azure driver: ${typeof body}`,
@@ -274,17 +275,7 @@ export class AzureDriver implements StorageDriver<'azure'> {
         versionId = response.versionId;
       }
 
-      const size =
-        options.contentLength ??
-        (typeof body === 'string'
-          ? Buffer.byteLength(body, 'utf8')
-          : Buffer.isBuffer(body)
-            ? body.length
-            : body instanceof Uint8Array
-              ? body.byteLength
-              : body instanceof ArrayBuffer
-                ? body.byteLength
-                : undefined);
+      const size = options.contentLength ?? uploadBodySize(body);
 
       return {
         path: normalized,
@@ -292,12 +283,12 @@ export class AzureDriver implements StorageDriver<'azure'> {
         etag: stripQuotes(etag),
         versionId,
         url: await this.getUrl(normalized),
-        provider: 'azure',
+        provider: "azure",
         native: { etag, versionId },
       };
     } catch (error) {
       if (error instanceof StorageError) throw error;
-      this.fail(error, 'upload', normalized);
+      this.fail(error, "upload", normalized);
     }
   }
 
@@ -310,26 +301,24 @@ export class AzureDriver implements StorageDriver<'azure'> {
       await blockBlob.getProperties({ abortSignal: signal });
     } catch (error) {
       if (isMissing(error)) return;
-      this.fail(error, 'upload', normalized);
+      this.fail(error, "upload", normalized);
     }
-    throw new StorageConflictError(
-      `"${normalized}" already exists and overwrite is disabled`,
-      { provider: 'azure', path: normalized },
-    );
+    throw new StorageConflictError(`"${normalized}" already exists and overwrite is disabled`, {
+      provider: "azure",
+      path: normalized,
+    });
   }
 
   async download(
     path: string,
-    options: DownloadOptions<'azure'> = {},
-  ): Promise<DownloadResult<'azure'>> {
+    options: DownloadOptions<"azure"> = {},
+  ): Promise<DownloadResult<"azure">> {
     const normalized = normalizeKey(path);
     try {
       await this.ready();
       const client = this.requireClient();
       const blobClient = client.getBlobClient(this.key(normalized));
-      const target = options.versionId
-        ? blobClient.withVersion(options.versionId)
-        : blobClient;
+      const target = options.versionId ? blobClient.withVersion(options.versionId) : blobClient;
 
       const downloadOptions: Azure.BlobDownloadOptions = {
         ...options.native,
@@ -346,11 +335,7 @@ export class AzureDriver implements StorageDriver<'azure'> {
       );
 
       const stream = response.readableStreamBody as unknown as Readable;
-      const {
-        readableStreamBody: _stream,
-        blobBody: _blob,
-        ...rest
-      } = response;
+      const { readableStreamBody: _stream, blobBody: _blob, ...rest } = response;
 
       return {
         stream,
@@ -360,19 +345,19 @@ export class AzureDriver implements StorageDriver<'azure'> {
         lastModified: response.lastModified,
         metadata: response.metadata,
         versionId: response.versionId,
-        provider: 'azure',
+        provider: "azure",
         native: rest,
         buffer: () => streamToBuffer(stream),
-        text: () => streamToBuffer(stream).then((b) => b.toString('utf8')),
-        json: <V,>() => streamToBuffer(stream).then((b) => JSON.parse(b.toString('utf8')) as V),
-      } as unknown as DownloadResult<'azure'>;
+        text: () => streamToBuffer(stream).then((b) => b.toString("utf8")),
+        json: <V>() => streamToBuffer(stream).then((b) => JSON.parse(b.toString("utf8")) as V),
+      } as unknown as DownloadResult<"azure">;
     } catch (error) {
       if (error instanceof StorageError) throw error;
-      this.fail(error, 'download', normalized);
+      this.fail(error, "download", normalized);
     }
   }
 
-  async delete(path: string, options: DeleteOptions<'azure'> = {}): Promise<void> {
+  async delete(path: string, options: DeleteOptions<"azure"> = {}): Promise<void> {
     const normalized = normalizeKey(path);
     try {
       await this.ready();
@@ -394,29 +379,29 @@ export class AzureDriver implements StorageDriver<'azure'> {
       // like every other driver.
       if (isMissing(error)) return;
       if (error instanceof StorageError) throw error;
-      this.fail(error, 'delete', normalized);
+      this.fail(error, "delete", normalized);
     }
   }
 
   async deleteMany(
     paths: string[],
-    options: DeleteManyOptions<'azure'> = {},
+    options: DeleteManyOptions<"azure"> = {},
   ): Promise<DeleteManyResult> {
     await this.ready();
     const settled = await Promise.allSettled(
-      paths.map((p) => this.delete(p, options as DeleteOptions<'azure'>)),
+      paths.map((p) => this.delete(p, options as DeleteOptions<"azure">)),
     );
     const deleted: string[] = [];
-    const failed: DeleteManyResult['failed'] = [];
+    const failed: DeleteManyResult["failed"] = [];
     settled.forEach((result, index) => {
       const path = paths[index];
-      if (result.status === 'fulfilled') deleted.push(path);
+      if (result.status === "fulfilled") deleted.push(path);
       else
         failed.push({
           path,
           error: normalizeError(result.reason, {
-            provider: 'azure',
-            operation: 'deleteMany',
+            provider: "azure",
+            operation: "deleteMany",
             path,
           }),
         });
@@ -424,7 +409,7 @@ export class AzureDriver implements StorageDriver<'azure'> {
     return { deleted, failed };
   }
 
-  async exists(path: string, options: ExistsOptions<'azure'> = {}): Promise<boolean> {
+  async exists(path: string, options: ExistsOptions<"azure"> = {}): Promise<boolean> {
     const normalized = normalizeKey(path);
     try {
       await this.ready();
@@ -438,19 +423,17 @@ export class AzureDriver implements StorageDriver<'azure'> {
     } catch (error) {
       if (isMissing(error)) return false;
       if (error instanceof StorageError) throw error;
-      this.fail(error, 'exists', normalized);
+      this.fail(error, "exists", normalized);
     }
   }
 
-  async stat(path: string, options: StatOptions<'azure'> = {}): Promise<FileStat<'azure'>> {
+  async stat(path: string, options: StatOptions<"azure"> = {}): Promise<FileStat<"azure">> {
     const normalized = normalizeKey(path);
     try {
       await this.ready();
       const client = this.requireClient();
       const blobClient = client.getBlobClient(this.key(normalized));
-      const target = options.versionId
-        ? blobClient.withVersion(options.versionId)
-        : blobClient;
+      const target = options.versionId ? blobClient.withVersion(options.versionId) : blobClient;
       const response = await target.getProperties({
         ...options.native,
         ...(options.native?.conditions !== undefined
@@ -466,20 +449,20 @@ export class AzureDriver implements StorageDriver<'azure'> {
         lastModified: response.lastModified,
         metadata: response.metadata,
         versionId: response.versionId,
-        provider: 'azure',
+        provider: "azure",
         native: response,
       };
     } catch (error) {
       if (error instanceof StorageError) throw error;
-      this.fail(error, 'stat', normalized);
+      this.fail(error, "stat", normalized);
     }
   }
 
-  async list(options: ListOptions<'azure'> = {}): Promise<ListResult<'azure'>> {
+  async list(options: ListOptions<"azure"> = {}): Promise<ListResult<"azure">> {
     try {
       await this.ready();
       const client = this.requireClient();
-      const prefix = joinKey(this.prefix, options.prefix ?? '');
+      const prefix = joinKey(this.prefix, options.prefix ?? "");
       const maxPageSize = Math.max(1, options.limit ?? 1000);
 
       const iterator =
@@ -488,13 +471,12 @@ export class AzureDriver implements StorageDriver<'azure'> {
               continuationToken: options.cursor,
               maxPageSize,
             })
-          : client.listBlobsByHierarchy('/', { prefix, ...options.native }).byPage({
+          : client.listBlobsByHierarchy("/", { prefix, ...options.native }).byPage({
               continuationToken: options.cursor,
               maxPageSize,
             });
 
-      const page =
-        (await iterator.next()).value as Azure.ContainerListBlobHierarchySegmentResponse;
+      const page = (await iterator.next()).value as Azure.ContainerListBlobHierarchySegmentResponse;
 
       const files: StorageFile[] = (page.segment?.blobItems ?? []).map((blob) => ({
         path: stripKey(this.prefix, blob.name),
@@ -518,14 +500,14 @@ export class AzureDriver implements StorageDriver<'azure'> {
       };
     } catch (error) {
       if (error instanceof StorageError) throw error;
-      this.fail(error, 'list');
+      this.fail(error, "list");
     }
   }
 
   async copy(
     source: string,
     destination: string,
-    options: CopyOptions<'azure'> = {},
+    options: CopyOptions<"azure"> = {},
   ): Promise<{ source: string; destination: string; etag?: string; lastModified?: Date }> {
     const src = normalizeKey(source);
     const dest = normalizeKey(destination);
@@ -558,13 +540,13 @@ export class AzureDriver implements StorageDriver<'azure'> {
       let response = poller.getResult();
       // Same-account copies usually complete synchronously; poll briefly.
       let attempts = 0;
-      while (response?.copyStatus !== 'success' && attempts < 30) {
+      while (response?.copyStatus !== "success" && attempts < 30) {
         await new Promise((resolve) => setTimeout(resolve, 100 * (attempts + 1)));
         response = poller.getResult();
         attempts += 1;
         if (poller.isDone()) break;
       }
-      if (response?.copyStatus !== 'success') {
+      if (response?.copyStatus !== "success") {
         throw new StorageUnsupportedOperationError(
           `Azure copy from "${source}" to "${destination}" did not complete synchronously; keep the poller via nativeRequest() to await it`,
         );
@@ -578,16 +560,16 @@ export class AzureDriver implements StorageDriver<'azure'> {
       };
     } catch (error) {
       if (error instanceof StorageError) throw error;
-      this.fail(error, 'copy', src);
+      this.fail(error, "copy", src);
     }
   }
 
   async move(
     source: string,
     destination: string,
-    options: MoveOptions<'azure'> = {},
+    options: MoveOptions<"azure"> = {},
   ): Promise<{ source: string; destination: string; etag?: string }> {
-    const copied = await this.copy(source, destination, options as CopyOptions<'azure'>);
+    const copied = await this.copy(source, destination, options as CopyOptions<"azure">);
     await this.delete(source, { signal: options.signal });
     return {
       source: normalizeKey(source),
@@ -596,31 +578,28 @@ export class AzureDriver implements StorageDriver<'azure'> {
     };
   }
 
-  async getUrl(path: string, _options: UrlOptions<'azure'> = {}): Promise<string> {
+  async getUrl(path: string, _options: UrlOptions<"azure"> = {}): Promise<string> {
     const key = this.key(normalizeKey(path));
     if (this.config.publicUrlBase) {
-      const base = this.config.publicUrlBase.replace(/\/+$/, '');
+      const base = this.config.publicUrlBase.replace(/\/+$/, "");
       return `${base}/${encodeKeyPath(key)}`;
     }
-    return `${this.requireClient().url.replace(/\/+$/, '')}/${encodeKeyPath(key)}`;
+    return `${this.requireClient().url.replace(/\/+$/, "")}/${encodeKeyPath(key)}`;
   }
 
-  async getSignedUrl(
-    path: string,
-    options: SignedUrlOptions<'azure'> = {},
-  ): Promise<string> {
+  async getSignedUrl(path: string, options: SignedUrlOptions<"azure"> = {}): Promise<string> {
     const normalized = normalizeKey(path);
     try {
       await this.ready();
       const sdk = this.sdk!;
       const credential =
-        this.config.credential && 'accountName' in (this.config.credential as object)
+        this.config.credential && "accountName" in (this.config.credential as object)
           ? (this.config.credential as Azure.StorageSharedKeyCredential)
           : this.sharedKeyCredential;
       if (!credential) {
         throw new StorageUnsupportedOperationError(
-          'Azure signed URLs require shared-key credentials (connection string or StorageSharedKeyCredential). ' +
-            'TokenCredential-based signing needs user delegation keys — use nativeRequest() with getUserDelegationKey.',
+          "Azure signed URLs require shared-key credentials (connection string or StorageSharedKeyCredential). " +
+            "TokenCredential-based signing needs user delegation keys — use nativeRequest() with getUserDelegationKey.",
         );
       }
 
@@ -631,7 +610,7 @@ export class AzureDriver implements StorageDriver<'azure'> {
           : new Date(Date.now() + validateExpiry(options.expiresIn) * 1000);
 
       const permissionsValue =
-        options.action === 'write' ? 'cw' : options.action === 'delete' ? 'd' : 'r';
+        options.action === "write" ? "cw" : options.action === "delete" ? "d" : "r";
 
       const sas = sdk.generateBlobSASQueryParameters(
         {
@@ -648,7 +627,7 @@ export class AzureDriver implements StorageDriver<'azure'> {
       return `${blobUrl}?${sas.toString()}`;
     } catch (error) {
       if (error instanceof StorageError) throw error;
-      this.fail(error, 'getSignedUrl', normalized);
+      this.fail(error, "getSignedUrl", normalized);
     }
   }
 }
@@ -658,7 +637,7 @@ function validateExpiry(expiresIn: number | undefined): number {
   if (!Number.isFinite(value) || value < 1 || value > MAX_SIGNED_URL_SECONDS) {
     throw new StorageUnsupportedOperationError(
       `expiresIn must be between 1 and ${MAX_SIGNED_URL_SECONDS} seconds (7 days), got ${expiresIn}`,
-      { code: 'INVALID_SIGNED_URL_EXPIRY' },
+      { code: "INVALID_SIGNED_URL_EXPIRY" },
     );
   }
   return Math.floor(value);
@@ -666,7 +645,7 @@ function validateExpiry(expiresIn: number | undefined): number {
 
 function stripQuotes(value: string | undefined): string | undefined {
   if (!value) return undefined;
-  return value.replace(/^"(.*)"$/, '$1');
+  return value.replace(/^"(.*)"$/, "$1");
 }
 
 function isMissing(error: unknown): boolean {
@@ -679,8 +658,8 @@ function isMissing(error: unknown): boolean {
   if (like.statusCode === 404 || like.details?.statusCode === 404) return true;
   const code = like.code ?? like.name ?? like.details?.errorCode;
   return (
-    code === 'BlobNotFound' ||
-    code === 'ContainerNotFound' ||
-    code === 'TheSpecifiedBlobDoesNotExist'
+    code === "BlobNotFound" ||
+    code === "ContainerNotFound" ||
+    code === "TheSpecifiedBlobDoesNotExist"
   );
 }

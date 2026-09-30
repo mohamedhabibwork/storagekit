@@ -15,8 +15,8 @@ import type {
   BlobDeleteResponse,
   BlobBeginCopyFromURLResponse,
   StorageSharedKeyCredential,
-} from '@azure/storage-blob';
-import type { TokenCredential } from '@azure/core-auth';
+} from "@azure/storage-blob";
+import type { TokenCredential } from "@azure/core-auth";
 
 /**
  * Azure Blob Storage configuration using `@azure/storage-blob`.
@@ -26,7 +26,7 @@ import type { TokenCredential } from '@azure/core-auth';
  * service/container client.
  */
 export interface AzureStorageConfig {
-  type: 'azure';
+  type: "azure";
   container: string;
   /** Virtual prefix every key is stored under, e.g. `production/`. */
   prefix?: string;
@@ -46,34 +46,31 @@ export interface AzureStorageConfig {
  */
 export type AzureNativeUploadOptions = Omit<
   BlockBlobUploadOptions,
-  'metadata' | 'abortSignal' | 'tracingOptions'
+  "metadata" | "abortSignal" | "tracingOptions"
 >;
 
 export type AzureNativeDownloadOptions = Omit<
   BlobDownloadOptions,
-  'abortSignal' | 'tracingOptions' | 'onProgress'
+  "abortSignal" | "tracingOptions" | "onProgress"
 >;
 
 export type AzureNativeStatOptions = Omit<
   BlobGetPropertiesOptions,
-  'abortSignal' | 'tracingOptions' | 'conditions'
+  "abortSignal" | "tracingOptions" | "conditions"
 > & { conditions?: BlobRequestConditions };
 
-export type AzureNativeDeleteOptions = Omit<
-  BlobDeleteOptions,
-  'abortSignal' | 'tracingOptions'
->;
+export type AzureNativeDeleteOptions = Omit<BlobDeleteOptions, "abortSignal" | "tracingOptions">;
 
 export type AzureNativeDeleteManyOptions = Record<string, never>;
 
 export type AzureNativeListOptions = Omit<
   ContainerListBlobsOptions,
-  'prefix' | 'abortSignal' | 'tracingOptions' | 'include'
+  "prefix" | "abortSignal" | "tracingOptions" | "include"
 >;
 
 export type AzureNativeCopyOptions = Omit<
   BlobBeginCopyFromURLOptions,
-  'abortSignal' | 'tracingOptions' | 'metadata' | 'blobHTTPHeaders' | 'conditions'
+  "abortSignal" | "tracingOptions" | "metadata" | "blobHTTPHeaders" | "conditions"
 > & { conditions?: BlobRequestConditions };
 
 /**
@@ -83,7 +80,7 @@ export type AzureNativeCopyOptions = Omit<
  */
 export type AzureNativeSignedUrlOptions = Omit<
   Partial<BlobSASSignatureValues>,
-  'containerName' | 'blobName' | 'permissions' | 'version'
+  "containerName" | "blobName" | "permissions" | "version"
 >;
 
 export interface AzureNativeUrlOptions {}
@@ -91,7 +88,10 @@ export interface AzureNativeUrlOptions {}
 export type AzureNativeClient = ContainerClient;
 export type AzureNativeFileStat = BlobGetPropertiesResponse;
 export type AzureNativeUploadResult = { etag?: string; versionId?: string };
-export type AzureNativeDownloadResult = Omit<BlobDownloadResponseParsed, 'readableStreamBody' | 'blobBody'>;
+export type AzureNativeDownloadResult = Omit<
+  BlobDownloadResponseParsed,
+  "readableStreamBody" | "blobBody"
+>;
 export type AzureNativeListResult = ContainerListBlobHierarchySegmentResponse;
 export type AzureNativeDeleteResult = BlobDeleteResponse;
 export type AzureNativeCopyResult = BlobBeginCopyFromURLResponse;

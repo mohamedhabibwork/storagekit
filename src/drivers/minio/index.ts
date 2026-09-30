@@ -1,8 +1,8 @@
-import { createStorage } from '../../factory';
-import type { Storage } from '../../core/types';
-import type { MinioStorageConfig } from './minio.types';
+import { createStorage } from "../../factory";
+import type { Storage } from "../../core/types";
+import type { MinioStorageConfig } from "./minio.types";
 
-export { MinioDriver } from './minio.driver';
+export { MinioDriver } from "./minio.driver";
 export type {
   MinioStorageConfig,
   MinioClientOptions,
@@ -19,7 +19,7 @@ export type {
   MinioNativeUploadResult,
   MinioNativeDownloadResult,
   MinioNativeListResult,
-} from './minio.types';
+} from "./minio.types";
 
 /**
  * Create a MinIO storage using the official MinIO client. MinIO is a
@@ -29,6 +29,6 @@ export type {
 export function createMinioStorage(
   config: MinioStorageConfig,
   options?: Parameters<typeof createStorage>[1],
-): Promise<Storage<'minio'>> {
+): Promise<Storage<"minio">> {
   return createStorage(config, options);
 }

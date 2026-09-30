@@ -1,8 +1,8 @@
-import { createStorage } from '../../factory';
-import type { Storage } from '../../core/types';
-import type { OracleStorageConfig } from './oracle.types';
+import { createStorage } from "../../factory";
+import type { Storage } from "../../core/types";
+import type { OracleStorageConfig } from "./oracle.types";
 
-export { OracleDriver } from './oracle.driver';
+export { OracleDriver } from "./oracle.driver";
 export type {
   OracleStorageConfig,
   OracleAuth,
@@ -19,8 +19,8 @@ export type {
   OracleNativeUploadResult,
   OracleNativeDownloadResult,
   OracleNativeListResult,
-} from './oracle.types';
-export type { Storage } from '../../core/types';
+} from "./oracle.types";
+export type { Storage } from "../../core/types";
 
 /**
  * Oracle-flavored storage with the provider-specific extras that do not fit
@@ -28,7 +28,7 @@ export type { Storage } from '../../core/types';
  * pre-authenticated requests (PARs), whose lifecycle is fundamentally
  * different from a presigned URL.
  */
-export interface OracleStorage extends Storage<'oracle'> {
+export interface OracleStorage extends Storage<"oracle"> {
   /**
    * Create a pre-authenticated request for an object (or prefix).
    * This is a persistent server-side resource — delete it when done via
@@ -52,7 +52,7 @@ export async function createOracleStorage(
   config: OracleStorageConfig,
   options?: Parameters<typeof createStorage>[1],
 ): Promise<OracleStorage> {
-  const storage = (await createStorage(config, options)) as Storage<'oracle'>;
+  const storage = (await createStorage(config, options)) as Storage<"oracle">;
   const oracleStorage = storage as OracleStorage;
   oracleStorage.createPreauthenticatedRequest = async (par) => {
     const response = await storage.nativeRequest((client) =>
@@ -64,9 +64,7 @@ export async function createOracleStorage(
           accessType: par.accessType,
           timeExpires: par.timeExpires,
           ...(par.objectName !== undefined ? { objectName: par.objectName } : {}),
-          ...(par.objectPrefix !== undefined
-            ? { objectPrefix: par.objectPrefix }
-            : {}),
+          ...(par.objectPrefix !== undefined ? { objectPrefix: par.objectPrefix } : {}),
           ...(par.bucketListingAction !== undefined
             ? { bucketListingAction: par.bucketListingAction }
             : {}),
@@ -77,8 +75,8 @@ export async function createOracleStorage(
       preauthenticatedRequest?: { accessUri?: string; id?: string };
     };
     return {
-      accessUri: like.preauthenticatedRequest?.accessUri ?? '',
-      id: like.preauthenticatedRequest?.id ?? '',
+      accessUri: like.preauthenticatedRequest?.accessUri ?? "",
+      id: like.preauthenticatedRequest?.id ?? "",
     };
   };
   return oracleStorage;

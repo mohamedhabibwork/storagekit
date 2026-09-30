@@ -1,4 +1,4 @@
-import { Readable } from 'node:stream';
+import { Readable } from "node:stream";
 
 import {
   StorageConflictError,
@@ -8,11 +8,11 @@ import {
   StorageUnsupportedOperationError,
   isStorageError,
   normalizeError,
-} from '../../core/errors';
-import { detectContentTypeFromPath } from '../../core/mime';
-import { joinKey, normalizeKey, stripKey } from '../../core/paths';
-import { bodyLength, streamToBuffer, toReadable } from '../../core/streams';
-import type { UploadBody } from '../../core/primitives';
+} from "../../core/errors";
+import { detectContentTypeFromPath } from "../../core/mime";
+import { joinKey, normalizeKey, stripKey } from "../../core/paths";
+import { bodyLength, streamToBuffer, toReadable } from "../../core/streams";
+import type { UploadBody } from "../../core/primitives";
 import type {
   CopyOptions,
   DeleteManyOptions,
@@ -32,15 +32,15 @@ import type {
   UploadOptions,
   UploadResult,
   UrlOptions,
-} from '../../core/types';
-import type { MapValueFor, NativeClientMap } from '../../core/maps';
-import type { StorageDriver } from '../driver';
-import type { GcsStorageConfig } from './gcs.types';
+} from "../../core/types";
+import type { MapValueFor, NativeClientMap } from "../../core/maps";
+import type { StorageDriver } from "../driver";
+import type { GcsStorageConfig } from "./gcs.types";
 
-type GcsSdk = typeof import('@google-cloud/storage');
-type GcsStorage = import('@google-cloud/storage').Storage;
-type GcsFile = import('@google-cloud/storage').File;
-type GcsFileMetadata = import('@google-cloud/storage').FileMetadata;
+type GcsSdk = typeof import("@google-cloud/storage");
+type GcsStorage = import("@google-cloud/storage").Storage;
+type GcsFile = import("@google-cloud/storage").File;
+type GcsFileMetadata = import("@google-cloud/storage").FileMetadata;
 
 let sdkPromise: Promise<GcsSdk> | undefined;
 
@@ -48,12 +48,12 @@ async function loadGcsSdk(): Promise<GcsSdk> {
   if (!sdkPromise) {
     sdkPromise = (async () => {
       try {
-        return (await import('@google-cloud/storage')) as unknown as GcsSdk;
+        return (await import("@google-cloud/storage")) as unknown as GcsSdk;
       } catch (error) {
         sdkPromise = undefined;
         throw new StorageInvalidConfigError(
-          'The GCS driver requires the official @google-cloud/storage client. Install it with:\n' +
-            'npm install @google-cloud/storage',
+          "The GCS driver requires the official @google-cloud/storage client. Install it with:\n" +
+            "npm install @google-cloud/storage",
           { cause: error },
         );
       }
@@ -73,8 +73,8 @@ const MAX_SIGNED_URL_SECONDS = 7 * 24 * 60 * 60;
  * client; speaks the GCS REST API. See `docs/gcs.md` for the upstream
  * protocol reference and local-dev emulator setup.
  */
-export class GcsDriver implements StorageDriver<'gcs'> {
-  readonly type = 'gcs' as const;
+export class GcsDriver implements StorageDriver<"gcs"> {
+  readonly type = "gcs" as const;
 
   private readonly config: GcsStorageConfig;
   private readonly runtime: GcsDriverRuntimeOptions;
@@ -84,7 +84,7 @@ export class GcsDriver implements StorageDriver<'gcs'> {
   constructor(config: GcsStorageConfig, runtime: GcsDriverRuntimeOptions = {}) {
     this.config = config;
     this.runtime = runtime;
-    this.prefix = config.prefix?.replace(/\/+$/, '') || undefined;
+    this.prefix = config.prefix?.replace(/\/+$/, "") || undefined;
     if (this.prefix) normalizeKey(this.prefix);
   }
 
@@ -96,11 +96,19 @@ export class GcsDriver implements StorageDriver<'gcs'> {
         this.config.client ??
         new (await loadGcsSdk()).Storage({
           ...(this.config.projectId !== undefined ? { projectId: this.config.projectId } : {}),
-          ...(this.config.keyFilename !== undefined ? { keyFilename: this.config.keyFilename } : {}),
-          ...(this.config.credentials !== undefined ? { credentials: this.config.credentials } : {}),
-          ...(this.config.apiEndpoint !== undefined ? { apiEndpoint: this.config.apiEndpoint } : {}),
-          ...(this.config.retryOptions !== undefined ? { retryOptions: this.config.retryOptions } : {}),
-          ...(this.config.clientOptions ?? {}),
+          ...(this.config.keyFilename !== undefined
+            ? { keyFilename: this.config.keyFilename }
+            : {}),
+          ...(this.config.credentials !== undefined
+            ? { credentials: this.config.credentials }
+            : {}),
+          ...(this.config.apiEndpoint !== undefined
+            ? { apiEndpoint: this.config.apiEndpoint }
+            : {}),
+          ...(this.config.retryOptions !== undefined
+            ? { retryOptions: this.config.retryOptions }
+            : {}),
+          ...this.config.clientOptions,
         });
     }
     return this;
@@ -109,7 +117,7 @@ export class GcsDriver implements StorageDriver<'gcs'> {
   private requireClient(): GcsStorage {
     if (!this.client) {
       throw new StorageInvalidConfigError(
-        'GCS driver is not initialized; await driver.ready() or use createStorage()',
+        "GCS driver is not initialized; await driver.ready() or use createStorage()",
       );
     }
     return this.client;
@@ -138,8 +146,8 @@ export class GcsDriver implements StorageDriver<'gcs'> {
   async upload(
     path: string,
     body: UploadBody,
-    options: UploadOptions<'gcs'> = {},
-  ): Promise<UploadResult<'gcs'>> {
+    options: UploadOptions<"gcs"> = {},
+  ): Promise<UploadResult<"gcs">> {
     const normalized = normalizeKey(path);
     const key = this.key(normalized);
     try {
@@ -176,7 +184,7 @@ export class GcsDriver implements StorageDriver<'gcs'> {
         if (this.isPreconditionFailed(error)) {
           throw new StorageConflictError(
             `"${normalized}" already exists and overwrite is disabled`,
-            { provider: 'gcs', path: normalized },
+            { provider: "gcs", path: normalized },
           );
         }
         throw error;
@@ -191,26 +199,27 @@ export class GcsDriver implements StorageDriver<'gcs'> {
         etag: extractEtag(metadata),
         versionId: stringify(metadata.generation),
         url,
-        provider: 'gcs',
+        provider: "gcs",
         native: metadata,
       };
     } catch (error) {
       if (error instanceof StorageError) throw error;
-      throw normalizeError(error, { provider: 'gcs', operation: 'upload', path: normalized });
+      throw normalizeError(error, { provider: "gcs", operation: "upload", path: normalized });
     }
   }
 
   async download(
     path: string,
-    options: DownloadOptions<'gcs'> = {},
-  ): Promise<DownloadResult<'gcs'>> {
+    options: DownloadOptions<"gcs"> = {},
+  ): Promise<DownloadResult<"gcs">> {
     const normalized = normalizeKey(path);
     const key = this.key(normalized);
     try {
       await this.ready();
-      const generation = options.versionId ?? (options.native?.generation as string | number | undefined);
-      const streamOpts: import('@google-cloud/storage').CreateReadStreamOptions = {
-        ...(options.native ?? {}),
+      const generation =
+        options.versionId ?? (options.native?.generation as string | number | undefined);
+      const streamOpts: import("@google-cloud/storage").CreateReadStreamOptions = {
+        ...options.native,
         ...(generation !== undefined ? { generation } : {}),
       };
       if (options.range !== undefined) {
@@ -220,11 +229,11 @@ export class GcsDriver implements StorageDriver<'gcs'> {
       }
       const stream = this.file(key).createReadStream(streamOpts);
 
-      const [metadata] = await this.file(key).getMetadata({
-        ...(generation !== undefined ? { generation } : {}),
-      });
+      const [metadata] = await this.file(key).getMetadata(
+        generation !== undefined ? { generation } : {},
+      );
 
-      const download: DownloadResult<'gcs'> = {
+      const download: DownloadResult<"gcs"> = {
         stream,
         contentType: metadata.contentType ?? undefined,
         contentLength: numericSize(metadata.size),
@@ -232,32 +241,32 @@ export class GcsDriver implements StorageDriver<'gcs'> {
         lastModified: metadata.updated ? new Date(metadata.updated) : undefined,
         metadata: stringifyUserMetadata(metadata.metadata),
         versionId: stringify(metadata.generation),
-        provider: 'gcs',
+        provider: "gcs",
         native: metadata as GcsFileMetadata,
         buffer: () => streamToBuffer(stream),
-        text: () => streamToBuffer(stream).then((b) => b.toString('utf8')),
-        json: <V,>() => streamToBuffer(stream).then((b) => JSON.parse(b.toString('utf8')) as V),
+        text: () => streamToBuffer(stream).then((b) => b.toString("utf8")),
+        json: <V>() => streamToBuffer(stream).then((b) => JSON.parse(b.toString("utf8")) as V),
       };
       return download;
     } catch (error) {
       if (error instanceof StorageError) throw error;
       if (isMissing(error)) {
         throw new StorageNotFoundError(`"${normalized}" not found`, {
-          provider: 'gcs',
-          operation: 'download',
+          provider: "gcs",
+          operation: "download",
           path: normalized,
         });
       }
-      throw normalizeError(error, { provider: 'gcs', operation: 'download', path: normalized });
+      throw normalizeError(error, { provider: "gcs", operation: "download", path: normalized });
     }
   }
 
-  async delete(path: string, options: DeleteOptions<'gcs'> = {}): Promise<void> {
+  async delete(path: string, options: DeleteOptions<"gcs"> = {}): Promise<void> {
     const normalized = normalizeKey(path);
     try {
       await this.ready();
       await this.file(this.key(normalized)).delete({
-        ...(options.native ?? {}),
+        ...options.native,
         ...(options.versionId !== undefined ? { generation: options.versionId } : {}),
       });
     } catch (error) {
@@ -265,31 +274,29 @@ export class GcsDriver implements StorageDriver<'gcs'> {
       // GCS `delete` returns success even for missing objects — but if
       // versionId is specified and does not match, we surface a 404.
       if (isMissing(error)) return;
-      throw normalizeError(error, { provider: 'gcs', operation: 'delete', path: normalized });
+      throw normalizeError(error, { provider: "gcs", operation: "delete", path: normalized });
     }
   }
 
   async deleteMany(
     paths: string[],
-    _options: DeleteManyOptions<'gcs'> = {},
+    _options: DeleteManyOptions<"gcs"> = {},
   ): Promise<DeleteManyResult> {
     await this.ready();
     const originals = paths.map((p) => normalizeKey(p));
-    const settled = await Promise.allSettled(
-      originals.map((original) => this.delete(original)),
-    );
+    const settled = await Promise.allSettled(originals.map((original) => this.delete(original)));
     const deleted: string[] = [];
-    const failed: DeleteManyResult['failed'] = [];
+    const failed: DeleteManyResult["failed"] = [];
     settled.forEach((result, index) => {
-      if (result.status === 'fulfilled') deleted.push(originals[index]);
+      if (result.status === "fulfilled") deleted.push(originals[index]);
       else {
         failed.push({
           path: originals[index],
           error: isStorageError(result.reason)
             ? result.reason
             : normalizeError(result.reason, {
-                provider: 'gcs',
-                operation: 'deleteMany',
+                provider: "gcs",
+                operation: "deleteMany",
                 path: originals[index],
               }),
         });
@@ -298,7 +305,7 @@ export class GcsDriver implements StorageDriver<'gcs'> {
     return { deleted, failed };
   }
 
-  async exists(path: string, _options: ExistsOptions<'gcs'> = {}): Promise<boolean> {
+  async exists(path: string, _options: ExistsOptions<"gcs"> = {}): Promise<boolean> {
     const normalized = normalizeKey(path);
     try {
       await this.ready();
@@ -306,18 +313,19 @@ export class GcsDriver implements StorageDriver<'gcs'> {
       return exists;
     } catch (error) {
       if (error instanceof StorageError) throw error;
-      throw normalizeError(error, { provider: 'gcs', operation: 'exists', path: normalized });
+      throw normalizeError(error, { provider: "gcs", operation: "exists", path: normalized });
     }
   }
 
-  async stat(path: string, options: StatOptions<'gcs'> = {}): Promise<FileStat<'gcs'>> {
+  async stat(path: string, options: StatOptions<"gcs"> = {}): Promise<FileStat<"gcs">> {
     const normalized = normalizeKey(path);
     try {
       await this.ready();
-      const generation = options.versionId ?? (options.native?.generation as string | number | undefined);
-      const [metadata] = await this.file(this.key(normalized)).getMetadata({
-        ...(generation !== undefined ? { generation } : {}),
-      });
+      const generation =
+        options.versionId ?? (options.native?.generation as string | number | undefined);
+      const [metadata] = await this.file(this.key(normalized)).getMetadata(
+        generation !== undefined ? { generation } : {},
+      );
       return {
         path: normalized,
         size: numericSize(metadata.size) ?? 0,
@@ -326,33 +334,33 @@ export class GcsDriver implements StorageDriver<'gcs'> {
         lastModified: metadata.updated ? new Date(metadata.updated) : undefined,
         metadata: stringifyUserMetadata(metadata.metadata),
         versionId: stringify(metadata.generation),
-        provider: 'gcs',
+        provider: "gcs",
         native: metadata,
       };
     } catch (error) {
       if (error instanceof StorageError) throw error;
       if (isMissing(error)) {
         throw new StorageNotFoundError(`"${normalized}" not found`, {
-          provider: 'gcs',
-          operation: 'stat',
+          provider: "gcs",
+          operation: "stat",
           path: normalized,
         });
       }
-      throw normalizeError(error, { provider: 'gcs', operation: 'stat', path: normalized });
+      throw normalizeError(error, { provider: "gcs", operation: "stat", path: normalized });
     }
   }
 
-  async list(options: ListOptions<'gcs'> = {}): Promise<ListResult<'gcs'>> {
+  async list(options: ListOptions<"gcs"> = {}): Promise<ListResult<"gcs">> {
     const limit = Math.min(1000, Math.max(1, options.limit ?? 1000));
     try {
       await this.ready();
       const bucket = this.requireClient().bucket(this.config.bucket);
       const response = (await bucket.getFiles({
-        prefix: joinKey(this.prefix, options.prefix ?? ''),
-        delimiter: options.recursive ? '' : '/',
+        prefix: joinKey(this.prefix, options.prefix ?? ""),
+        delimiter: options.recursive ? "" : "/",
         maxResults: limit,
         pageToken: options.cursor,
-        ...(options.native ?? {}),
+        ...options.native,
       })) as [GcsFile[], { pageToken?: string; prefixes?: string[] } | undefined, unknown];
 
       const [files, nextQuery] = response;
@@ -380,14 +388,14 @@ export class GcsDriver implements StorageDriver<'gcs'> {
       };
     } catch (error) {
       if (error instanceof StorageError) throw error;
-      throw normalizeError(error, { provider: 'gcs', operation: 'list' });
+      throw normalizeError(error, { provider: "gcs", operation: "list" });
     }
   }
 
   async copy(
     source: string,
     destination: string,
-    options: CopyOptions<'gcs'> = {},
+    options: CopyOptions<"gcs"> = {},
   ): Promise<{ source: string; destination: string; etag?: string; lastModified?: Date }> {
     const src = normalizeKey(source);
     const dest = normalizeKey(destination);
@@ -402,12 +410,14 @@ export class GcsDriver implements StorageDriver<'gcs'> {
       const [destinationFile] = (await this.file(srcKey).copy(this.file(destKey), {
         ...(options.contentType !== undefined ? { contentType: options.contentType } : {}),
         ...(options.cacheControl !== undefined ? { cacheControl: options.cacheControl } : {}),
-        ...(options.contentEncoding !== undefined ? { contentEncoding: options.contentEncoding } : {}),
+        ...(options.contentEncoding !== undefined
+          ? { contentEncoding: options.contentEncoding }
+          : {}),
         ...(options.contentDisposition !== undefined
           ? { contentDisposition: options.contentDisposition }
           : {}),
         ...(options.metadata !== undefined ? { metadata: options.metadata } : {}),
-        ...(options.native ?? {}),
+        ...options.native,
         ...(sourceGeneration !== undefined ? { generation: sourceGeneration } : {}),
       })) as [GcsFile, unknown];
 
@@ -422,19 +432,19 @@ export class GcsDriver implements StorageDriver<'gcs'> {
     } catch (error) {
       if (error instanceof StorageError) throw error;
       if (this.isPreconditionFailed(error)) {
-        throw new StorageConflictError(
-          `"${dest}" already exists and overwrite is disabled`,
-          { provider: 'gcs', path: dest },
-        );
+        throw new StorageConflictError(`"${dest}" already exists and overwrite is disabled`, {
+          provider: "gcs",
+          path: dest,
+        });
       }
-      throw normalizeError(error, { provider: 'gcs', operation: 'copy', path: src });
+      throw normalizeError(error, { provider: "gcs", operation: "copy", path: src });
     }
   }
 
   async move(
     source: string,
     destination: string,
-    options: MoveOptions<'gcs'> = {},
+    options: MoveOptions<"gcs"> = {},
   ): Promise<{ source: string; destination: string; etag?: string }> {
     const src = normalizeKey(source);
     const dest = normalizeKey(destination);
@@ -445,7 +455,7 @@ export class GcsDriver implements StorageDriver<'gcs'> {
       }
       const moved = (await this.file(this.key(src)).move(this.key(dest), {
         ...(options.metadata !== undefined ? { metadata: options.metadata } : {}),
-        ...(options.native ?? {}),
+        ...options.native,
       })) as unknown as [GcsFile] | undefined;
       const movedFile = Array.isArray(moved) ? moved[0] : undefined;
       const metadata = movedFile?.metadata;
@@ -457,67 +467,60 @@ export class GcsDriver implements StorageDriver<'gcs'> {
     } catch (error) {
       if (error instanceof StorageError) throw error;
       if (this.isPreconditionFailed(error)) {
-        throw new StorageConflictError(
-          `"${dest}" already exists and overwrite is disabled`,
-          { provider: 'gcs', path: dest },
-        );
+        throw new StorageConflictError(`"${dest}" already exists and overwrite is disabled`, {
+          provider: "gcs",
+          path: dest,
+        });
       }
-      throw normalizeError(error, { provider: 'gcs', operation: 'move', path: src });
+      throw normalizeError(error, { provider: "gcs", operation: "move", path: src });
     }
   }
 
-  async getUrl(path: string, _options: UrlOptions<'gcs'> = {}): Promise<string> {
+  async getUrl(path: string, _options: UrlOptions<"gcs"> = {}): Promise<string> {
     const normalized = normalizeKey(path);
     if (this.config.publicUrlBase) {
-      const base = this.config.publicUrlBase.replace(/\/+$/, '');
+      const base = this.config.publicUrlBase.replace(/\/+$/, "");
       return `${base}/${encodePath(this.key(normalized))}`;
     }
     const encodedBucket = encodeURIComponent(this.config.bucket);
     return `https://storage.googleapis.com/${encodedBucket}/${encodePath(this.key(normalized))}`;
   }
 
-  async getSignedUrl(path: string, options: SignedUrlOptions<'gcs'> = {}): Promise<string> {
+  async getSignedUrl(path: string, options: SignedUrlOptions<"gcs"> = {}): Promise<string> {
     const normalized = normalizeKey(path);
     try {
       await this.ready();
       const expiresIn = validateExpiry(options.expiresIn);
       const expiresAt = Date.now() + expiresIn * 1000;
-      const action = options.action ?? 'read';
-      const mapAction =
-        action === 'read'
-          ? 'read'
-          : action === 'write'
-            ? 'write'
-            : action === 'delete'
-              ? 'delete'
-              : (() => {
-                  throw new StorageUnsupportedOperationError(
-                    `GCS signed URLs do not support action "${action}"`,
-                    { provider: 'gcs', operation: 'getSignedUrl', path: normalized },
-                  );
-                })();
+      const action = options.action ?? "read";
+      if (action !== "read" && action !== "write" && action !== "delete") {
+        throw new StorageUnsupportedOperationError(
+          `GCS signed URLs do not support action "${action}"`,
+          { provider: "gcs", operation: "getSignedUrl", path: normalized },
+        );
+      }
       const [url] = await this.file(this.key(normalized)).getSignedUrl({
-        action: mapAction,
-        version: options.native?.version ?? 'v4',
+        action,
+        version: options.native?.version ?? "v4",
         expires: expiresAt,
-        ...(options.native ?? {}),
+        ...options.native,
       });
       return url;
     } catch (error) {
       if (error instanceof StorageError) throw error;
-      throw normalizeError(error, { provider: 'gcs', operation: 'getSignedUrl', path: normalized });
+      throw normalizeError(error, { provider: "gcs", operation: "getSignedUrl", path: normalized });
     }
   }
 
   /** The underlying `Storage` client — escape hatch for SDK calls we do not wrap. */
-  native(): MapValueFor<NativeClientMap, 'gcs'> {
-    return this.requireClient() as MapValueFor<NativeClientMap, 'gcs'>;
+  native(): MapValueFor<NativeClientMap, "gcs"> {
+    return this.requireClient() as MapValueFor<NativeClientMap, "gcs">;
   }
 
   async nativeRequest<R>(
-    fn: (client: MapValueFor<NativeClientMap, 'gcs'>) => Promise<R>,
+    fn: (client: MapValueFor<NativeClientMap, "gcs">) => Promise<R>,
   ): Promise<R> {
-    return fn(this.requireClient() as MapValueFor<NativeClientMap, 'gcs'>);
+    return fn(this.requireClient() as MapValueFor<NativeClientMap, "gcs">);
   }
 
   // ---------- helpers ----------
@@ -528,17 +531,15 @@ export class GcsDriver implements StorageDriver<'gcs'> {
       if (!exists) return;
     } catch (error) {
       if (error instanceof StorageError) throw error;
-      throw normalizeError(error, { provider: 'gcs', operation: 'upload', path: normalized });
+      throw normalizeError(error, { provider: "gcs", operation: "upload", path: normalized });
     }
-    throw new StorageConflictError(
-      `"${normalized}" already exists and overwrite is disabled`,
-      { provider: 'gcs', path: normalized },
-    );
+    throw new StorageConflictError(`"${normalized}" already exists and overwrite is disabled`, {
+      provider: "gcs",
+      path: normalized,
+    });
   }
 
-  private nativeOptions(
-    native: UploadOptions<'gcs'>['native'],
-  ): Record<string, unknown> {
+  private nativeOptions(native: UploadOptions<"gcs">["native"]): Record<string, unknown> {
     if (!native) return {};
     const out: Record<string, unknown> = { ...native };
     if (native.predefinedAcl) out.predefinedAcl = native.predefinedAcl;
@@ -548,7 +549,7 @@ export class GcsDriver implements StorageDriver<'gcs'> {
 
   private isPreconditionFailed(error: unknown): boolean {
     const code = (error as { code?: number | string }).code;
-    return code === 412 || code === '412' || code === 'PRECONDITION_FAILED';
+    return code === 412 || code === "412" || code === "PRECONDITION_FAILED";
   }
 }
 
@@ -559,7 +560,7 @@ function validateExpiry(expiresIn: number | undefined): number {
   if (!Number.isFinite(value) || value < 1 || value > MAX_SIGNED_URL_SECONDS) {
     throw new StorageUnsupportedOperationError(
       `expiresIn must be between 1 and ${MAX_SIGNED_URL_SECONDS} seconds (7 days), got ${expiresIn}`,
-      { code: 'INVALID_SIGNED_URL_EXPIRY' },
+      { code: "INVALID_SIGNED_URL_EXPIRY" },
     );
   }
   return Math.floor(value);
@@ -567,7 +568,7 @@ function validateExpiry(expiresIn: number | undefined): number {
 
 function isMissing(error: unknown): boolean {
   const code = (error as { code?: number | string }).code;
-  return code === 404 || code === '404' || code === 'NOT_FOUND';
+  return code === 404 || code === "404" || code === "NOT_FOUND";
 }
 
 function stringify(value: string | number | undefined): string | undefined {
@@ -577,30 +578,31 @@ function stringify(value: string | number | undefined): string | undefined {
 
 function numericSize(value: string | number | bigint | undefined): number | undefined {
   if (value === undefined || value === null) return undefined;
-  if (typeof value === 'bigint') return Number(value);
-  const n = typeof value === 'string' ? Number(value) : value;
+  if (typeof value === "bigint") return Number(value);
+  const n = typeof value === "string" ? Number(value) : value;
   return Number.isFinite(n) ? n : undefined;
 }
 
 function extractEtag(metadata: GcsFileMetadata): string | undefined {
   if (!metadata) return undefined;
-  if (typeof metadata.etag === 'string' && metadata.etag.length > 0) return metadata.etag;
-  if (typeof metadata.md5Hash === 'string' && metadata.md5Hash.length > 0) {
+  if (typeof metadata.etag === "string" && metadata.etag.length > 0) return metadata.etag;
+  if (typeof metadata.md5Hash === "string" && metadata.md5Hash.length > 0) {
     return metadata.md5Hash;
   }
-  if (typeof metadata.crc32c === 'string' && metadata.crc32c.length > 0) {
+  if (typeof metadata.crc32c === "string" && metadata.crc32c.length > 0) {
     return metadata.crc32c;
   }
   return undefined;
 }
 
 function stringifyUserMetadata(
-  metadata: GcsFileMetadata['metadata'],
+  metadata: GcsFileMetadata["metadata"],
 ): Record<string, string> | undefined {
   if (!metadata) return undefined;
-  const entries = Object.entries(metadata).filter(
-    ([, v]) => v !== undefined && v !== null,
-  ) as [string, string | number | boolean][];
+  const entries = Object.entries(metadata).filter(([, v]) => v !== undefined && v !== null) as [
+    string,
+    string | number | boolean,
+  ][];
   if (entries.length === 0) return undefined;
   return Object.fromEntries(entries.map(([k, v]) => [k, String(v)]));
 }
@@ -608,7 +610,7 @@ function stringifyUserMetadata(
 function encodePath(key: string): string {
   // GCS object paths can contain '/'; encode each segment but leave slashes
   // intact so the URL stays human-readable.
-  return key.split('/').map(encodeURIComponent).join('/');
+  return key.split("/").map(encodeURIComponent).join("/");
 }
 
 /**
@@ -619,9 +621,9 @@ function encodePath(key: string): string {
  */
 function pipelinePromisify(source: Readable, dest: NodeJS.WritableStream): Promise<void> {
   return new Promise<void>((resolve, reject) => {
-    source.on('error', reject);
-    dest.on('error', reject);
-    dest.on('finish', () => resolve());
+    source.on("error", reject);
+    dest.on("error", reject);
+    dest.on("finish", () => resolve());
     source.pipe(dest);
   });
 }

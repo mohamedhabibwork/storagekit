@@ -1,32 +1,25 @@
-import { createReadStream, createWriteStream } from 'node:fs';
-import fs from 'node:fs/promises';
-import path from 'node:path';
-import { pipeline } from 'node:stream/promises';
-import { pathToFileURL } from 'node:url';
+import { createReadStream, createWriteStream } from "node:fs";
+import fs from "node:fs/promises";
+import path from "node:path";
+import { pipeline } from "node:stream/promises";
+import { pathToFileURL } from "node:url";
 
 import {
   StorageConflictError,
   StorageError,
   StorageUnsupportedOperationError,
   normalizeError,
-} from '../../core/errors';
-import {
-  DEFAULT_CONTENT_TYPE,
-  detectContentTypeFromPath,
-} from '../../core/mime';
+} from "../../core/errors";
+import { DEFAULT_CONTENT_TYPE, detectContentTypeFromPath } from "../../core/mime";
 import {
   encodeKeyPath,
   joinKey,
   normalizeKey,
   resolveInsideRoot,
   stripKey,
-} from '../../core/paths';
-import {
-  bodyLength,
-  bodyToReadable,
-  streamToBuffer,
-} from '../../core/streams';
-import type { UploadBody } from '../../core/primitives';
+} from "../../core/paths";
+import { bodyLength, bodyToReadable, streamToBuffer } from "../../core/streams";
+import type { UploadBody } from "../../core/primitives";
 import type {
   CopyOptions,
   DeleteManyOptions,
@@ -46,12 +39,9 @@ import type {
   UploadOptions,
   UploadResult,
   UrlOptions,
-} from '../../core/types';
-import type {
-  LocalNativeClient,
-  LocalStorageConfig,
-} from './local.types';
-import type { StorageDriver } from '../driver';
+} from "../../core/types";
+import type { LocalNativeClient, LocalStorageConfig } from "./local.types";
+import type { StorageDriver } from "../driver";
 
 export interface LocalDriverRuntimeOptions {
   detectContentType?: boolean;
@@ -70,18 +60,18 @@ interface Entry {
 /** Sort key that makes DFS order equal to plain lexicographic order. */
 function sortKeyOf(key: string): string {
   return `${key
-    .split('/')
+    .split("/")
     .map((segment) => `${segment}/`)
-    .join('')}`;
+    .join("")}`;
 }
 
 function isMissingError(error: unknown): boolean {
   const code = (error as NodeJS.ErrnoException | undefined)?.code;
-  return code === 'ENOENT' || code === 'ENAMETOOLONG';
+  return code === "ENOENT" || code === "ENAMETOOLONG";
 }
 
-export class LocalDriver implements StorageDriver<'local'> {
-  readonly type = 'local' as const;
+export class LocalDriver implements StorageDriver<"local"> {
+  readonly type = "local" as const;
 
   readonly root: string;
   private readonly config: LocalStorageConfig;
@@ -93,7 +83,7 @@ export class LocalDriver implements StorageDriver<'local'> {
     this.config = config;
     this.runtime = runtime;
     this.root = path.resolve(config.root);
-    this.prefix = config.prefix?.replace(/\/+$/, '') || undefined;
+    this.prefix = config.prefix?.replace(/\/+$/, "") || undefined;
     if (this.prefix) normalizeKey(this.prefix);
   }
 
@@ -101,8 +91,7 @@ export class LocalDriver implements StorageDriver<'local'> {
     if (!this.nativeClient) {
       this.nativeClient = {
         root: this.root,
-        resolve: (key: string) =>
-          resolveInsideRoot(this.root, joinKey(this.prefix, key)),
+        resolve: (key: string) => resolveInsideRoot(this.root, joinKey(this.prefix, key)),
       };
     }
     return this.nativeClient;
@@ -129,7 +118,7 @@ export class LocalDriver implements StorageDriver<'local'> {
   }
 
   private fail(error: unknown, operation: string, key?: string): never {
-    throw normalizeError(error, { provider: 'local', operation, path: key });
+    throw normalizeError(error, { provider: "local", operation, path: key });
   }
 
   private async assertOverwriteAllowed(key: string, overwrite: boolean): Promise<void> {
@@ -142,10 +131,10 @@ export class LocalDriver implements StorageDriver<'local'> {
         throw error;
       });
     if (exists) {
-      throw new StorageConflictError(
-        `"${key}" already exists and overwrite is disabled`,
-        { provider: 'local', path: key },
-      );
+      throw new StorageConflictError(`"${key}" already exists and overwrite is disabled`, {
+        provider: "local",
+        path: key,
+      });
     }
   }
 
@@ -159,8 +148,8 @@ export class LocalDriver implements StorageDriver<'local'> {
   async upload(
     key: string,
     body: UploadBody,
-    options: UploadOptions<'local'> = {},
-  ): Promise<UploadResult<'local'>> {
+    options: UploadOptions<"local"> = {},
+  ): Promise<UploadResult<"local">> {
     const normalized = normalizeKey(key);
     try {
       await this.assertOverwriteAllowed(normalized, options.overwrite ?? true);
@@ -169,12 +158,6 @@ export class LocalDriver implements StorageDriver<'local'> {
       if (this.config.createDirectories !== false) {
         await fs.mkdir(path.dirname(absolute), this.mkdirOptions());
       }
-
-      const contentType =
-        options.contentType ??
-        (this.runtime.detectContentType !== false
-          ? detectContentTypeFromPath(normalized)
-          : undefined);
 
       const stream = bodyToReadable(body);
       try {
@@ -193,7 +176,7 @@ export class LocalDriver implements StorageDriver<'local'> {
 
       let url: string | undefined;
       if (this.config.baseUrl) {
-        const base = this.config.baseUrl.replace(/\/+$/, '');
+        const base = this.config.baseUrl.replace(/\/+$/, "");
         url = `${base}/${encodeKeyPath(joinKey(this.prefix, normalized))}`;
       }
 
@@ -201,25 +184,23 @@ export class LocalDriver implements StorageDriver<'local'> {
         path: normalized,
         size,
         url,
-        provider: 'local',
+        provider: "local",
         native: { absolutePath: absolute },
       };
     } catch (error) {
       if (error instanceof StorageError) throw error;
-      this.fail(error, 'upload', normalized);
+      this.fail(error, "upload", normalized);
     }
   }
 
   async download(
     key: string,
-    options: DownloadOptions<'local'> = {},
-  ): Promise<DownloadResult<'local'>> {
+    options: DownloadOptions<"local"> = {},
+  ): Promise<DownloadResult<"local">> {
     const normalized = normalizeKey(key);
     try {
       if (options.versionId) {
-        throw new StorageUnsupportedOperationError(
-          'The local driver does not support versioning',
-        );
+        throw new StorageUnsupportedOperationError("The local driver does not support versioning");
       }
       const absolute = this.resolveKey(normalized);
       const stats = await fs.stat(absolute);
@@ -229,10 +210,7 @@ export class LocalDriver implements StorageDriver<'local'> {
         ...(range
           ? {
               start: range.offset,
-              end:
-                range.length !== undefined
-                  ? range.offset + range.length - 1
-                  : undefined,
+              end: range.length !== undefined ? range.offset + range.length - 1 : undefined,
             }
           : {}),
         encoding: options.native?.encoding,
@@ -240,10 +218,7 @@ export class LocalDriver implements StorageDriver<'local'> {
       } as Parameters<typeof createReadStream>[1]);
 
       const contentLength = range
-        ? Math.min(
-            stats.size - range.offset,
-            range.length ?? Number.MAX_SAFE_INTEGER,
-          )
+        ? Math.min(stats.size - range.offset, range.length ?? Number.MAX_SAFE_INTEGER)
         : stats.size;
 
       return {
@@ -251,26 +226,23 @@ export class LocalDriver implements StorageDriver<'local'> {
         contentType: detectContentTypeFromPath(normalized) ?? DEFAULT_CONTENT_TYPE,
         contentLength,
         lastModified: stats.mtime,
-        provider: 'local',
+        provider: "local",
         native: { absolutePath: absolute },
         buffer: () => streamToBuffer(stream),
-        text: () => streamToBuffer(stream).then((b) => b.toString('utf8')),
-        json: <V,>() =>
-          streamToBuffer(stream).then((b) => JSON.parse(b.toString('utf8')) as V),
-      } as unknown as DownloadResult<'local'>;
+        text: () => streamToBuffer(stream).then((b) => b.toString("utf8")),
+        json: <V>() => streamToBuffer(stream).then((b) => JSON.parse(b.toString("utf8")) as V),
+      } as unknown as DownloadResult<"local">;
     } catch (error) {
       if (error instanceof StorageError) throw error;
-      this.fail(error, 'download', normalized);
+      this.fail(error, "download", normalized);
     }
   }
 
-  async delete(key: string, options: DeleteOptions<'local'> = {}): Promise<void> {
+  async delete(key: string, options: DeleteOptions<"local"> = {}): Promise<void> {
     const normalized = normalizeKey(key);
     try {
       if (options.versionId) {
-        throw new StorageUnsupportedOperationError(
-          'The local driver does not support versioning',
-        );
+        throw new StorageUnsupportedOperationError("The local driver does not support versioning");
       }
       await fs.unlink(this.resolveKey(normalized));
 
@@ -287,48 +259,43 @@ export class LocalDriver implements StorageDriver<'local'> {
       // Deleting a missing object is a no-op, matching object-store semantics.
       if (isMissingError(error)) return;
       if (error instanceof StorageError) throw error;
-      this.fail(error, 'delete', normalized);
+      this.fail(error, "delete", normalized);
     }
   }
 
   async deleteMany(
     keys: string[],
-    options: DeleteManyOptions<'local'> = {},
+    options: DeleteManyOptions<"local"> = {},
   ): Promise<DeleteManyResult> {
     const settled = await Promise.allSettled(
-      keys.map((key) => this.delete(key, options as DeleteOptions<'local'>)),
+      keys.map((key) => this.delete(key, options as DeleteOptions<"local">)),
     );
     const deleted: string[] = [];
-    const failed: DeleteManyResult['failed'] = [];
+    const failed: DeleteManyResult["failed"] = [];
     settled.forEach((result, index) => {
       const key = keys[index];
-      if (result.status === 'fulfilled') deleted.push(key);
+      if (result.status === "fulfilled") deleted.push(key);
       else failed.push({ path: key, error: result.reason });
     });
     return { deleted, failed };
   }
 
-  async exists(key: string, _options: ExistsOptions<'local'> = {}): Promise<boolean> {
+  async exists(key: string, _options: ExistsOptions<"local"> = {}): Promise<boolean> {
     const normalized = normalizeKey(key);
     try {
       await fs.access(this.resolveKey(normalized), fs.constants.F_OK);
       return true;
     } catch (error) {
       if (isMissingError(error)) return false;
-      this.fail(error, 'exists', normalized);
+      this.fail(error, "exists", normalized);
     }
   }
 
-  async stat(
-    key: string,
-    options: StatOptions<'local'> = {},
-  ): Promise<FileStat<'local'>> {
+  async stat(key: string, options: StatOptions<"local"> = {}): Promise<FileStat<"local">> {
     const normalized = normalizeKey(key);
     try {
       if (options.versionId) {
-        throw new StorageUnsupportedOperationError(
-          'The local driver does not support versioning',
-        );
+        throw new StorageUnsupportedOperationError("The local driver does not support versioning");
       }
       const absolute = this.resolveKey(normalized);
       const stats =
@@ -338,25 +305,23 @@ export class LocalDriver implements StorageDriver<'local'> {
       return {
         path: normalized,
         size: stats.size,
-        contentType:
-          detectContentTypeFromPath(normalized) ?? DEFAULT_CONTENT_TYPE,
+        contentType: detectContentTypeFromPath(normalized) ?? DEFAULT_CONTENT_TYPE,
         lastModified: stats.mtime,
-        provider: 'local',
+        provider: "local",
         native: { stats },
       };
     } catch (error) {
       if (error instanceof StorageError) throw error;
-      this.fail(error, 'stat', normalized);
+      this.fail(error, "stat", normalized);
     }
   }
 
-  async list(options: ListOptions<'local'> = {}): Promise<ListResult<'local'>> {
+  async list(options: ListOptions<"local"> = {}): Promise<ListResult<"local">> {
     const limit = Math.max(1, options.limit ?? 1000);
     const recursive = options.recursive ?? false;
-    const followSymlinks =
-      options.native?.followSymlinks ?? this.config.followSymlinks ?? false;
+    const followSymlinks = options.native?.followSymlinks ?? this.config.followSymlinks ?? false;
 
-    const internalPrefix = joinKey(this.prefix, options.prefix ?? '');
+    const internalPrefix = joinKey(this.prefix, options.prefix ?? "");
     const baseDir = internalPrefix ? resolveInsideRoot(this.root, internalPrefix) : this.root;
     const basePrefix = internalPrefix;
 
@@ -416,10 +381,10 @@ export class LocalDriver implements StorageDriver<'local'> {
         }
       }
     } catch (error) {
-      if ((error as NodeJS.ErrnoException)?.code === 'ENOTDIR') {
+      if ((error as NodeJS.ErrnoException)?.code === "ENOTDIR") {
         return { files: [], directories: [], hasMore: false };
       }
-      this.fail(error, 'list');
+      this.fail(error, "list");
     }
 
     return {
@@ -440,8 +405,8 @@ export class LocalDriver implements StorageDriver<'local'> {
     followSymlinks: boolean,
   ): Promise<Entry> {
     const directory = isDir || treatAsDir;
-    const cleanPrefix = dirPrefix.replace(/\/+$/, '');
-    const key = `${cleanPrefix ? `${cleanPrefix}/` : ''}${name}${directory ? '/' : ''}`;
+    const cleanPrefix = dirPrefix.replace(/\/+$/, "");
+    const key = `${cleanPrefix ? `${cleanPrefix}/` : ""}${name}${directory ? "/" : ""}`;
     let size: number | undefined;
     let lastModified: Date | undefined;
     try {
@@ -489,7 +454,7 @@ export class LocalDriver implements StorageDriver<'local'> {
       if (entry.isDirectory) {
         await this.walk(
           path.join(dir, entry.name),
-          entry.key.replace(/\/$/, ''),
+          entry.key.replace(/\/$/, ""),
           visit,
           followSymlinks,
           depth + 1,
@@ -501,7 +466,7 @@ export class LocalDriver implements StorageDriver<'local'> {
   async copy(
     source: string,
     destination: string,
-    options: CopyOptions<'local'> = {},
+    options: CopyOptions<"local"> = {},
   ): Promise<{ source: string; destination: string; lastModified?: Date }> {
     const src = normalizeKey(source);
     const dest = normalizeKey(destination);
@@ -514,14 +479,14 @@ export class LocalDriver implements StorageDriver<'local'> {
       return { source: src, destination: dest, lastModified: stats.mtime };
     } catch (error) {
       if (error instanceof StorageError) throw error;
-      this.fail(error, 'copy', src);
+      this.fail(error, "copy", src);
     }
   }
 
   async move(
     source: string,
     destination: string,
-    options: MoveOptions<'local'> = {},
+    options: MoveOptions<"local"> = {},
   ): Promise<{ source: string; destination: string }> {
     const src = normalizeKey(source);
     const dest = normalizeKey(destination);
@@ -533,7 +498,7 @@ export class LocalDriver implements StorageDriver<'local'> {
       try {
         await fs.rename(srcAbs, destAbs);
       } catch (error) {
-        if ((error as NodeJS.ErrnoException).code === 'EXDEV') {
+        if ((error as NodeJS.ErrnoException).code === "EXDEV") {
           await fs.copyFile(srcAbs, destAbs);
           await fs.unlink(srcAbs);
         } else {
@@ -543,32 +508,27 @@ export class LocalDriver implements StorageDriver<'local'> {
       return { source: src, destination: dest };
     } catch (error) {
       if (error instanceof StorageError) throw error;
-      this.fail(error, 'move', src);
+      this.fail(error, "move", src);
     }
   }
 
-  async getUrl(key: string, options: UrlOptions<'local'> = {}): Promise<string> {
+  async getUrl(key: string, options: UrlOptions<"local"> = {}): Promise<string> {
     const normalized = normalizeKey(key);
     if (options.native?.fileUrl) {
       return pathToFileURL(this.resolveKey(normalized)).toString();
     }
     if (!this.config.baseUrl) {
       throw new StorageUnsupportedOperationError(
-        'getUrl() requires `baseUrl` in the local storage config (or use native: { fileUrl: true })',
+        "getUrl() requires `baseUrl` in the local storage config (or use native: { fileUrl: true })",
       );
     }
-    const base = this.config.baseUrl.replace(/\/+$/, '');
+    const base = this.config.baseUrl.replace(/\/+$/, "");
     return `${base}/${encodeKeyPath(joinKey(this.prefix, normalized))}`;
   }
 
-  async getSignedUrl(
-    _key: string,
-    _options?: SignedUrlOptions<'local'>,
-  ): Promise<string> {
+  async getSignedUrl(_key: string, _options?: SignedUrlOptions<"local">): Promise<string> {
     throw new StorageUnsupportedOperationError(
-      'The local driver does not support signed URLs. Serve files through your own application.',
+      "The local driver does not support signed URLs. Serve files through your own application.",
     );
   }
 }
-
-

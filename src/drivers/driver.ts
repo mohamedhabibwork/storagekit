@@ -12,13 +12,12 @@ import type {
   SignedUrlOptions,
   StatOptions,
   StorageCapabilities,
-  StorageType,
   UploadBody,
   UploadOptions,
   UploadResult,
   UrlOptions,
-} from '../core/types';
-import type { MapValueFor, NativeClientMap } from '../core/maps';
+} from "../core/types";
+import type { MapValueFor, NativeClientMap } from "../core/maps";
 
 /**
  * Runtime contract implemented by every provider adapter — builtin or
@@ -26,21 +25,12 @@ import type { MapValueFor, NativeClientMap } from '../core/maps';
  * driver code stays fully typed while the wrapper layer works with the
  * erased form. Custom drivers get `unknown` native slots.
  */
-export interface StorageDriver<
-  T extends string = string,
-> {
+export interface StorageDriver<T extends string = string> {
   readonly type: T;
 
-  upload(
-    path: string,
-    body: UploadBody,
-    options?: UploadOptions<T>,
-  ): Promise<UploadResult<T>>;
+  upload(path: string, body: UploadBody, options?: UploadOptions<T>): Promise<UploadResult<T>>;
 
-  download(
-    path: string,
-    options?: DownloadOptions<T>,
-  ): Promise<DownloadResult<T>>;
+  download(path: string, options?: DownloadOptions<T>): Promise<DownloadResult<T>>;
 
   delete(path: string, options?: DeleteOptions<T>): Promise<void>;
 
@@ -81,13 +71,10 @@ export interface StorageDriver<
   capabilities(): StorageCapabilities;
 }
 
-
 /**
  * Identity helper that types a custom driver implementation. Purely for
  * ergonomics — editor feedback and future-proofing.
  */
-export function defineDriver<T extends string>(
-  driver: StorageDriver<T>,
-): StorageDriver<T> {
+export function defineDriver<T extends string>(driver: StorageDriver<T>): StorageDriver<T> {
   return driver;
 }

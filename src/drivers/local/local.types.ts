@@ -1,4 +1,4 @@
-import type { Stats } from 'node:fs';
+import type { Stats } from "node:fs";
 
 /**
  * Local filesystem storage configuration.
@@ -7,7 +7,7 @@ import type { Stats } from 'node:fs';
  * `node:stream`) — no extra dependencies.
  */
 export interface LocalStorageConfig {
-  type: 'local';
+  type: "local";
   /** Absolute or relative root directory for all stored files. */
   root: string;
   /**

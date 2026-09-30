@@ -1,8 +1,8 @@
-import { createStorage } from '../../factory';
-import type { Storage } from '../../core/types';
-import type { LocalStorageConfig } from './local.types';
+import { createStorage } from "../../factory";
+import type { Storage } from "../../core/types";
+import type { LocalStorageConfig } from "./local.types";
 
-export { LocalDriver } from './local.driver';
+export { LocalDriver } from "./local.driver";
 export type {
   LocalStorageConfig,
   LocalNativeUploadOptions,
@@ -16,7 +16,7 @@ export type {
   LocalNativeDownloadResult,
   LocalNativeListResult,
   LocalNativeUrlOptions,
-} from './local.types';
+} from "./local.types";
 
 /**
  * Create a local-filesystem storage. Direct entrypoint — importing this
@@ -25,6 +25,6 @@ export type {
 export function createLocalStorage(
   config: LocalStorageConfig,
   options?: Parameters<typeof createStorage>[1],
-): Promise<Storage<'local'>> {
+): Promise<Storage<"local">> {
   return createStorage(config, options);
 }

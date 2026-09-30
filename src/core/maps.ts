@@ -1,4 +1,4 @@
-import type { StorageType } from './primitives';
+import type { StorageType } from "./primitives";
 import type {
   LocalNativeClient,
   LocalNativeDeleteOptions,
@@ -12,7 +12,7 @@ import type {
   LocalNativeUploadResult,
   LocalNativeUrlOptions,
   LocalStorageConfig,
-} from '../drivers/local/local.types';
+} from "../drivers/local/local.types";
 import type {
   S3NativeClient,
   S3NativeCopyOptions,
@@ -28,7 +28,8 @@ import type {
   S3NativeUploadResult,
   S3NativeUrlOptions,
   S3StorageConfig,
-} from '../drivers/s3/s3.types';
+  S3NativeStatOptions,
+} from "../drivers/s3/s3.types";
 import type {
   MinioNativeClient,
   MinioNativeCopyOptions,
@@ -44,7 +45,7 @@ import type {
   MinioNativeUploadResult,
   MinioNativeUrlOptions,
   MinioStorageConfig,
-} from '../drivers/minio/minio.types';
+} from "../drivers/minio/minio.types";
 import type {
   AzureNativeClient,
   AzureNativeCopyOptions,
@@ -61,7 +62,7 @@ import type {
   AzureNativeUploadResult,
   AzureNativeUrlOptions,
   AzureStorageConfig,
-} from '../drivers/azure/azure.types';
+} from "../drivers/azure/azure.types";
 import type {
   OracleNativeClient,
   OracleNativeCopyOptions,
@@ -77,7 +78,7 @@ import type {
   OracleNativeUploadResult,
   OracleNativeUrlOptions,
   OracleStorageConfig,
-} from '../drivers/oracle/oracle.types';
+} from "../drivers/oracle/oracle.types";
 import type {
   GcsNativeClient,
   GcsNativeCopyOptions,
@@ -94,10 +95,9 @@ import type {
   GcsNativeUploadResult,
   GcsNativeUrlOptions,
   GcsStorageConfig,
-} from '../drivers/gcs/gcs.types';
-import type { RustfsStorageConfig } from '../drivers/rustfs/rustfs.types';
-import type { R2StorageConfig } from '../drivers/r2/r2.types';
-import type { S3NativeStatOptions } from '../drivers/s3/s3.types';
+} from "../drivers/gcs/gcs.types";
+import type { RustfsStorageConfig } from "../drivers/rustfs/rustfs.types";
+import type { R2StorageConfig } from "../drivers/r2/r2.types";
 
 export type StorageConfig =
   | LocalStorageConfig

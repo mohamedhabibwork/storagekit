@@ -1,21 +1,15 @@
-import { Readable } from 'node:stream';
+import { Readable } from "node:stream";
 
 /**
  * All storage backends supported by the package.
  */
-export type StorageType = 'local' | 's3' | 'minio' | 'azure' | 'oracle' | 'rustfs' | 'r2' | 'gcs';
+export type StorageType = "local" | "s3" | "minio" | "azure" | "oracle" | "rustfs" | "r2" | "gcs";
 
 /**
  * Accepted bodies for uploads. Streams are always preferred so large files
  * never need to be buffered in memory.
  */
-export type UploadBody =
-  | Buffer
-  | Uint8Array
-  | Readable
-  | Blob
-  | ArrayBuffer
-  | string;
+export type UploadBody = Buffer | Uint8Array | Readable | Blob | ArrayBuffer | string;
 
 /**
  * Options that share the same meaning on every provider. Anything that is
@@ -49,7 +43,7 @@ export interface MultipartOptions {
   concurrency?: number;
 }
 
-export type SignedUrlAction = 'read' | 'write' | 'delete';
+export type SignedUrlAction = "read" | "write" | "delete";
 
 export interface RangeOptions {
   /** Byte offset to start reading from. */
@@ -90,22 +84,21 @@ export interface OperationContext {
 }
 
 export interface UploadHookContext extends OperationContext {
-  operation: 'upload';
+  operation: "upload";
   path: string;
 }
 
 export interface DownloadHookContext extends OperationContext {
-  operation: 'download';
+  operation: "download";
   path: string;
 }
 
 export interface DeleteHookContext extends OperationContext {
-  operation: 'delete';
+  operation: "delete";
   path: string;
 }
 
-export interface ErrorHookContext<TOp extends string = string>
-  extends OperationContext {
+export interface ErrorHookContext<TOp extends string = string> extends OperationContext {
   operation: TOp;
   path?: string;
   error: unknown;
@@ -114,13 +107,13 @@ export interface ErrorHookContext<TOp extends string = string>
 export type StorageHooks = {
   beforeUpload?: (ctx: UploadHookContext) => void | Promise<void>;
   afterUpload?: (ctx: UploadHookContext) => void | Promise<void>;
-  uploadError?: (ctx: ErrorHookContext<'upload'>) => void | Promise<void>;
+  uploadError?: (ctx: ErrorHookContext<"upload">) => void | Promise<void>;
   beforeDownload?: (ctx: DownloadHookContext) => void | Promise<void>;
   afterDownload?: (ctx: DownloadHookContext) => void | Promise<void>;
-  downloadError?: (ctx: ErrorHookContext<'download'>) => void | Promise<void>;
+  downloadError?: (ctx: ErrorHookContext<"download">) => void | Promise<void>;
   beforeDelete?: (ctx: DeleteHookContext) => void | Promise<void>;
   afterDelete?: (ctx: DeleteHookContext) => void | Promise<void>;
-  deleteError?: (ctx: ErrorHookContext<'delete'>) => void | Promise<void>;
+  deleteError?: (ctx: ErrorHookContext<"delete">) => void | Promise<void>;
 };
 
 export interface StorageOperationEvent {

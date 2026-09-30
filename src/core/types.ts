@@ -1,4 +1,4 @@
-import type { Readable } from 'node:stream';
+import type { Readable } from "node:stream";
 import type {
   BaseUploadOptions,
   MultipartOptions,
@@ -10,7 +10,7 @@ import type {
   StorageOperationEvent,
   StorageType,
   UploadBody,
-} from './primitives';
+} from "./primitives";
 import type {
   MapValueFor,
   NativeClientMap,
@@ -27,7 +27,7 @@ import type {
   NativeSignedUrlOptionsMap,
   NativeUploadResultMap,
   NativeUrlOptionsMap,
-} from './maps';
+} from "./maps";
 
 export type {
   BaseUploadOptions,
@@ -41,14 +41,14 @@ export type {
   StorageOperationEvent,
   StorageType,
   UploadBody,
-} from './primitives';
+} from "./primitives";
 export type {
   MapValueFor,
   NativeClientMap,
   NativeOptionsMap,
   StorageConfig,
   StorageConfigMap,
-} from './maps';
+} from "./maps";
 
 /**
  * Option/result generics accept ANY string so custom driver types flow
@@ -56,8 +56,7 @@ export type {
  * fall back to `unknown` (see {@link MapValueFor}).
  */
 
-export interface UploadOptions<T extends string = StorageType>
-  extends BaseUploadOptions {
+export interface UploadOptions<T extends string = StorageType> extends BaseUploadOptions {
   multipart?: MultipartOptions;
   /** Provider-native upload options, strongly typed by storage type. */
   native?: MapValueFor<NativeOptionsMap, T>;
@@ -81,7 +80,7 @@ export interface DeleteManyResult {
   failed: Array<{ path: string; error: StorageErrorAlias }>;
 }
 
-type StorageErrorAlias = import('./errors').StorageError;
+type StorageErrorAlias = import("./errors").StorageError;
 
 export interface DeleteManyOptions<T extends string = StorageType> {
   signal?: AbortSignal;
@@ -94,7 +93,7 @@ export interface StatOptions<T extends string = StorageType> {
   native?: MapValueFor<NativeStatOptionsAlias, T>;
 }
 
-type NativeStatOptionsAlias = import('./maps').NativeStatOptionsMap;
+type NativeStatOptionsAlias = import("./maps").NativeStatOptionsMap;
 
 export interface ExistsOptions<T extends string = StorageType> {
   signal?: AbortSignal;
@@ -221,23 +220,13 @@ export interface MoveResult<T extends string = StorageType> {
 export interface Storage<T extends string = StorageType> {
   readonly type: T;
 
-  upload(
-    path: string,
-    body: UploadBody,
-    options?: UploadOptions<T>,
-  ): Promise<UploadResult<T>>;
+  upload(path: string, body: UploadBody, options?: UploadOptions<T>): Promise<UploadResult<T>>;
 
-  download(
-    path: string,
-    options?: DownloadOptions<T>,
-  ): Promise<DownloadResult<T>>;
+  download(path: string, options?: DownloadOptions<T>): Promise<DownloadResult<T>>;
 
   delete(path: string, options?: DeleteOptions<T>): Promise<void>;
 
-  deleteMany(
-    paths: string[],
-    options?: DeleteManyOptions<T>,
-  ): Promise<DeleteManyResult>;
+  deleteMany(paths: string[], options?: DeleteManyOptions<T>): Promise<DeleteManyResult>;
 
   exists(path: string, options?: ExistsOptions<T>): Promise<boolean>;
 
@@ -249,28 +238,20 @@ export interface Storage<T extends string = StorageType> {
    * Recursively walk everything under `prefix`, transparently following
    * pagination. Yields files only.
    */
-  iterate(prefix?: string, options?: Omit<ListOptions<T>, 'prefix' | 'recursive'>): AsyncIterable<StorageFile>;
+  iterate(
+    prefix?: string,
+    options?: Omit<ListOptions<T>, "prefix" | "recursive">,
+  ): AsyncIterable<StorageFile>;
 
-  copy(
-    source: string,
-    destination: string,
-    options?: CopyOptions<T>,
-  ): Promise<CopyResult<T>>;
+  copy(source: string, destination: string, options?: CopyOptions<T>): Promise<CopyResult<T>>;
 
-  move(
-    source: string,
-    destination: string,
-    options?: MoveOptions<T>,
-  ): Promise<MoveResult<T>>;
+  move(source: string, destination: string, options?: MoveOptions<T>): Promise<MoveResult<T>>;
 
   /** Public, unsigned URL. Never performs network requests. */
   getUrl(path: string, options?: UrlOptions<T>): Promise<string>;
 
   /** Provider-signed URL for read/write/delete access. */
-  getSignedUrl(
-    path: string,
-    options?: SignedUrlOptions<T>,
-  ): Promise<string>;
+  getSignedUrl(path: string, options?: SignedUrlOptions<T>): Promise<string>;
 
   /** The underlying native SDK client, typed per provider. */
   native(): MapValueFor<NativeClientMap, T>;
@@ -279,14 +260,12 @@ export interface Storage<T extends string = StorageType> {
    * Escape hatch for SDK operations the package does not wrap.
    * The client passed to `fn` is the native, provider-typed one.
    */
-  nativeRequest<R>(
-    fn: (client: MapValueFor<NativeClientMap, T>) => Promise<R>,
-  ): Promise<R>;
+  nativeRequest<R>(fn: (client: MapValueFor<NativeClientMap, T>) => Promise<R>): Promise<R>;
 
   capabilities(): StorageCapabilities;
 
   /** Subscribe to normalized operation events (durations, outcomes). */
-  on(event: 'operation', listener: (event: StorageOperationEvent) => void): () => void;
+  on(event: "operation", listener: (event: StorageOperationEvent) => void): () => void;
 
   /** Configured hooks (read-only view). */
   hooks: StorageHooks;

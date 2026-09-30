@@ -10,15 +10,15 @@
  * Multer itself is NOT imported: the engine satisfies multer's
  * `StorageEngine` interface structurally, so multer stays an optional peer.
  */
-import type { Readable } from 'node:stream';
-import type { Storage, StorageType } from '../core/types';
-import { normalizeKey } from '../core/paths';
+import type { Readable } from "node:stream";
+import type { Storage, StorageType } from "../core/types";
+import { normalizeKey } from "../core/paths";
 import {
   saveUpload,
   type SaveUploadOptions,
   type SavedUpload,
   type UploadFileInput,
-} from '../uploads';
+} from "../uploads";
 
 /**
  * The slice of multer's `File` object the engine touches. Multer's own
@@ -59,15 +59,13 @@ export interface MulterStorageEngine<T extends string = StorageType> {
     file: MulterFileLike<T>,
     callback: (error?: unknown, info?: Partial<MulterStoredInfo<T>>) => void,
   ): void;
-  _removeFile(
-    req: unknown,
-    file: MulterFileLike<T>,
-    callback: (error: Error | null) => void,
-  ): void;
+  _removeFile(req: unknown, file: MulterFileLike<T>, callback: (error: Error | null) => void): void;
 }
 
-export interface MulterStorageOptions<T extends string = StorageType>
-  extends Omit<SaveUploadOptions<T>, 'key'> {
+export interface MulterStorageOptions<T extends string = StorageType> extends Omit<
+  SaveUploadOptions<T>,
+  "key"
+> {
   /**
    * Object key or key resolver. Receives the normalized upload (with
    * `originalName`, `fieldname`, `mimeType`, `size`). Defaults to a random
@@ -95,15 +93,19 @@ export function createMulterStorage<T extends string = StorageType>(
 ): MulterStorageEngine<T> {
   return {
     _handleFile(_req, file, callback) {
-      const upload = saveUpload(storage, {
-        body: file.stream,
-        fieldname: file.fieldname,
-        originalName: file.originalname,
-        ...(file.mimetype !== undefined ? { mimeType: file.mimetype } : {}),
-        ...(file.size !== undefined ? { size: file.size } : {}),
-      }, options);
-      upload.then(
-        (saved) => {
+      void (async () => {
+        try {
+          const saved = await saveUpload(
+            storage,
+            {
+              body: file.stream,
+              fieldname: file.fieldname,
+              originalName: file.originalname,
+              ...(file.mimetype !== undefined ? { mimeType: file.mimetype } : {}),
+              ...(file.size !== undefined ? { size: file.size } : {}),
+            },
+            options,
+          );
           file.storagekit = saved;
           callback(null, {
             key: saved.key,
@@ -112,17 +114,18 @@ export function createMulterStorage<T extends string = StorageType>(
             ...(saved.result.url !== undefined ? { url: saved.result.url } : {}),
             storagekit: saved,
           });
-        },
-        (error: unknown) => callback(error),
-      );
+        } catch (error) {
+          callback(error);
+        }
+      })();
     },
     async _removeFile(_req, file, callback) {
       // Multer merges the `_handleFile` info onto the file object, so the
       // `storagekit` record is present; `key` is read defensively for
       // engines wrapped by third parties that may only copy the plain info.
       const fallbackKey = (file as { key?: unknown }).key;
-      const key = file.storagekit?.key
-        ?? (typeof fallbackKey === 'string' ? fallbackKey : undefined);
+      const key =
+        file.storagekit?.key ?? (typeof fallbackKey === "string" ? fallbackKey : undefined);
       if (options.removeOnError === false || key === undefined) {
         callback(null);
         return;

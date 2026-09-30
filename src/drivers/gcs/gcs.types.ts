@@ -6,7 +6,7 @@ import type {
   MoveOptions as GcsMoveOptions,
   StorageOptions as GcsStorageOptions,
   FileMetadata as GcsFileMetadata,
-} from '@google-cloud/storage';
+} from "@google-cloud/storage";
 
 /**
  * Google Cloud Storage configuration. Backed by the official `@google-cloud/storage`
@@ -19,7 +19,7 @@ import type {
  * `StorageInvalidConfigError` with the exact `npm install` command.
  */
 export interface GcsStorageConfig {
-  type: 'gcs';
+  type: "gcs";
   /** Bucket every operation is scoped to. */
   bucket: string;
   /** Project ID. Optional when running on GCP with ADC — the SDK resolves it. */
@@ -27,7 +27,7 @@ export interface GcsStorageConfig {
   /** Path to a Google service-account JSON key file. */
   keyFilename?: string;
   /** Inline service-account credentials (parsed or already a `CredentialBody`). */
-  credentials?: GcsStorageOptions['credentials'];
+  credentials?: GcsStorageOptions["credentials"];
   /**
    * Override the API endpoint. Defaults to `storage.googleapis.com`. Useful
    * for [fake-gcs-server](https://github.com/fsouza/fake-gcs-server) and
@@ -35,21 +35,24 @@ export interface GcsStorageConfig {
    */
   apiEndpoint?: string;
   /** Retry tuning forwarded to the SDK. */
-  retryOptions?: GcsStorageOptions['retryOptions'];
+  retryOptions?: GcsStorageOptions["retryOptions"];
   /** Virtual prefix every key is stored under, e.g. `production/`. */
   prefix?: string;
   /** Base URL used by `getUrl()` when a CDN fronts the bucket. */
   publicUrlBase?: string;
   /** Inject an existing `Storage` client instead of constructing one. */
-  client?: import('@google-cloud/storage').Storage;
+  client?: import("@google-cloud/storage").Storage;
   /** Extra options forwarded to `new Storage(options)`. */
   clientOptions?: Partial<GcsStorageOptions>;
 }
 
 /** Anything a {@link GcsStorageConfig} does not already map, merged last. */
-export type GcsNativeUploadOptions = Omit<GcsCreateWriteStreamOptions, 'contentType' | 'metadata'> & {
+export type GcsNativeUploadOptions = Omit<
+  GcsCreateWriteStreamOptions,
+  "contentType" | "metadata"
+> & {
   /** Public-ACL shortcut — maps onto `predefinedAcl`. */
-  predefinedAcl?: GcsCopyOptions['predefinedAcl'];
+  predefinedAcl?: GcsCopyOptions["predefinedAcl"];
   /** Customer-managed KMS key — maps onto `kmsKeyName` for the underlying call. */
   kmsKeyName?: string;
   /** Custom metadata bag — maps onto the SDK `metadata` option. */
@@ -57,8 +60,8 @@ export type GcsNativeUploadOptions = Omit<GcsCreateWriteStreamOptions, 'contentT
 };
 
 export type GcsNativeDownloadOptions = Omit<
-  import('@google-cloud/storage').CreateReadStreamOptions,
-  'start' | 'end'
+  import("@google-cloud/storage").CreateReadStreamOptions,
+  "start" | "end"
 > & {
   /** Optional generation (alias for {@link DownloadOptions.versionId}). */
   generation?: string | number;
@@ -69,20 +72,23 @@ export type GcsNativeStatOptions = {
 };
 
 export type GcsNativeDeleteOptions = GcsDeleteFileOptions;
-export type GcsNativeListOptions = import('@google-cloud/storage').GetFilesOptions;
+export type GcsNativeListOptions = import("@google-cloud/storage").GetFilesOptions;
 export type GcsNativeCopyOptions = GcsCopyOptions;
 export type GcsNativeMoveOptions = GcsMoveOptions;
-export type GcsNativeSignedUrlOptions = Omit<GcsGetSignedUrlConfig, 'action' | 'version' | 'expires'> & {
+export type GcsNativeSignedUrlOptions = Omit<
+  GcsGetSignedUrlConfig,
+  "action" | "version" | "expires"
+> & {
   /**
    * Override the signing version. Defaults to `v4` (the only option that
    * works with bucket-bound IAM and the recommended choice).
    */
-  version?: 'v2' | 'v4';
+  version?: "v2" | "v4";
 };
 export type GcsNativeUrlOptions = Record<string, never>;
 
-export type GcsNativeClient = import('@google-cloud/storage').Storage;
+export type GcsNativeClient = import("@google-cloud/storage").Storage;
 export type GcsNativeFileStat = GcsFileMetadata;
 export type GcsNativeUploadResult = GcsFileMetadata;
-export type GcsNativeDownloadResult = Omit<GcsFileMetadata, 'mediaLink'>;
+export type GcsNativeDownloadResult = Omit<GcsFileMetadata, "mediaLink">;
 export type GcsNativeListResult = GcsFileMetadata[];

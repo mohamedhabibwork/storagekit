@@ -1,5 +1,5 @@
-import type * as OciCommon from 'oci-common';
-import type * as OciObjectStorage from 'oci-objectstorage';
+import type * as OciCommon from "oci-common";
+import type * as OciObjectStorage from "oci-objectstorage";
 
 /**
  * Oracle Cloud Infrastructure Object Storage configuration using
@@ -10,7 +10,7 @@ import type * as OciObjectStorage from 'oci-objectstorage';
  * Access-key style credentials are intentionally not supported here.
  */
 export interface OracleStorageConfig {
-  type: 'oracle';
+  type: "oracle";
   /** The object storage namespace (stable per tenancy). */
   namespaceName: string;
   bucketName: string;
@@ -31,10 +31,10 @@ export interface OracleStorageConfig {
 }
 
 export type OracleAuth =
-  | { type: 'config-file'; configFilePath?: string; profile?: string }
-  | { type: 'instance-principals' }
-  | { type: 'resource-principals' }
-  | { type: 'provider'; provider: OciCommon.AuthenticationDetailsProvider };
+  | { type: "config-file"; configFilePath?: string; profile?: string }
+  | { type: "instance-principals" }
+  | { type: "resource-principals" }
+  | { type: "provider"; provider: OciCommon.AuthenticationDetailsProvider };
 
 /**
  * Any {@link OciObjectStorage.requests.PutObjectRequest} field the package
@@ -45,30 +45,30 @@ export type OracleAuth =
  */
 export type OracleNativeUploadOptions = Omit<
   OciObjectStorage.requests.PutObjectRequest,
-  | 'namespaceName'
-  | 'bucketName'
-  | 'objectName'
-  | 'contentLength'
-  | 'putObjectBody'
-  | 'contentType'
-  | 'cacheControl'
-  | 'contentDisposition'
-  | 'contentEncoding'
+  | "namespaceName"
+  | "bucketName"
+  | "objectName"
+  | "contentLength"
+  | "putObjectBody"
+  | "contentType"
+  | "cacheControl"
+  | "contentDisposition"
+  | "contentEncoding"
 > & { opcMeta?: Record<string, string> };
 
 export type OracleNativeDownloadOptions = Omit<
   OciObjectStorage.requests.GetObjectRequest,
-  'namespaceName' | 'bucketName' | 'objectName' | 'versionId' | 'range'
+  "namespaceName" | "bucketName" | "objectName" | "versionId" | "range"
 >;
 
 export type OracleNativeStatOptions = Omit<
   OciObjectStorage.requests.HeadObjectRequest,
-  'namespaceName' | 'bucketName' | 'objectName' | 'versionId'
+  "namespaceName" | "bucketName" | "objectName" | "versionId"
 >;
 
 export type OracleNativeDeleteOptions = Omit<
   OciObjectStorage.requests.DeleteObjectRequest,
-  'namespaceName' | 'bucketName' | 'objectName' | 'versionId'
+  "namespaceName" | "bucketName" | "objectName" | "versionId"
 >;
 
 /**
@@ -78,7 +78,7 @@ export type OracleNativeDeleteOptions = Omit<
  */
 export type OracleNativeListOptions = Omit<
   OciObjectStorage.requests.ListObjectsRequest,
-  'namespaceName' | 'bucketName' | 'prefix' | 'limit' | 'start' | 'delimiter' | 'fields'
+  "namespaceName" | "bucketName" | "prefix" | "limit" | "start" | "delimiter" | "fields"
 > & { fields?: string };
 
 /**
@@ -89,7 +89,11 @@ export type OracleNativeListOptions = Omit<
  */
 export type OracleNativeCopyOptions = Omit<
   OciObjectStorage.models.CopyObjectDetails,
-  'sourceObjectName' | 'destinationObjectName' | 'destinationBucket' | 'destinationRegion' | 'destinationNamespace'
+  | "sourceObjectName"
+  | "destinationObjectName"
+  | "destinationBucket"
+  | "destinationRegion"
+  | "destinationNamespace"
 > & {
   destinationRegion?: string;
   destinationNamespace?: string;
@@ -106,6 +110,6 @@ export type OracleNativeUploadResult =
   | OciObjectStorage.responses.CommitMultipartUploadResponse;
 export type OracleNativeDownloadResult = Omit<
   OciObjectStorage.responses.GetObjectResponse,
-  'value'
+  "value"
 >;
 export type OracleNativeListResult = OciObjectStorage.responses.ListObjectsResponse;

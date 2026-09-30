@@ -1,4 +1,4 @@
-import type { S3StorageConfig } from '../s3/s3.types';
+import type { S3StorageConfig } from "../s3/s3.types";
 
 /**
  * RustFS storage configuration. RustFS is an Apache-2.0 S3-compatible
@@ -15,7 +15,7 @@ import type { S3StorageConfig } from '../s3/s3.types';
  * quick-start that this driver mirrors.
  */
 export interface RustfsStorageConfig {
-  type: 'rustfs';
+  type: "rustfs";
   bucket: string;
   /** RustFS endpoint, e.g. `http://localhost:9000`. Required. */
   endpoint: string;
@@ -27,7 +27,7 @@ export interface RustfsStorageConfig {
         secretAccessKey: string;
         sessionToken?: string;
       }
-    | import('@aws-sdk/types').AwsCredentialIdentityProvider;
+    | import("@aws-sdk/types").AwsCredentialIdentityProvider;
   /**
    * Defaults to `true` (RustFS uses path-style URLs by default).
    * Virtual-host style requires `RUSTFS_SERVER_DOMAINS` to be set on
@@ -39,9 +39,9 @@ export interface RustfsStorageConfig {
   /** Base URL used by `getUrl()` when a CDN fronts the bucket. */
   publicUrlBase?: string;
   /** Inject an existing `S3Client` instead of constructing one. */
-  client?: import('@aws-sdk/client-s3').S3Client;
+  client?: import("@aws-sdk/client-s3").S3Client;
   /** Extra options forwarded to `new S3Client(options)`. */
-  clientOptions?: Partial<import('@aws-sdk/client-s3').S3ClientConfig>;
+  clientOptions?: Partial<import("@aws-sdk/client-s3").S3ClientConfig>;
 }
 
 /**

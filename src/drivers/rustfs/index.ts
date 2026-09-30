@@ -1,9 +1,9 @@
-import { createStorage } from '../../factory';
-import type { Storage } from '../../core/types';
-import type { RustfsStorageConfig } from './rustfs.types';
+import { createStorage } from "../../factory";
+import type { Storage } from "../../core/types";
+import type { RustfsStorageConfig } from "./rustfs.types";
 
-export { RustfsDriver } from './rustfs.driver';
-export type { RustfsStorageConfig } from './rustfs.types';
+export { RustfsDriver } from "./rustfs.driver";
+export type { RustfsStorageConfig } from "./rustfs.types";
 
 /**
  * Create a RustFS storage using the AWS SDK v3 (RustFS is S3-compatible
@@ -14,6 +14,6 @@ export type { RustfsStorageConfig } from './rustfs.types';
 export function createRustfsStorage(
   config: RustfsStorageConfig,
   options?: Parameters<typeof createStorage>[1],
-): Promise<Storage<'rustfs'>> {
+): Promise<Storage<"rustfs">> {
   return createStorage(config, options);
 }

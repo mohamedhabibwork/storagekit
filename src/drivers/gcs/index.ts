@@ -1,9 +1,9 @@
-import { createStorage } from '../../factory';
-import type { Storage } from '../../core/types';
-import type { GcsStorageConfig } from './gcs.types';
+import { createStorage } from "../../factory";
+import type { Storage } from "../../core/types";
+import type { GcsStorageConfig } from "./gcs.types";
 
-export { GcsDriver } from './gcs.driver';
-export type { GcsStorageConfig } from './gcs.types';
+export { GcsDriver } from "./gcs.driver";
+export type { GcsStorageConfig } from "./gcs.types";
 
 /**
  * Create a Google Cloud Storage instance using the official
@@ -15,6 +15,6 @@ export type { GcsStorageConfig } from './gcs.types';
 export function createGcsStorage(
   config: GcsStorageConfig,
   options?: Parameters<typeof createStorage>[1],
-): Promise<Storage<'gcs'>> {
+): Promise<Storage<"gcs">> {
   return createStorage(config, options);
 }

@@ -1,20 +1,16 @@
-import { createHash } from 'node:crypto';
-import { Readable } from 'node:stream';
+import { createHash } from "node:crypto";
+import { Readable } from "node:stream";
 
 import {
   StorageConflictError,
   StorageError,
   StorageNotFoundError,
   StorageUnsupportedOperationError,
-} from '../core/errors';
-import { detectContentTypeFromPath } from '../core/mime';
-import { normalizeKey } from '../core/paths';
-import { bodyToReadable, streamToBuffer } from '../core/streams';
-import type {
-  OperationListener,
-  StorageHooks,
-  UploadBody,
-} from '../core/primitives';
+} from "../core/errors";
+import { detectContentTypeFromPath } from "../core/mime";
+import { normalizeKey } from "../core/paths";
+import { bodyToReadable, streamToBuffer } from "../core/streams";
+import type { OperationListener, StorageHooks, UploadBody } from "../core/primitives";
 import type {
   CopyOptions,
   DownloadResult,
@@ -26,9 +22,9 @@ import type {
   Storage,
   UploadOptions,
   UploadResult,
-} from '../core/types';
-import type { StorageDriver } from '../drivers/driver';
-import { StorageInstance } from '../storage';
+} from "../core/types";
+import type { StorageDriver } from "../drivers/driver";
+import { StorageInstance } from "../storage";
 
 /**
  * In-memory fake driver for tests: no SDKs, no network, no filesystem —
@@ -49,7 +45,7 @@ export interface FakeStoredFile {
 }
 
 export interface FakeStorageConfig {
-  type: 'fake';
+  type: "fake";
   /** Base URL used by `getUrl()` and fake signed URLs. */
   baseUrl?: string;
   /** Files preloaded at construction, keyed by path. */
@@ -60,22 +56,22 @@ export interface FakeStorageConfig {
   signedUrls?: boolean;
 }
 
-export type FakeStorageOptions = Omit<FakeStorageConfig, 'type'>;
+export type FakeStorageOptions = Omit<FakeStorageConfig, "type">;
 
 /** Operations that can be failed once via {@link FakeStorageDriver.failOnce}. */
 export type FakeFailureOperation =
-  | 'upload'
-  | 'download'
-  | 'delete'
-  | 'deleteMany'
-  | 'exists'
-  | 'stat'
-  | 'list'
-  | 'copy'
-  | 'move';
+  | "upload"
+  | "download"
+  | "delete"
+  | "deleteMany"
+  | "exists"
+  | "stat"
+  | "list"
+  | "copy"
+  | "move";
 
-export class FakeStorageDriver implements StorageDriver<'fake'> {
-  readonly type = 'fake' as const;
+export class FakeStorageDriver implements StorageDriver<"fake"> {
+  readonly type = "fake" as const;
 
   /** Live file table — assert against it directly in tests. */
   readonly files = new Map<string, FakeStoredFile>();
@@ -87,10 +83,7 @@ export class FakeStorageDriver implements StorageDriver<'fake'> {
   private readonly failures = new Map<FakeFailureOperation, Error>();
   private nativeClient: { files: Map<string, FakeStoredFile> } | undefined;
 
-  constructor(
-    config: FakeStorageConfig,
-    runtime?: { detectContentType?: boolean },
-  ) {
+  constructor(config: FakeStorageConfig, runtime?: { detectContentType?: boolean }) {
     this.baseUrl = config.baseUrl;
     this.latencyMs = Math.max(0, config.latencyMs ?? 0);
     this.signedUrlsEnabled = config.signedUrls ?? false;
@@ -139,11 +132,12 @@ export class FakeStorageDriver implements StorageDriver<'fake'> {
   failOnce(operation: FakeFailureOperation, error?: Error): void {
     this.failures.set(
       operation,
-      error ?? new StorageError(`fake storage: simulated ${operation} failure`, {
-        provider: 'fake',
-        operation,
-        code: 'FAKE_FAILURE',
-      }),
+      error ??
+        new StorageError(`fake storage: simulated ${operation} failure`, {
+          provider: "fake",
+          operation,
+          code: "FAKE_FAILURE",
+        }),
     );
   }
 
@@ -182,14 +176,14 @@ export class FakeStorageDriver implements StorageDriver<'fake'> {
   async upload(
     path: string,
     body: UploadBody,
-    options: UploadOptions<'fake'> = {},
-  ): Promise<UploadResult<'fake'>> {
-    this.injectFailure('upload', path);
+    options: UploadOptions<"fake"> = {},
+  ): Promise<UploadResult<"fake">> {
+    this.injectFailure("upload", path);
     await this.tick();
     const key = normalizeKey(path);
     if (options.overwrite === false && this.files.has(key)) {
       throw new StorageConflictError(`"${path}" already exists`, {
-        provider: 'fake',
+        provider: "fake",
         path,
       });
     }
@@ -204,15 +198,15 @@ export class FakeStorageDriver implements StorageDriver<'fake'> {
       metadata: options.metadata ?? existing?.metadata,
       lastModified: new Date(),
     });
-    return { path: key, size: data.length, provider: 'fake' };
+    return { path: key, size: data.length, provider: "fake" };
   }
 
-  async download(path: string): Promise<DownloadResult<'fake'>> {
-    this.injectFailure('download', path);
+  async download(path: string): Promise<DownloadResult<"fake">> {
+    this.injectFailure("download", path);
     await this.tick();
     const file = this.files.get(normalizeKey(path));
     if (!file) {
-      throw new StorageNotFoundError(`"${path}" not found`, { provider: 'fake', path });
+      throw new StorageNotFoundError(`"${path}" not found`, { provider: "fake", path });
     }
     // buffer()/text()/json() each read from a fresh stream so callers can
     // mix them freely without competing for the same stream.
@@ -222,15 +216,16 @@ export class FakeStorageDriver implements StorageDriver<'fake'> {
       contentLength: file.data.length,
       lastModified: file.lastModified,
       metadata: file.metadata,
-      provider: 'fake',
+      provider: "fake",
       buffer: () => streamToBuffer(Readable.from(file.data)),
-      text: () => streamToBuffer(Readable.from(file.data)).then((b) => b.toString('utf8')),
-      json: <V>() => streamToBuffer(Readable.from(file.data)).then((b) => JSON.parse(b.toString('utf8')) as V),
+      text: () => streamToBuffer(Readable.from(file.data)).then((b) => b.toString("utf8")),
+      json: <V>() =>
+        streamToBuffer(Readable.from(file.data)).then((b) => JSON.parse(b.toString("utf8")) as V),
     };
   }
 
   async delete(path: string): Promise<void> {
-    this.injectFailure('delete', path);
+    this.injectFailure("delete", path);
     await this.tick();
     this.remove(path);
   }
@@ -239,7 +234,7 @@ export class FakeStorageDriver implements StorageDriver<'fake'> {
     deleted: string[];
     failed: Array<{ path: string; error: unknown }>;
   }> {
-    this.injectFailure('deleteMany');
+    this.injectFailure("deleteMany");
     await this.tick();
     const deleted: string[] = [];
     const failed: Array<{ path: string; error: unknown }> = [];
@@ -255,17 +250,17 @@ export class FakeStorageDriver implements StorageDriver<'fake'> {
   }
 
   async exists(path: string): Promise<boolean> {
-    this.injectFailure('exists', path);
+    this.injectFailure("exists", path);
     await this.tick();
     return this.files.has(normalizeKey(path));
   }
 
-  async stat(path: string): Promise<FileStat<'fake'>> {
-    this.injectFailure('stat', path);
+  async stat(path: string): Promise<FileStat<"fake">> {
+    this.injectFailure("stat", path);
     await this.tick();
     const file = this.files.get(normalizeKey(path));
     if (!file) {
-      throw new StorageNotFoundError(`"${path}" not found`, { provider: 'fake', path });
+      throw new StorageNotFoundError(`"${path}" not found`, { provider: "fake", path });
     }
     return {
       path: normalizeKey(path),
@@ -273,23 +268,23 @@ export class FakeStorageDriver implements StorageDriver<'fake'> {
       contentType: file.contentType,
       lastModified: file.lastModified,
       metadata: file.metadata,
-      provider: 'fake',
+      provider: "fake",
     };
   }
 
-  async list(options: ListOptions<'fake'> = {}): Promise<ListResult<'fake'>> {
-    this.injectFailure('list');
+  async list(options: ListOptions<"fake"> = {}): Promise<ListResult<"fake">> {
+    this.injectFailure("list");
     await this.tick();
     const limit = Math.max(1, options.limit ?? 1000);
     const recursive = options.recursive ?? false;
-    const prefix = options.prefix ?? '';
+    const prefix = options.prefix ?? "";
 
     // Collect sorted entries: files as their full key, directories as key+'/'.
     const names = new Set<string>();
     for (const key of this.files.keys()) {
       if (!key.startsWith(prefix)) continue;
       const rest = key.slice(prefix.length);
-      const slash = rest.indexOf('/');
+      const slash = rest.indexOf("/");
       if (recursive || slash === -1) {
         names.add(key);
       } else {
@@ -297,8 +292,13 @@ export class FakeStorageDriver implements StorageDriver<'fake'> {
       }
     }
 
-    const sorted = [...names].sort();
-    const files: Array<{ path: string; size?: number; lastModified?: Date; metadata?: Record<string, string> }> = [];
+    const sorted = [...names].toSorted();
+    const files: Array<{
+      path: string;
+      size?: number;
+      lastModified?: Date;
+      metadata?: Record<string, string>;
+    }> = [];
     const directories: string[] = [];
     let cursor: string | undefined;
     let hasMore = false;
@@ -312,7 +312,7 @@ export class FakeStorageDriver implements StorageDriver<'fake'> {
       }
       emitted += 1;
       cursor = name;
-      if (name.endsWith('/')) {
+      if (name.endsWith("/")) {
         directories.push(name);
       } else {
         const file = this.files.get(name)!;
@@ -331,17 +331,17 @@ export class FakeStorageDriver implements StorageDriver<'fake'> {
   async copy(
     source: string,
     destination: string,
-    options: CopyOptions<'fake'> = {},
+    options: CopyOptions<"fake"> = {},
   ): Promise<{ source: string; destination: string }> {
-    this.injectFailure('copy', source);
+    this.injectFailure("copy", source);
     await this.tick();
     const src = this.files.get(normalizeKey(source));
     if (!src) {
-      throw new StorageNotFoundError(`"${source}" not found`, { provider: 'fake', path: source });
+      throw new StorageNotFoundError(`"${source}" not found`, { provider: "fake", path: source });
     }
     if (options.overwrite === false && this.files.has(normalizeKey(destination))) {
       throw new StorageConflictError(`"${destination}" already exists`, {
-        provider: 'fake',
+        provider: "fake",
         path: destination,
       });
     }
@@ -355,9 +355,9 @@ export class FakeStorageDriver implements StorageDriver<'fake'> {
   async move(
     source: string,
     destination: string,
-    options: MoveOptions<'fake'> = {},
+    options: MoveOptions<"fake"> = {},
   ): Promise<{ source: string; destination: string }> {
-    this.injectFailure('move', source);
+    this.injectFailure("move", source);
     await this.tick();
     await this.copy(source, destination, options);
     this.remove(source);
@@ -366,33 +366,33 @@ export class FakeStorageDriver implements StorageDriver<'fake'> {
 
   async getUrl(path: string): Promise<string> {
     if (!this.baseUrl) {
-      throw new StorageUnsupportedOperationError('fake driver needs a `baseUrl` for getUrl()', {
-        provider: 'fake',
+      throw new StorageUnsupportedOperationError("fake driver needs a `baseUrl` for getUrl()", {
+        provider: "fake",
         path,
       });
     }
-    return `${this.baseUrl.replace(/\/+$/, '')}/${path}`;
+    return `${this.baseUrl.replace(/\/+$/, "")}/${path}`;
   }
 
-  async getSignedUrl(path: string, options: SignedUrlOptions<'fake'> = {}): Promise<string> {
+  async getSignedUrl(path: string, options: SignedUrlOptions<"fake"> = {}): Promise<string> {
     if (!this.signedUrlsEnabled) {
       throw new StorageUnsupportedOperationError(
-        'fake signed URLs are disabled; pass `signedUrls: true` to the config',
-        { provider: 'fake', path },
+        "fake signed URLs are disabled; pass `signedUrls: true` to the config",
+        { provider: "fake", path },
       );
     }
     const expiresIn = options.expiresIn ?? 3600;
     if (expiresIn > 7 * 24 * 60 * 60) {
-      throw new StorageError('signed URL expiry is capped at 7 days', {
-        provider: 'fake',
+      throw new StorageError("signed URL expiry is capped at 7 days", {
+        provider: "fake",
         path,
       });
     }
-    const action = options.action ?? 'read';
-    const base = (this.baseUrl ?? 'https://fake.test').replace(/\/+$/, '');
-    const signature = createHash('sha256')
+    const action = options.action ?? "read";
+    const base = (this.baseUrl ?? "https://fake.test").replace(/\/+$/, "");
+    const signature = createHash("sha256")
       .update(`${action}:${normalizeKey(path)}:${expiresIn}`)
-      .digest('hex')
+      .digest("hex")
       .slice(0, 32);
     return `${base}/${path}?X-Fake-Action=${action}&X-Fake-Expires=${expiresIn}&X-Fake-Signature=${signature}`;
   }
@@ -421,11 +421,11 @@ export class FakeStorageDriver implements StorageDriver<'fake'> {
   }
 
   private async toBuffer(body: UploadBody): Promise<Buffer> {
-    if (typeof body === 'string') return Buffer.from(body, 'utf8');
+    if (typeof body === "string") return Buffer.from(body, "utf8");
     if (Buffer.isBuffer(body)) return body;
     if (body instanceof Uint8Array) return Buffer.from(body);
     if (body instanceof ArrayBuffer) return Buffer.from(body);
-    if (typeof Blob !== 'undefined' && body instanceof Blob) {
+    if (typeof Blob !== "undefined" && body instanceof Blob) {
       return Buffer.from(await body.arrayBuffer());
     }
     return streamToBuffer(bodyToReadable(body));
@@ -461,12 +461,12 @@ export interface CreateFakeStorageOptions {
 export async function createFakeStorage(
   config: FakeStorageOptions = {},
   options: CreateFakeStorageOptions = {},
-): Promise<Storage<'fake'>> {
+): Promise<Storage<"fake">> {
   const driver = new FakeStorageDriver(
-    { type: 'fake', ...config },
+    { type: "fake", ...config },
     { detectContentType: options.detectContentType },
   );
-  return new StorageInstance<'fake'>(driver, {
+  return new StorageInstance<"fake">(driver, {
     hooks: options.hooks,
     onOperation: options.onOperation,
   });

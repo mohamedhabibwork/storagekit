@@ -1,15 +1,14 @@
-import { StorageInvalidConfigError } from './core/errors';
-import { normalizeKey } from './core/paths';
-import type { StorageHooks, StorageType } from './core/types';
-import type { Storage } from './core/types';
-import type { StorageConfig } from './core/maps';
-import { StorageInstance } from './storage';
-import type { StorageDriver } from './drivers/driver';
+import { StorageInvalidConfigError } from "./core/errors";
+import { normalizeKey } from "./core/paths";
+import type { StorageHooks, StorageType, Storage } from "./core/types";
+import type { StorageConfig } from "./core/maps";
+import { StorageInstance } from "./storage";
+import type { StorageDriver } from "./drivers/driver";
 
 export interface CreateStorageOptions {
   hooks?: StorageHooks;
   /** Subscribe to operation events at construction time. */
-  onOperation?: import('./core/primitives').OperationListener;
+  onOperation?: import("./core/primitives").OperationListener;
   /**
    * Lightweight extension-based MIME detection for uploads that do not pass
    * an explicit `contentType`. Defaults to true.
@@ -17,7 +16,16 @@ export interface CreateStorageOptions {
   detectContentType?: boolean;
 }
 
-const BUILTIN_TYPES = new Set<string>(['local', 's3', 'minio', 'azure', 'oracle', 'rustfs', 'r2', 'gcs']);
+const BUILTIN_TYPES = new Set<string>([
+  "local",
+  "s3",
+  "minio",
+  "azure",
+  "oracle",
+  "rustfs",
+  "r2",
+  "gcs",
+]);
 
 /* ------------------------------------------------------------------ *
  * Custom driver registry
@@ -39,7 +47,7 @@ export type StorageDriverFactory = (
  * registration made through any entrypoint is visible everywhere.
  */
 const DRIVER_REGISTRY: Map<string, StorageDriverFactory> = ((globalThis as Record<symbol, unknown>)[
-  Symbol.for('storagekit.driver-registry')
+  Symbol.for("storagekit.driver-registry")
 ] ??= new Map()) as Map<string, StorageDriverFactory>;
 
 /**
@@ -53,12 +61,9 @@ const DRIVER_REGISTRY: Map<string, StorageDriverFactory> = ((globalThis as Recor
  * const storage = await createStorage({ type: 'memory', /* driver config *\/ });
  * ```
  */
-export function registerStorageDriver(
-  type: string,
-  factory: StorageDriverFactory,
-): void {
-  if (typeof type !== 'string' || type.length === 0) {
-    throw new StorageInvalidConfigError('registerStorageDriver requires a non-empty type string');
+export function registerStorageDriver(type: string, factory: StorageDriverFactory): void {
+  if (typeof type !== "string" || type.length === 0) {
+    throw new StorageInvalidConfigError("registerStorageDriver requires a non-empty type string");
   }
   if (BUILTIN_TYPES.has(type)) {
     throw new StorageInvalidConfigError(
@@ -66,12 +71,10 @@ export function registerStorageDriver(
     );
   }
   if (DRIVER_REGISTRY.has(type)) {
-    throw new StorageInvalidConfigError(
-      `A custom driver is already registered for type "${type}"`,
-    );
+    throw new StorageInvalidConfigError(`A custom driver is already registered for type "${type}"`);
   }
-  if (typeof factory !== 'function') {
-    throw new StorageInvalidConfigError('registerStorageDriver requires a factory function');
+  if (typeof factory !== "function") {
+    throw new StorageInvalidConfigError("registerStorageDriver requires a factory function");
   }
   DRIVER_REGISTRY.set(type, factory);
 }
@@ -97,29 +100,29 @@ export function unregisterStorageDriver(type: string): void {
  */
 function assertValidConfig(config: StorageConfig): void {
   switch (config.type) {
-    case 'local':
-      if (typeof config.root !== 'string' || config.root.length === 0) {
-        throw new StorageInvalidConfigError('local storage requires a non-empty `root`');
+    case "local":
+      if (typeof config.root !== "string" || config.root.length === 0) {
+        throw new StorageInvalidConfigError("local storage requires a non-empty `root`");
       }
       break;
-    case 's3':
-      if (typeof config.bucket !== 'string' || config.bucket.length === 0) {
-        throw new StorageInvalidConfigError('s3 storage requires a non-empty `bucket`');
+    case "s3":
+      if (typeof config.bucket !== "string" || config.bucket.length === 0) {
+        throw new StorageInvalidConfigError("s3 storage requires a non-empty `bucket`");
       }
       if (config.prefix !== undefined) normalizeKey(config.prefix);
       break;
-    case 'minio':
-      if (typeof config.bucket !== 'string' || config.bucket.length === 0) {
-        throw new StorageInvalidConfigError('minio storage requires a non-empty `bucket`');
+    case "minio":
+      if (typeof config.bucket !== "string" || config.bucket.length === 0) {
+        throw new StorageInvalidConfigError("minio storage requires a non-empty `bucket`");
       }
-      if (typeof config.endPoint !== 'string' || config.endPoint.length === 0) {
-        throw new StorageInvalidConfigError('minio storage requires a non-empty `endPoint`');
+      if (typeof config.endPoint !== "string" || config.endPoint.length === 0) {
+        throw new StorageInvalidConfigError("minio storage requires a non-empty `endPoint`");
       }
       if (config.prefix !== undefined) normalizeKey(config.prefix);
       break;
-    case 'azure': {
-      if (typeof config.container !== 'string' || config.container.length === 0) {
-        throw new StorageInvalidConfigError('azure storage requires a non-empty `container`');
+    case "azure": {
+      if (typeof config.container !== "string" || config.container.length === 0) {
+        throw new StorageInvalidConfigError("azure storage requires a non-empty `container`");
       }
       if (
         !config.connectionString &&
@@ -128,44 +131,44 @@ function assertValidConfig(config: StorageConfig): void {
         !config.containerClient
       ) {
         throw new StorageInvalidConfigError(
-          'azure storage requires one of: connectionString, accountUrl (+ credential), serviceClient, or containerClient',
+          "azure storage requires one of: connectionString, accountUrl (+ credential), serviceClient, or containerClient",
         );
       }
       if (config.prefix !== undefined) normalizeKey(config.prefix);
       break;
     }
-    case 'oracle':
-      if (typeof config.namespaceName !== 'string' || config.namespaceName.length === 0) {
-        throw new StorageInvalidConfigError('oracle storage requires a non-empty `namespaceName`');
+    case "oracle":
+      if (typeof config.namespaceName !== "string" || config.namespaceName.length === 0) {
+        throw new StorageInvalidConfigError("oracle storage requires a non-empty `namespaceName`");
       }
-      if (typeof config.bucketName !== 'string' || config.bucketName.length === 0) {
-        throw new StorageInvalidConfigError('oracle storage requires a non-empty `bucketName`');
-      }
-      if (config.prefix !== undefined) normalizeKey(config.prefix);
-      break;
-    case 'rustfs':
-      if (typeof config.bucket !== 'string' || config.bucket.length === 0) {
-        throw new StorageInvalidConfigError('rustfs storage requires a non-empty `bucket`');
-      }
-      if (typeof config.endpoint !== 'string' || config.endpoint.length === 0) {
-        throw new StorageInvalidConfigError('rustfs storage requires a non-empty `endpoint`');
+      if (typeof config.bucketName !== "string" || config.bucketName.length === 0) {
+        throw new StorageInvalidConfigError("oracle storage requires a non-empty `bucketName`");
       }
       if (config.prefix !== undefined) normalizeKey(config.prefix);
       break;
-    case 'r2':
-      if (typeof config.bucket !== 'string' || config.bucket.length === 0) {
-        throw new StorageInvalidConfigError('r2 storage requires a non-empty `bucket`');
+    case "rustfs":
+      if (typeof config.bucket !== "string" || config.bucket.length === 0) {
+        throw new StorageInvalidConfigError("rustfs storage requires a non-empty `bucket`");
+      }
+      if (typeof config.endpoint !== "string" || config.endpoint.length === 0) {
+        throw new StorageInvalidConfigError("rustfs storage requires a non-empty `endpoint`");
+      }
+      if (config.prefix !== undefined) normalizeKey(config.prefix);
+      break;
+    case "r2":
+      if (typeof config.bucket !== "string" || config.bucket.length === 0) {
+        throw new StorageInvalidConfigError("r2 storage requires a non-empty `bucket`");
       }
       if (!config.accountId && !config.endpoint && !config.client) {
         throw new StorageInvalidConfigError(
-          'r2 storage requires an `accountId`, `endpoint`, or injected `client`',
+          "r2 storage requires an `accountId`, `endpoint`, or injected `client`",
         );
       }
       if (config.prefix !== undefined) normalizeKey(config.prefix);
       break;
-    case 'gcs':
-      if (typeof config.bucket !== 'string' || config.bucket.length === 0) {
-        throw new StorageInvalidConfigError('gcs storage requires a non-empty `bucket`');
+    case "gcs":
+      if (typeof config.bucket !== "string" || config.bucket.length === 0) {
+        throw new StorageInvalidConfigError("gcs storage requires a non-empty `bucket`");
       }
       if (config.prefix !== undefined) normalizeKey(config.prefix);
       break;
@@ -183,16 +186,16 @@ async function createCustomDriver(
   const factory = DRIVER_REGISTRY.get(type);
   if (!factory) {
     throw new StorageInvalidConfigError(
-      `Unknown storage type "${type}". Builtin types: ${[...BUILTIN_TYPES].join(', ')}. ` +
-        'Custom drivers must be registered first: registerStorageDriver(type, factory).',
+      `Unknown storage type "${type}". Builtin types: ${[...BUILTIN_TYPES].join(", ")}. ` +
+        "Custom drivers must be registered first: registerStorageDriver(type, factory).",
     );
   }
   const driver = await factory(config as { type: string }, runtime);
   if (
     !driver ||
-    typeof driver.upload !== 'function' ||
-    typeof driver.download !== 'function' ||
-    typeof driver.type !== 'string'
+    typeof driver.upload !== "function" ||
+    typeof driver.download !== "function" ||
+    typeof driver.type !== "string"
   ) {
     throw new StorageInvalidConfigError(
       `The custom driver registered for "${type}" does not implement the StorageDriver interface`,
@@ -217,9 +220,7 @@ async function createCustomDriver(
  * native slots are typed `unknown`.
  */
 export async function createStorage<T extends StorageType>(
-  config: T extends StorageType
-    ? Extract<StorageConfig, { type: T }>
-    : never,
+  config: T extends StorageType ? Extract<StorageConfig, { type: T }> : never,
   options?: CreateStorageOptions,
 ): Promise<Storage<T>>;
 export async function createStorage<T extends string>(
@@ -237,49 +238,49 @@ export async function createStorage(
   if (BUILTIN_TYPES.has(type)) {
     assertValidConfig(config as unknown as StorageConfig);
     switch (type) {
-      case 'local': {
-        const { LocalDriver } = await import('./drivers/local/local.driver');
+      case "local": {
+        const { LocalDriver } = await import("./drivers/local/local.driver");
         driver = new LocalDriver(config as never, runtime) as never;
         break;
       }
-      case 's3': {
-        const { S3Driver } = await import('./drivers/s3/s3.driver');
+      case "s3": {
+        const { S3Driver } = await import("./drivers/s3/s3.driver");
         driver = new S3Driver(config as never, runtime) as never;
         await (driver as unknown as { ready(): Promise<unknown> }).ready();
         break;
       }
-      case 'minio': {
-        const { MinioDriver } = await import('./drivers/minio/minio.driver');
+      case "minio": {
+        const { MinioDriver } = await import("./drivers/minio/minio.driver");
         driver = new MinioDriver(config as never, runtime) as never;
         await (driver as unknown as { ready(): Promise<unknown> }).ready();
         break;
       }
-      case 'azure': {
-        const { AzureDriver } = await import('./drivers/azure/azure.driver');
+      case "azure": {
+        const { AzureDriver } = await import("./drivers/azure/azure.driver");
         driver = new AzureDriver(config as never, runtime) as never;
         await (driver as unknown as { ready(): Promise<unknown> }).ready();
         break;
       }
-      case 'oracle': {
-        const { OracleDriver } = await import('./drivers/oracle/oracle.driver');
+      case "oracle": {
+        const { OracleDriver } = await import("./drivers/oracle/oracle.driver");
         driver = new OracleDriver(config as never, runtime) as never;
         await (driver as unknown as { ready(): Promise<unknown> }).ready();
         break;
       }
-      case 'rustfs': {
-        const { RustfsDriver } = await import('./drivers/rustfs/rustfs.driver');
+      case "rustfs": {
+        const { RustfsDriver } = await import("./drivers/rustfs/rustfs.driver");
         driver = new RustfsDriver(config as never, runtime) as never;
         await (driver as unknown as { ready(): Promise<unknown> }).ready();
         break;
       }
-      case 'r2': {
-        const { R2Driver } = await import('./drivers/r2/r2.driver');
+      case "r2": {
+        const { R2Driver } = await import("./drivers/r2/r2.driver");
         driver = new R2Driver(config as never, runtime) as never;
         await (driver as unknown as { ready(): Promise<unknown> }).ready();
         break;
       }
-      case 'gcs': {
-        const { GcsDriver } = await import('./drivers/gcs/gcs.driver');
+      case "gcs": {
+        const { GcsDriver } = await import("./drivers/gcs/gcs.driver");
         driver = new GcsDriver(config as never, runtime) as never;
         await (driver as unknown as { ready(): Promise<unknown> }).ready();
         break;

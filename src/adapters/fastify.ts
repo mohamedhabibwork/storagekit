@@ -5,13 +5,9 @@
  * stream to {@link saveUpload}. `@fastify/multipart` is NOT imported: the
  * part type is structural, so the package stays an optional peer.
  */
-import type { Readable } from 'node:stream';
-import type { Storage, StorageType } from '../core/types';
-import {
-  saveUpload,
-  type SaveUploadOptions,
-  type SavedUpload,
-} from '../uploads';
+import type { Readable } from "node:stream";
+import type { Storage, StorageType } from "../core/types";
+import { saveUpload, type SaveUploadOptions, type SavedUpload } from "../uploads";
 
 /**
  * The slice of a `@fastify/multipart` `MultipartFile` this adapter touches.
@@ -48,12 +44,16 @@ export async function saveFastifyFile<T extends string = StorageType>(
   options: SaveUploadOptions<T> = {},
 ): Promise<SavedUpload<T>> {
   try {
-    return await saveUpload(storage, {
-      body: file.file,
-      ...(file.fieldname !== undefined ? { fieldname: file.fieldname } : {}),
-      originalName: file.filename,
-      ...(file.mimetype !== undefined ? { mimeType: file.mimetype } : {}),
-    }, options);
+    return await saveUpload(
+      storage,
+      {
+        body: file.file,
+        ...(file.fieldname !== undefined ? { fieldname: file.fieldname } : {}),
+        originalName: file.filename,
+        ...(file.mimetype !== undefined ? { mimeType: file.mimetype } : {}),
+      },
+      options,
+    );
   } catch (error) {
     file.file.destroy();
     throw error;

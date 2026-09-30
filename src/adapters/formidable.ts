@@ -6,13 +6,9 @@
  * imported — the file shape is structural, so the package stays an
  * optional peer.
  */
-import { createReadStream } from 'node:fs';
-import type { Storage, StorageType } from '../core/types';
-import {
-  saveUpload,
-  type SaveUploadOptions,
-  type SavedUpload,
-} from '../uploads';
+import { createReadStream } from "node:fs";
+import type { Storage, StorageType } from "../core/types";
+import { saveUpload, type SaveUploadOptions, type SavedUpload } from "../uploads";
 
 /**
  * The slice of a formidable `File` (v2 plain object, v3 class) this
@@ -42,10 +38,14 @@ export async function saveFormidableFile<T extends string = StorageType>(
   file: FormidableFileLike,
   options: SaveUploadOptions<T> = {},
 ): Promise<SavedUpload<T>> {
-  return saveUpload(storage, {
-    body: createReadStream(file.filepath),
-    originalName: file.originalFilename,
-    ...(file.mimetype !== undefined ? { mimeType: file.mimetype } : {}),
-    ...(file.size !== undefined ? { size: file.size } : {}),
-  }, options);
+  return saveUpload(
+    storage,
+    {
+      body: createReadStream(file.filepath),
+      originalName: file.originalFilename,
+      ...(file.mimetype !== undefined ? { mimeType: file.mimetype } : {}),
+      ...(file.size !== undefined ? { size: file.size } : {}),
+    },
+    options,
+  );
 }

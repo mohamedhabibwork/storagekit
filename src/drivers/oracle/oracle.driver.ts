@@ -1,5 +1,5 @@
-import type * as OciCommon from 'oci-common';
-import type * as OciObjectStorage from 'oci-objectstorage';
+import type * as OciCommon from "oci-common";
+import type * as OciObjectStorage from "oci-objectstorage";
 
 import {
   StorageConflictError,
@@ -7,22 +7,17 @@ import {
   StorageInvalidConfigError,
   StorageUnsupportedOperationError,
   normalizeError,
-} from '../../core/errors';
-import { detectContentTypeFromPath } from '../../core/mime';
-import {
-  encodeKeyPath,
-  joinKey,
-  normalizeKey,
-  stripKey,
-} from '../../core/paths';
+} from "../../core/errors";
+import { detectContentTypeFromPath } from "../../core/mime";
+import { encodeKeyPath, joinKey, normalizeKey, stripKey } from "../../core/paths";
 import {
   bodyLength,
   chunkStream,
   mapWithConcurrency,
   toReadable,
   streamToBuffer,
-} from '../../core/streams';
-import type { UploadBody } from '../../core/primitives';
+} from "../../core/streams";
+import type { UploadBody } from "../../core/primitives";
 import type {
   CopyOptions,
   DeleteManyOptions,
@@ -42,9 +37,9 @@ import type {
   UploadOptions,
   UploadResult,
   UrlOptions,
-} from '../../core/types';
-import type { OracleStorageConfig } from './oracle.types';
-import type { StorageDriver } from '../driver';
+} from "../../core/types";
+import type { OracleStorageConfig } from "./oracle.types";
+import type { StorageDriver } from "../driver";
 
 type CommonSdk = typeof OciCommon;
 type ObjectStorageSdk = typeof OciObjectStorage;
@@ -56,13 +51,13 @@ async function loadOciCommon(): Promise<CommonSdk> {
   if (!commonPromise) {
     commonPromise = (async () => {
       try {
-        const mod = await import('oci-common');
+        const mod = await import("oci-common");
         return mod as unknown as CommonSdk;
       } catch (error) {
         commonPromise = undefined;
         throw new StorageInvalidConfigError(
-          'The Oracle driver requires the OCI SDK. Install it with:\n' +
-            'npm install oci-common oci-objectstorage',
+          "The Oracle driver requires the OCI SDK. Install it with:\n" +
+            "npm install oci-common oci-objectstorage",
           { cause: error },
         );
       }
@@ -75,13 +70,13 @@ async function loadOciObjectStorage(): Promise<ObjectStorageSdk> {
   if (!objectStoragePromise) {
     objectStoragePromise = (async () => {
       try {
-        const mod = await import('oci-objectstorage');
+        const mod = await import("oci-objectstorage");
         return mod as unknown as ObjectStorageSdk;
       } catch (error) {
         objectStoragePromise = undefined;
         throw new StorageInvalidConfigError(
-          'The Oracle driver requires the OCI SDK. Install it with:\n' +
-            'npm install oci-common oci-objectstorage',
+          "The Oracle driver requires the OCI SDK. Install it with:\n" +
+            "npm install oci-common oci-objectstorage",
           { cause: error },
         );
       }
@@ -96,8 +91,8 @@ export interface OracleDriverRuntimeOptions {
 
 export const OCI_MAX_PART_SIZE = 128 * 1024 * 1024; // OCI part size ceiling
 
-export class OracleDriver implements StorageDriver<'oracle'> {
-  readonly type = 'oracle' as const;
+export class OracleDriver implements StorageDriver<"oracle"> {
+  readonly type = "oracle" as const;
 
   private readonly config: OracleStorageConfig;
   private readonly runtime: OracleDriverRuntimeOptions;
@@ -107,7 +102,7 @@ export class OracleDriver implements StorageDriver<'oracle'> {
   constructor(config: OracleStorageConfig, runtime: OracleDriverRuntimeOptions = {}) {
     this.config = config;
     this.runtime = runtime;
-    this.prefix = config.prefix?.replace(/\/+$/, '') || undefined;
+    this.prefix = config.prefix?.replace(/\/+$/, "") || undefined;
     if (this.prefix) normalizeKey(this.prefix);
   }
 
@@ -127,19 +122,19 @@ export class OracleDriver implements StorageDriver<'oracle'> {
   }
 
   private async resolveAuthProvider(): Promise<OciCommon.AuthenticationDetailsProvider> {
-    const auth = this.config.auth ?? { type: 'config-file' as const };
-    if (auth.type === 'provider') return auth.provider;
+    const auth = this.config.auth ?? { type: "config-file" as const };
+    if (auth.type === "provider") return auth.provider;
     const common = await loadOciCommon();
     switch (auth.type) {
-      case 'config-file':
+      case "config-file":
         return new common.ConfigFileAuthenticationDetailsProvider(
           auth.configFilePath,
           auth.profile,
         );
-      case 'instance-principals':
+      case "instance-principals":
         // Build() is async — instance principals require a metadata call.
         return await new common.InstancePrincipalsAuthenticationDetailsProviderBuilder().build();
-      case 'resource-principals': {
+      case "resource-principals": {
         const Provider = common.ResourcePrincipalAuthenticationDetailsProvider as unknown as {
           builder(): { build(): OciCommon.AuthenticationDetailsProvider };
         };
@@ -151,7 +146,7 @@ export class OracleDriver implements StorageDriver<'oracle'> {
   private requireClient(): OciObjectStorage.ObjectStorageClient {
     if (!this.client) {
       throw new StorageInvalidConfigError(
-        'Oracle driver is not initialized; await driver.ready() or use createStorage()',
+        "Oracle driver is not initialized; await driver.ready() or use createStorage()",
       );
     }
     return this.client;
@@ -161,9 +156,7 @@ export class OracleDriver implements StorageDriver<'oracle'> {
     return this.requireClient();
   }
 
-  nativeRequest<R>(
-    fn: (client: OciObjectStorage.ObjectStorageClient) => Promise<R>,
-  ): Promise<R> {
+  nativeRequest<R>(fn: (client: OciObjectStorage.ObjectStorageClient) => Promise<R>): Promise<R> {
     return fn(this.requireClient());
   }
 
@@ -184,24 +177,21 @@ export class OracleDriver implements StorageDriver<'oracle'> {
   }
 
   private fail(error: unknown, operation: string, path?: string): never {
-    throw normalizeError(error, { provider: 'oracle', operation, path });
+    throw normalizeError(error, { provider: "oracle", operation, path });
   }
 
-  private contentTypeFor(
-    key: string,
-    explicit: string | undefined,
-  ): string | undefined {
-    return explicit ??
-      (this.runtime.detectContentType !== false
-        ? detectContentTypeFromPath(key)
-        : undefined);
+  private contentTypeFor(key: string, explicit: string | undefined): string | undefined {
+    return (
+      explicit ??
+      (this.runtime.detectContentType !== false ? detectContentTypeFromPath(key) : undefined)
+    );
   }
 
   async upload(
     path: string,
     body: UploadBody,
-    options: UploadOptions<'oracle'> = {},
-  ): Promise<UploadResult<'oracle'>> {
+    options: UploadOptions<"oracle"> = {},
+  ): Promise<UploadResult<"oracle">> {
     const normalized = normalizeKey(path);
     const key = this.key(normalized);
     try {
@@ -232,9 +222,9 @@ export class OracleDriver implements StorageDriver<'oracle'> {
       const isInMemory =
         Buffer.isBuffer(body) ||
         body instanceof Uint8Array ||
-        typeof body === 'string' ||
+        typeof body === "string" ||
         body instanceof ArrayBuffer ||
-        (typeof Blob !== 'undefined' && body instanceof Blob);
+        (typeof Blob !== "undefined" && body instanceof Blob);
 
       if (!options.multipart?.enabled && isInMemory) {
         const buffer = await toBuffer(body);
@@ -254,7 +244,7 @@ export class OracleDriver implements StorageDriver<'oracle'> {
           size: buffer.length,
           etag: response.eTag,
           url,
-          provider: 'oracle',
+          provider: "oracle",
           native: response,
         };
       }
@@ -271,12 +261,12 @@ export class OracleDriver implements StorageDriver<'oracle'> {
         size: options.contentLength ?? bodyLength(body),
         etag: result.etag,
         url,
-        provider: 'oracle',
+        provider: "oracle",
         native: result.response,
       };
     } catch (error) {
       if (error instanceof StorageError) throw error;
-      this.fail(error, 'upload', normalized);
+      this.fail(error, "upload", normalized);
     }
   }
 
@@ -284,9 +274,12 @@ export class OracleDriver implements StorageDriver<'oracle'> {
   private async multipartUpload(
     key: string,
     body: UploadBody,
-    options: UploadOptions<'oracle'>,
+    options: UploadOptions<"oracle">,
     commonRequest: Record<string, unknown>,
-  ): Promise<{ etag?: string; response: OciObjectStorage.responses.CommitMultipartUploadResponse }> {
+  ): Promise<{
+    etag?: string;
+    response: OciObjectStorage.responses.CommitMultipartUploadResponse;
+  }> {
     const client = this.requireClient();
     const created = await client.createMultipartUpload({
       namespaceName: this.config.namespaceName,
@@ -297,9 +290,7 @@ export class OracleDriver implements StorageDriver<'oracle'> {
         cacheControl: commonRequest.cacheControl as string | undefined,
         contentDisposition: commonRequest.contentDisposition as string | undefined,
         contentEncoding: commonRequest.contentEncoding as string | undefined,
-        ...(commonRequest.opcMeta !== undefined
-          ? { opcMeta: commonRequest.opcMeta }
-          : {}),
+        ...(commonRequest.opcMeta !== undefined ? { opcMeta: commonRequest.opcMeta } : {}),
         ...(commonRequest.storageTier !== undefined
           ? { storageTier: commonRequest.storageTier }
           : {}),
@@ -308,9 +299,9 @@ export class OracleDriver implements StorageDriver<'oracle'> {
     const uploadId = created.multipartUpload?.uploadId;
 
     if (!uploadId) {
-      throw new StorageError('OCI did not return a multipart uploadId', {
-        provider: 'oracle',
-        operation: 'upload',
+      throw new StorageError("OCI did not return a multipart uploadId", {
+        provider: "oracle",
+        operation: "upload",
         path: key,
       });
     }
@@ -319,10 +310,7 @@ export class OracleDriver implements StorageDriver<'oracle'> {
       Math.max(options.multipart?.partSize ?? 64 * 1024 * 1024, 1024 * 1024),
       OCI_MAX_PART_SIZE,
     );
-    const concurrency = Math.max(
-      1,
-      Math.min(options.multipart?.concurrency ?? 4, 16),
-    );
+    const concurrency = Math.max(1, Math.min(options.multipart?.concurrency ?? 4, 16));
 
     try {
       const stream = toReadable(body);
@@ -331,22 +319,18 @@ export class OracleDriver implements StorageDriver<'oracle'> {
         parts.push(chunk);
       }
 
-      const uploaded = await mapWithConcurrency(
-        parts,
-        concurrency,
-        async (part, index) => {
-          const response = await client.uploadPart({
-            namespaceName: this.config.namespaceName,
-            bucketName: this.config.bucketName,
-            objectName: key,
-            uploadId,
-            uploadPartNum: index + 1,
-            contentLength: part.length,
-            uploadPartBody: part,
-          });
-          return { partNum: index + 1, etag: response.eTag ?? '' };
-        },
-      );
+      const uploaded = await mapWithConcurrency(parts, concurrency, async (part, index) => {
+        const response = await client.uploadPart({
+          namespaceName: this.config.namespaceName,
+          bucketName: this.config.bucketName,
+          objectName: key,
+          uploadId,
+          uploadPartNum: index + 1,
+          contentLength: part.length,
+          uploadPartBody: part,
+        });
+        return { partNum: index + 1, etag: response.eTag ?? "" };
+      });
 
       const committed = await client.commitMultipartUpload({
         namespaceName: this.config.namespaceName,
@@ -371,11 +355,7 @@ export class OracleDriver implements StorageDriver<'oracle'> {
     }
   }
 
-  private async assertAbsent(
-    normalized: string,
-    key: string,
-    signal?: AbortSignal,
-  ): Promise<void> {
+  private async assertAbsent(normalized: string, key: string, signal?: AbortSignal): Promise<void> {
     void signal;
     try {
       await this.requireClient().headObject({
@@ -385,18 +365,18 @@ export class OracleDriver implements StorageDriver<'oracle'> {
       });
     } catch (error) {
       if (isMissing(error)) return;
-      this.fail(error, 'upload', normalized);
+      this.fail(error, "upload", normalized);
     }
-    throw new StorageConflictError(
-      `"${normalized}" already exists and overwrite is disabled`,
-      { provider: 'oracle', path: normalized },
-    );
+    throw new StorageConflictError(`"${normalized}" already exists and overwrite is disabled`, {
+      provider: "oracle",
+      path: normalized,
+    });
   }
 
   async download(
     path: string,
-    options: DownloadOptions<'oracle'> = {},
-  ): Promise<DownloadResult<'oracle'>> {
+    options: DownloadOptions<"oracle"> = {},
+  ): Promise<DownloadResult<"oracle">> {
     const normalized = normalizeKey(path);
     try {
       await this.ready();
@@ -432,19 +412,19 @@ export class OracleDriver implements StorageDriver<'oracle'> {
         metadata: response.opcMeta,
         versionId: response.versionId,
         range: options.range,
-        provider: 'oracle',
+        provider: "oracle",
         native: rest,
         buffer: () => streamToBuffer(stream),
-        text: () => streamToBuffer(stream).then((b) => b.toString('utf8')),
-        json: <V,>() => streamToBuffer(stream).then((b) => JSON.parse(b.toString('utf8')) as V),
-      } as unknown as DownloadResult<'oracle'>;
+        text: () => streamToBuffer(stream).then((b) => b.toString("utf8")),
+        json: <V>() => streamToBuffer(stream).then((b) => JSON.parse(b.toString("utf8")) as V),
+      } as unknown as DownloadResult<"oracle">;
     } catch (error) {
       if (error instanceof StorageError) throw error;
-      this.fail(error, 'download', normalized);
+      this.fail(error, "download", normalized);
     }
   }
 
-  async delete(path: string, options: DeleteOptions<'oracle'> = {}): Promise<void> {
+  async delete(path: string, options: DeleteOptions<"oracle"> = {}): Promise<void> {
     const normalized = normalizeKey(path);
     try {
       await this.ready();
@@ -458,29 +438,29 @@ export class OracleDriver implements StorageDriver<'oracle'> {
       await this.requireClient().deleteObject(request);
     } catch (error) {
       if (error instanceof StorageError) throw error;
-      this.fail(error, 'delete', normalized);
+      this.fail(error, "delete", normalized);
     }
   }
 
   async deleteMany(
     paths: string[],
-    options: DeleteManyOptions<'oracle'> = {},
+    options: DeleteManyOptions<"oracle"> = {},
   ): Promise<DeleteManyResult> {
     await this.ready();
     const settled = await Promise.allSettled(
-      paths.map((p) => this.delete(p, options as DeleteOptions<'oracle'>)),
+      paths.map((p) => this.delete(p, options as DeleteOptions<"oracle">)),
     );
     const deleted: string[] = [];
-    const failed: DeleteManyResult['failed'] = [];
+    const failed: DeleteManyResult["failed"] = [];
     settled.forEach((result, index) => {
       const path = paths[index];
-      if (result.status === 'fulfilled') deleted.push(path);
+      if (result.status === "fulfilled") deleted.push(path);
       else
         failed.push({
           path,
           error: normalizeError(result.reason, {
-            provider: 'oracle',
-            operation: 'deleteMany',
+            provider: "oracle",
+            operation: "deleteMany",
             path,
           }),
         });
@@ -488,7 +468,7 @@ export class OracleDriver implements StorageDriver<'oracle'> {
     return { deleted, failed };
   }
 
-  async exists(path: string, options: ExistsOptions<'oracle'> = {}): Promise<boolean> {
+  async exists(path: string, options: ExistsOptions<"oracle"> = {}): Promise<boolean> {
     const normalized = normalizeKey(path);
     try {
       await this.ready();
@@ -502,14 +482,11 @@ export class OracleDriver implements StorageDriver<'oracle'> {
     } catch (error) {
       if (isMissing(error)) return false;
       if (error instanceof StorageError) throw error;
-      this.fail(error, 'exists', normalized);
+      this.fail(error, "exists", normalized);
     }
   }
 
-  async stat(
-    path: string,
-    options: StatOptions<'oracle'> = {},
-  ): Promise<FileStat<'oracle'>> {
+  async stat(path: string, options: StatOptions<"oracle"> = {}): Promise<FileStat<"oracle">> {
     const normalized = normalizeKey(path);
     try {
       await this.ready();
@@ -529,16 +506,16 @@ export class OracleDriver implements StorageDriver<'oracle'> {
         lastModified: response.lastModified,
         metadata: response.opcMeta,
         versionId: response.versionId,
-        provider: 'oracle',
+        provider: "oracle",
         native: response,
       };
     } catch (error) {
       if (error instanceof StorageError) throw error;
-      this.fail(error, 'stat', normalized);
+      this.fail(error, "stat", normalized);
     }
   }
 
-  async list(options: ListOptions<'oracle'> = {}): Promise<ListResult<'oracle'>> {
+  async list(options: ListOptions<"oracle"> = {}): Promise<ListResult<"oracle">> {
     try {
       await this.ready();
       const client = this.requireClient();
@@ -546,11 +523,11 @@ export class OracleDriver implements StorageDriver<'oracle'> {
       const request: OciObjectStorage.requests.ListObjectsRequest = {
         namespaceName: this.config.namespaceName,
         bucketName: this.config.bucketName,
-        prefix: joinKey(this.prefix, options.prefix ?? '') || undefined,
+        prefix: joinKey(this.prefix, options.prefix ?? "") || undefined,
         limit: Math.max(1, options.limit ?? 1000),
-        ...(options.recursive ? {} : { delimiter: '/' }),
+        ...(options.recursive ? {} : { delimiter: "/" }),
         ...(options.cursor ? { start: options.cursor } : {}),
-        fields: 'name,size,etag,timeModified',
+        fields: "name,size,etag,timeModified",
         ...native,
       };
       const response = await client.listObjects(request);
@@ -559,7 +536,7 @@ export class OracleDriver implements StorageDriver<'oracle'> {
       const files: StorageFile[] = (listing.objects ?? [])
         .filter((object) => object.name !== undefined)
         .map((object) => ({
-          path: stripKey(this.prefix, object.name ?? ''),
+          path: stripKey(this.prefix, object.name ?? ""),
           size: object.size,
           etag: object.etag,
           lastModified: object.timeModified,
@@ -577,14 +554,14 @@ export class OracleDriver implements StorageDriver<'oracle'> {
       };
     } catch (error) {
       if (error instanceof StorageError) throw error;
-      this.fail(error, 'list');
+      this.fail(error, "list");
     }
   }
 
   async copy(
     source: string,
     destination: string,
-    options: CopyOptions<'oracle'> = {},
+    options: CopyOptions<"oracle"> = {},
   ): Promise<{ source: string; destination: string; etag?: string; lastModified?: Date }> {
     const src = normalizeKey(source);
     const dest = normalizeKey(destination);
@@ -597,10 +574,10 @@ export class OracleDriver implements StorageDriver<'oracle'> {
       const destinationRegion = native.destinationRegion ?? this.config.region;
       if (!destinationRegion) {
         throw new StorageInvalidConfigError(
-          'Oracle copyObject requires `region` in the config (or native.destinationRegion)',
+          "Oracle copyObject requires `region` in the config (or native.destinationRegion)",
         );
       }
-      const response = await this.requireClient().copyObject({
+      await this.requireClient().copyObject({
         namespaceName: this.config.namespaceName,
         bucketName: this.config.bucketName,
         copyObjectDetails: {
@@ -615,9 +592,7 @@ export class OracleDriver implements StorageDriver<'oracle'> {
                   ...(options.contentType !== undefined
                     ? { contentType: options.contentType }
                     : {}),
-                  ...(options.metadata !== undefined
-                    ? { userMetadata: options.metadata }
-                    : {}),
+                  ...(options.metadata !== undefined ? { userMetadata: options.metadata } : {}),
                 },
               }
             : {}),
@@ -633,16 +608,16 @@ export class OracleDriver implements StorageDriver<'oracle'> {
       };
     } catch (error) {
       if (error instanceof StorageError) throw error;
-      this.fail(error, 'copy', src);
+      this.fail(error, "copy", src);
     }
   }
 
   async move(
     source: string,
     destination: string,
-    options: MoveOptions<'oracle'> = {},
+    options: MoveOptions<"oracle"> = {},
   ): Promise<{ source: string; destination: string; etag?: string }> {
-    const copied = await this.copy(source, destination, options as CopyOptions<'oracle'>);
+    const copied = await this.copy(source, destination, options as CopyOptions<"oracle">);
     await this.delete(source, { signal: options.signal });
     return {
       source: normalizeKey(source),
@@ -651,37 +626,34 @@ export class OracleDriver implements StorageDriver<'oracle'> {
     };
   }
 
-  async getUrl(path: string, _options: UrlOptions<'oracle'> = {}): Promise<string> {
+  async getUrl(path: string, _options: UrlOptions<"oracle"> = {}): Promise<string> {
     const key = this.key(normalizeKey(path));
     if (this.config.publicUrlBase) {
-      const base = this.config.publicUrlBase.replace(/\/+$/, '');
+      const base = this.config.publicUrlBase.replace(/\/+$/, "");
       return `${base}/${encodeKeyPath(key)}`;
     }
     if (!this.config.region) {
       throw new StorageUnsupportedOperationError(
-        'getUrl() requires `region` (or `publicUrlBase`) in the Oracle storage config',
+        "getUrl() requires `region` (or `publicUrlBase`) in the Oracle storage config",
       );
     }
     return `https://objectstorage.${this.config.region}.oraclecloud.com/n/${this.config.namespaceName}/b/${this.config.bucketName}/o/${encodeKeyPath(key)}`;
   }
 
-  async getSignedUrl(
-    path: string,
-    _options?: SignedUrlOptions<'oracle'>,
-  ): Promise<string> {
+  async getSignedUrl(path: string, _options?: SignedUrlOptions<"oracle">): Promise<string> {
     void path;
     throw new StorageUnsupportedOperationError(
-      'Oracle Object Storage has no presigned URLs. Use pre-authenticated requests via nativeRequest() — see ObjectStorageClient.createPreauthenticatedRequest. Their lifecycle and scope differ from presigned URLs.',
+      "Oracle Object Storage has no presigned URLs. Use pre-authenticated requests via nativeRequest() — see ObjectStorageClient.createPreauthenticatedRequest. Their lifecycle and scope differ from presigned URLs.",
     );
   }
 }
 
 async function toBuffer(body: UploadBody): Promise<Buffer> {
-  if (typeof body === 'string') return Buffer.from(body, 'utf8');
+  if (typeof body === "string") return Buffer.from(body, "utf8");
   if (Buffer.isBuffer(body)) return body;
   if (body instanceof Uint8Array) return Buffer.from(body);
   if (body instanceof ArrayBuffer) return Buffer.from(body);
-  if (typeof Blob !== 'undefined' && body instanceof Blob) {
+  if (typeof Blob !== "undefined" && body instanceof Blob) {
     return Buffer.from(await body.arrayBuffer());
   }
   return streamToBuffer(body as never);
@@ -691,5 +663,5 @@ function isMissing(error: unknown): boolean {
   const like = error as { statusCode?: number; code?: string; name?: string };
   if (like.statusCode === 404) return true;
   const code = like.code ?? like.name;
-  return code === 'NotExists' || code === 'NotFound' || code === 'NoSuchObject';
+  return code === "NotExists" || code === "NotFound" || code === "NoSuchObject";
 }

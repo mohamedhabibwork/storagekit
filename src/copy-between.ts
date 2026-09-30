@@ -1,11 +1,7 @@
-import { Transform } from 'node:stream';
+import { Transform } from "node:stream";
 
-import { StorageError } from './core/errors.js';
-import type {
-  Storage,
-  StorageType,
-  UploadResult,
-} from './core/types.js';
+import { StorageError } from "./core/errors.js";
+import type { Storage, StorageType, UploadResult } from "./core/types.js";
 
 export interface CopyBetweenOptions {
   /** Part size used by multipart uploads on the destination driver. */
@@ -29,10 +25,7 @@ export interface CopyBetweenOptions {
  * For copies inside a single driver, prefer `storage.copy()`, which uses
  * server-side copy.
  */
-export async function copyBetween<
-  TSource extends StorageType,
-  TDest extends StorageType,
->(
+export async function copyBetween<TSource extends StorageType, TDest extends StorageType>(
   sourceStorage: Storage<TSource>,
   sourcePath: string,
   destinationStorage: Storage<TDest>,
@@ -58,13 +51,13 @@ export async function copyBetween<
   });
   // Forward source errors so the destination upload fails instead of
   // silently writing an incomplete object.
-  download.stream.on('error', (error) => counting.destroy(error));
+  download.stream.on("error", (error) => counting.destroy(error));
   download.stream.pipe(counting);
 
   try {
     const metadata = { ...download.metadata, ...options.metadata };
     return await destinationStorage.upload(destinationPath, counting, {
-      ...(options.contentType ?? download.contentType
+      ...((options.contentType ?? download.contentType)
         ? { contentType: options.contentType ?? download.contentType }
         : {}),
       ...(total !== undefined ? { contentLength: total } : {}),
@@ -74,9 +67,7 @@ export async function copyBetween<
         ? {
             multipart: {
               ...(options.partSize !== undefined ? { partSize: options.partSize } : {}),
-              ...(options.concurrency !== undefined
-                ? { concurrency: options.concurrency }
-                : {}),
+              ...(options.concurrency !== undefined ? { concurrency: options.concurrency } : {}),
             },
           }
         : {}),

@@ -1,4 +1,4 @@
-import type { Client, ClientOptions } from 'minio';
+import type { Client, ClientOptions } from "minio";
 
 /**
  * MinIO storage configuration using the official `minio` JavaScript client.
@@ -6,7 +6,7 @@ import type { Client, ClientOptions } from 'minio';
  * MinIO-native options and behavior stay available.
  */
 export interface MinioStorageConfig {
-  type: 'minio';
+  type: "minio";
   bucket: string;
   endPoint: string;
   port?: number;

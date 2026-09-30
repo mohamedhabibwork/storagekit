@@ -1,8 +1,8 @@
-import { createStorage } from '../../factory';
-import type { Storage } from '../../core/types';
-import type { AzureStorageConfig } from './azure.types';
+import { createStorage } from "../../factory";
+import type { Storage } from "../../core/types";
+import type { AzureStorageConfig } from "./azure.types";
 
-export { AzureDriver } from './azure.driver';
+export { AzureDriver } from "./azure.driver";
 export type {
   AzureStorageConfig,
   AzureNativeUploadOptions,
@@ -19,7 +19,7 @@ export type {
   AzureNativeUploadResult,
   AzureNativeDownloadResult,
   AzureNativeListResult,
-} from './azure.types';
+} from "./azure.types";
 
 /**
  * Create an Azure Blob Storage. Direct entrypoint — importing this module
@@ -28,6 +28,6 @@ export type {
 export function createAzureStorage(
   config: AzureStorageConfig,
   options?: Parameters<typeof createStorage>[1],
-): Promise<Storage<'azure'>> {
+): Promise<Storage<"azure">> {
   return createStorage(config, options);
 }
