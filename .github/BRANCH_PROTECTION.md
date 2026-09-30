@@ -6,22 +6,22 @@ This document describes the branch-protection rules that must be applied to
 
 ## Settings to enable
 
-| Setting | Value | Why |
-| --- | --- | --- |
-| **Require a pull request before merging** | ON | Direct pushes to `main` are blocked. |
-| **Require approvals** | `1` | At least one code owner must approve every PR. |
-| **Dismiss stale pull request approvals when new commits are pushed** | ON | Re-review is forced when code changes. |
-| **Require review from Code Owners** | ON | A CODEOWNERS-listed reviewer must approve the changed paths. |
-| **Require status checks to pass before merging** | ON | All required checks must be green. |
-| **Require branches to be up to date before merging** | ON | The PR re-runs against the latest `main`. |
-| **Required status checks** | `required-checks / required` *(see below)* **and** `CodeQL / Analyze (typescript)` | The CI gate **and** the security static-analysis gate must both be green. |
-| **Require conversation resolution** | ON | All review comments must be resolved. |
-| **Require signed commits** | optional | Recommended once the team is comfortable with it. |
-| **Require linear history** | optional | Recommended (squash or rebase merge only). |
-| **Include administrators** | ON | Admins are not exempt from these rules. |
-| **Allow force pushes** | OFF | Never. |
-| **Allow deletions** | OFF | Never. |
-| **Block creation by non-fast-forwards** | already implied by the above | — |
+| Setting                                                              | Value                                                                              | Why                                                                       |
+| -------------------------------------------------------------------- | ---------------------------------------------------------------------------------- | ------------------------------------------------------------------------- |
+| **Require a pull request before merging**                            | ON                                                                                 | Direct pushes to `main` are blocked.                                      |
+| **Require approvals**                                                | `1`                                                                                | At least one code owner must approve every PR.                            |
+| **Dismiss stale pull request approvals when new commits are pushed** | ON                                                                                 | Re-review is forced when code changes.                                    |
+| **Require review from Code Owners**                                  | ON                                                                                 | A CODEOWNERS-listed reviewer must approve the changed paths.              |
+| **Require status checks to pass before merging**                     | ON                                                                                 | All required checks must be green.                                        |
+| **Require branches to be up to date before merging**                 | ON                                                                                 | The PR re-runs against the latest `main`.                                 |
+| **Required status checks**                                           | `required-checks / required` _(see below)_ **and** `CodeQL / Analyze (typescript)` | The CI gate **and** the security static-analysis gate must both be green. |
+| **Require conversation resolution**                                  | ON                                                                                 | All review comments must be resolved.                                     |
+| **Require signed commits**                                           | optional                                                                           | Recommended once the team is comfortable with it.                         |
+| **Require linear history**                                           | optional                                                                           | Recommended (squash or rebase merge only).                                |
+| **Include administrators**                                           | ON                                                                                 | Admins are not exempt from these rules.                                   |
+| **Allow force pushes**                                               | OFF                                                                                | Never.                                                                    |
+| **Allow deletions**                                                  | OFF                                                                                | Never.                                                                    |
+| **Block creation by non-fast-forwards**                              | already implied by the above                                                       | —                                                                         |
 
 ## Required status check
 

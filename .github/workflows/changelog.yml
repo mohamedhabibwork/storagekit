@@ -6,7 +6,7 @@ name: Changelog
 
 on:
   push:
-    tags: ['v*']
+    tags: ["v*"]
   workflow_dispatch:
 
 concurrency:

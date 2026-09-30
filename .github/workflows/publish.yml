@@ -11,7 +11,7 @@ name: Publish
 
 on:
   push:
-    tags: ['v*']
+    tags: ["v*"]
   release:
     types: [published]
   workflow_dispatch:
@@ -75,7 +75,7 @@ jobs:
         with:
           node-version: 22
           cache: npm
-          registry-url: 'https://registry.npmjs.org'
+          registry-url: "https://registry.npmjs.org"
       - run: npm ci
       - run: npm run build
       - name: Publish to npm

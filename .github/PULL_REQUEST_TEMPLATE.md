@@ -12,13 +12,17 @@ Rules:
 -->
 
 ## Summary
+
 <!-- One or two sentences. What does this PR change and why? -->
 
 ## Related Issue
+
 <!-- Link the issue this PR closes or relates to: Closes #123, Fixes #456. -->
 
 ## Type of Change
+
 <!-- Check all that apply. -->
+
 - [ ] Bug fix (non-breaking change that fixes an issue)
 - [ ] New feature (non-breaking change that adds functionality)
 - [ ] Breaking change (fix or feature that would cause existing functionality to change)
@@ -27,7 +31,9 @@ Rules:
 - [ ] Test improvement
 
 ## Drivers Touched
+
 <!-- Leave blank if none. -->
+
 - [ ] Local
 - [ ] S3 / AWS
 - [ ] MinIO
@@ -36,7 +42,9 @@ Rules:
 - [ ] Core / shared
 
 ## Required Checks
+
 <!-- Confirm locally before requesting review. CI must pass on the PR. -->
+
 - [ ] `npm test` passes locally
 - [ ] `npm run build` succeeds
 - [ ] `npm run lint` passes (if configured)
@@ -44,18 +52,25 @@ Rules:
 - [ ] No new TypeScript `any` introduced (or justified inline)
 
 ## Release Notes
+
 <!-- Required when src/ or package.json is touched. One bullet per user-visible change. -->
+
 - <!-- e.g. feat(s3): add `expiresIn` to presigned upload helper -->
 
 ## Breaking Changes
+
 <!-- If you checked "Breaking change" above, describe the migration path. -->
+
 - <!-- What changed, who is affected, and how to migrate. -->
 
 ## Screenshots / Logs
+
 <!-- Only if relevant. Skip otherwise. -->
 
 ## Approvals Required
+
 <!-- Do NOT merge until: -->
+
 - [ ] At least **1 approval** from a code owner listed in `.github/CODEOWNERS`
 - [ ] All **Required Checks** above are green
 - [ ] Conversation is resolved
