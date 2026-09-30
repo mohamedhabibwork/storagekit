@@ -17,22 +17,22 @@ strongly-typed **native provider options** preserved instead of flattened
 into a lowest-common-denominator API.
 
 ```ts
-import { createStorage } from '@mohamedhabibwork/storagekit';
+import { createStorage } from "@mohamedhabibwork/storagekit";
 
 const storage = await createStorage({
-  type: 's3',
-  bucket: 'uploads',
-  region: 'eu-central-1',
+  type: "s3",
+  bucket: "uploads",
+  region: "eu-central-1",
 });
 
-await storage.upload('users/100/avatar.jpg', fileStream, {
-  contentType: 'image/jpeg',
+await storage.upload("users/100/avatar.jpg", fileStream, {
+  contentType: "image/jpeg",
   // normalized, works on every provider
-  cacheControl: 'public,max-age=31536000',
+  cacheControl: "public,max-age=31536000",
   // real AWS options, typed per storage type
   native: {
-    StorageClass: 'INTELLIGENT_TIERING',
-    ServerSideEncryption: 'AES256',
+    StorageClass: "INTELLIGENT_TIERING",
+    ServerSideEncryption: "AES256",
   },
 });
 ```
@@ -42,16 +42,16 @@ options (`tier: 'Cool'`, SAS conditions, …) — and **rejects** AWS ones.
 
 ## Providers
 
-| Provider | Entrypoint | SDK |
-| --- | --- | --- |
-| Local filesystem | `storagekit/local` | Node built-ins only |
-| AWS S3 | `storagekit/s3` | `@aws-sdk/client-s3`, `@aws-sdk/lib-storage`, `@aws-sdk/s3-request-presigner` |
-| MinIO | `storagekit/minio` | `minio` |
-| Azure Blob Storage | `storagekit/azure` | `@azure/storage-blob` |
-| Oracle OCI Object Storage | `storagekit/oracle` | `oci-objectstorage`, `oci-common` |
+| Provider                     | Entrypoint          | SDK                                                                           |
+| ---------------------------- | ------------------- | ----------------------------------------------------------------------------- |
+| Local filesystem             | `storagekit/local`  | Node built-ins only                                                           |
+| AWS S3                       | `storagekit/s3`     | `@aws-sdk/client-s3`, `@aws-sdk/lib-storage`, `@aws-sdk/s3-request-presigner` |
+| MinIO                        | `storagekit/minio`  | `minio`                                                                       |
+| Azure Blob Storage           | `storagekit/azure`  | `@azure/storage-blob`                                                         |
+| Oracle OCI Object Storage    | `storagekit/oracle` | `oci-objectstorage`, `oci-common`                                             |
 | RustFS (S3-compatible, Rust) | `storagekit/rustfs` | `@aws-sdk/client-s3`, `@aws-sdk/lib-storage`, `@aws-sdk/s3-request-presigner` |
-| Cloudflare R2 | `storagekit/r2` | `@aws-sdk/client-s3`, `@aws-sdk/lib-storage`, `@aws-sdk/s3-request-presigner` |
-| Google Cloud Storage | `storagekit/gcs` | `@google-cloud/storage` |
+| Cloudflare R2                | `storagekit/r2`     | `@aws-sdk/client-s3`, `@aws-sdk/lib-storage`, `@aws-sdk/s3-request-presigner` |
+| Google Cloud Storage         | `storagekit/gcs`    | `@google-cloud/storage`                                                       |
 
 All provider SDKs are **optional peer dependencies**. Import only the
 entrypoint you use; when a driver is loaded without its SDK installed you
@@ -83,11 +83,11 @@ filesystem access are first-class here.
 
 ## Runtime support
 
-| Runtime | Status | Notes |
-| --- | --- | --- |
-| Node.js ≥ 20 | fully supported | primary target; CI matrix on 20 + 22 |
-| Bun ≥ 1.1 | fully supported | smoke-tested on every build (CI job) |
-| Deno ≥ 2.0 | fully supported | via npm compatibility; smoke-tested on every build (CI job) |
+| Runtime      | Status          | Notes                                                       |
+| ------------ | --------------- | ----------------------------------------------------------- |
+| Node.js ≥ 20 | fully supported | primary target; CI matrix on 20 + 22                        |
+| Bun ≥ 1.1    | fully supported | smoke-tested on every build (CI job)                        |
+| Deno ≥ 2.0   | fully supported | via npm compatibility; smoke-tested on every build (CI job) |
 
 The runtime smoke (`scripts/runtime-smoke.mjs`) exercises the local driver,
 streams, listings, error normalization and the custom-driver registry on
@@ -102,19 +102,20 @@ auto-deployed from [`docs/`](docs/) on every push to `main`.
 Full per-driver guides live in [`docs/`](docs/) (also shipped in the npm
 tarball):
 
-| Guide | Contents |
-| --- | --- |
-| **Site**: [mohamedhabibwork.github.io/storagekit](https://mohamedhabibwork.github.io/storagekit/) | rendered MkDocs + Material site (search, dark mode, copy-button) |
-| [docs/local.md](docs/local.md) | config, permissions, traversal protection, symlinks, native options |
-| [docs/s3.md](docs/s3.md) | AWS SDK v3, multipart tuning, storage classes/KMS, presigned URLs, LocalStack testing |
-| [docs/minio.md](docs/minio.md) | native MinIO client, metadata bags, copy preconditions, presigned URLs |
-| [docs/azure.md](docs/azure.md) | auth routes, access tiers, SAS generation, versioning, Azurite testing |
-| [docs/oracle.md](docs/oracle.md) | OCI auth providers, native multipart, PARs, cross-region copy |
-| [docs/rustfs.md](docs/rustfs.md) | RustFS endpoints, defaults (`us-east-1`, path-style), AWS SDK v3 mapping, local dev server |
-| [docs/r2.md](docs/r2.md) | Cloudflare R2 account/jurisdiction endpoints, `auto` region, S3-native options, presigned URLs |
-| [docs/gcs.md](docs/gcs.md) | Google Cloud Storage driver, ADC auth, fake-gcs-server emulator, V4 signed URLs, CMEK |
-| [docs/custom-drivers.md](docs/custom-drivers.md) | full `StorageDriver` reference, registry semantics, contract testing, built-in fake driver for tests, correctness checklist |
-| [docs/uploads.md](docs/uploads.md) | framework upload recipes: multer/Express/NestJS/Koa, Fastify, Hono, Next.js, Elysia, Bun/Deno, formidable, busboy, GraphQL Upload, validation & serving back |
+| Guide                                                                                             | Contents                                                                                                                                                     |
+| ------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **Site**: [mohamedhabibwork.github.io/storagekit](https://mohamedhabibwork.github.io/storagekit/) | rendered MkDocs + Material site (search, dark mode, copy-button)                                                                                             |
+| [docs/local.md](docs/local.md)                                                                    | config, permissions, traversal protection, symlinks, native options                                                                                          |
+| [docs/s3.md](docs/s3.md)                                                                          | AWS SDK v3, multipart tuning, storage classes/KMS, presigned URLs, LocalStack testing                                                                        |
+| [docs/minio.md](docs/minio.md)                                                                    | native MinIO client, metadata bags, copy preconditions, presigned URLs                                                                                       |
+| [docs/azure.md](docs/azure.md)                                                                    | auth routes, access tiers, SAS generation, versioning, Azurite testing                                                                                       |
+| [docs/oracle.md](docs/oracle.md)                                                                  | OCI auth providers, native multipart, PARs, cross-region copy                                                                                                |
+| [docs/rustfs.md](docs/rustfs.md)                                                                  | RustFS endpoints, defaults (`us-east-1`, path-style), AWS SDK v3 mapping, local dev server                                                                   |
+| [docs/r2.md](docs/r2.md)                                                                          | Cloudflare R2 account/jurisdiction endpoints, `auto` region, S3-native options, presigned URLs                                                               |
+| [docs/gcs.md](docs/gcs.md)                                                                        | Google Cloud Storage driver, ADC auth, fake-gcs-server emulator, V4 signed URLs, CMEK                                                                        |
+| [docs/custom-drivers.md](docs/custom-drivers.md)                                                  | full `StorageDriver` reference, registry semantics, contract testing, built-in fake driver for tests, correctness checklist                                  |
+| [docs/uploads.md](docs/uploads.md)                                                                | framework upload recipes: multer/Express/NestJS/Koa, Fastify, Hono, Next.js, Elysia, Bun/Deno, formidable, busboy, GraphQL Upload, validation & serving back |
+| [docs/examples.md](docs/examples.md)                                                              | end-to-end apps: upload service, streaming backup pipeline, fake-driver testing                                                                              |
 
 ## The design rule
 
@@ -147,27 +148,27 @@ given.
 ## Quick start (every provider)
 
 ```ts
-import { createStorage } from '@mohamedhabibwork/storagekit';
+import { createStorage } from "@mohamedhabibwork/storagekit";
 
 // Local
 const local = await createStorage({
-  type: 'local',
-  root: './storage/app',
-  baseUrl: 'https://cdn.example.com', // optional, powers getUrl()
+  type: "local",
+  root: "./storage/app",
+  baseUrl: "https://cdn.example.com", // optional, powers getUrl()
 });
 
 // AWS S3 (credentials resolve through the normal AWS chain when omitted)
 const s3 = await createStorage({
-  type: 's3',
-  bucket: 'my-files',
-  region: 'eu-west-1',
+  type: "s3",
+  bucket: "my-files",
+  region: "eu-west-1",
 });
 
 // MinIO
 const minio = await createStorage({
-  type: 'minio',
-  bucket: 'uploads',
-  endPoint: 'localhost',
+  type: "minio",
+  bucket: "uploads",
+  endPoint: "localhost",
   port: 9000,
   useSSL: false,
   accessKey: process.env.MINIO_ACCESS_KEY,
@@ -176,18 +177,18 @@ const minio = await createStorage({
 
 // Azure Blob (connection string, shared key, TokenCredential, or inject clients)
 const azure = await createStorage({
-  type: 'azure',
-  container: 'uploads',
+  type: "azure",
+  container: "uploads",
   connectionString: process.env.AZURE_STORAGE_CONNECTION_STRING,
 });
 
 // Oracle — native auth providers, never access-key style
 const oracle = await createStorage({
-  type: 'oracle',
-  namespaceName: 'mynamespace',
-  bucketName: 'mybucket',
-  region: 'eu-frankfurt-1',
-  auth: { type: 'instance-principals' },
+  type: "oracle",
+  namespaceName: "mynamespace",
+  bucketName: "mybucket",
+  region: "eu-frankfurt-1",
+  auth: { type: "instance-principals" },
 });
 ```
 
@@ -199,45 +200,47 @@ or `authProvider` (Oracle).
 
 ```ts
 // upload — Buffer, string, Uint8Array, ArrayBuffer, Blob or Node stream
-await storage.upload('users/1/avatar.jpg', buffer, {
-  contentType: 'image/jpeg',
+await storage.upload("users/1/avatar.jpg", buffer, {
+  contentType: "image/jpeg",
 });
 
 // upload from a stream — never buffered into memory
-await storage.upload('videos/movie.mp4', readableStream, {
+await storage.upload("videos/movie.mp4", readableStream, {
   multipart: { enabled: true, partSize: 10 * 1024 * 1024, concurrency: 4 },
 });
 
 // download — stream-first
-const download = await storage.download('documents/report.pdf');
-download.stream.pipe(response);          // Node Readable
-const text = await download.text();       // or .buffer() / .json()
-download.contentType;                     // normalized metadata
-download.etag; download.contentLength; download.metadata;
+const download = await storage.download("documents/report.pdf");
+download.stream.pipe(response); // Node Readable
+const text = await download.text(); // or .buffer() / .json()
+download.contentType; // normalized metadata
+download.etag;
+download.contentLength;
+download.metadata;
 
 // existence & metadata (native HEAD calls, never full downloads)
-await storage.exists('users/1/avatar.jpg');
-const stat = await storage.stat('users/1/avatar.jpg'); // size, etag, contentType, …
+await storage.exists("users/1/avatar.jpg");
+const stat = await storage.stat("users/1/avatar.jpg"); // size, etag, contentType, …
 
 // delete (idempotent — deleting a missing object is a no-op)
-await storage.delete('users/1/avatar.jpg');
-await storage.deleteMany(['a.jpg', 'b.jpg', 'c.jpg']); // per-path outcome report
+await storage.delete("users/1/avatar.jpg");
+await storage.deleteMany(["a.jpg", "b.jpg", "c.jpg"]); // per-path outcome report
 
 // list — one level (default) or recursive, with opaque cursors
-const page = await storage.list({ prefix: 'users/100/', limit: 100 });
-page.files;        // StorageFile[] (path, size, etag, lastModified, …)
-page.directories;  // ['users/100/sub/'] — trailing slash, one level
-page.cursor;       // pass back via { cursor } to continue
+const page = await storage.list({ prefix: "users/100/", limit: 100 });
+page.files; // StorageFile[] (path, size, etag, lastModified, …)
+page.directories; // ['users/100/sub/'] — trailing slash, one level
+page.cursor; // pass back via { cursor } to continue
 page.hasMore;
 
 // async iteration for very large buckets — pagination handled for you
-for await (const file of storage.iterate('uploads/')) {
+for await (const file of storage.iterate("uploads/")) {
   console.log(file.path);
 }
 
 // copy (server-side) & move (copy + delete; rename on local)
-await storage.copy('temp/image.jpg', 'images/image.jpg');
-await storage.move('temp/file.pdf', 'documents/file.pdf');
+await storage.copy("temp/image.jpg", "images/image.jpg");
+await storage.move("temp/file.pdf", "documents/file.pdf");
 ```
 
 ## Framework uploads (multer, Fastify, Hono, formidable, …)
@@ -249,19 +252,39 @@ hono and formidable all stay optional peers.
 
 ```ts
 // Express / NestJS / koa-multer — a real multer storage engine
-import multer from 'multer';
-import { createMulterStorage } from '@mohamedhabibwork/storagekit/adapters/express';
+import multer from "multer";
+import { createMulterStorage } from "@mohamedhabibwork/storagekit/adapters/express";
 
-const upload = multer({ storage: createMulterStorage(storage, { directory: 'uploads' }) });
-app.post('/upload', upload.single('avatar'), (req, res) => {
+const upload = multer({ storage: createMulterStorage(storage, { directory: "uploads" }) });
+app.post("/upload", upload.single("avatar"), (req, res) => {
   res.json({ key: req.file!.key, etag: req.file!.etag, name: req.file!.originalname });
 });
 
 // Fastify (@fastify/multipart), Hono / Next.js / Bun / Deno (web File),
 // formidable — see docs/uploads.md for each recipe.
-import { saveFastifyFile } from '@mohamedhabibwork/storagekit/adapters/fastify';
-import { saveWebFile } from '@mohamedhabibwork/storagekit/uploads';
+import { saveFastifyFile } from "@mohamedhabibwork/storagekit/adapters/fastify";
+import { saveWebFile } from "@mohamedhabibwork/storagekit/uploads";
 ```
+
+### Or describe the upload as an intent
+
+`UploadIntent` is a plain object — where the bytes come from and how to store
+them — that you can build anywhere (HTTP handler, queue consumer, CLI) and run
+against any storage. Web `File`/`Blob`, middleware-shaped files and bare bytes
+all work as the source.
+
+```ts
+import { defineUploadIntent, saveUploadIntent } from "@mohamedhabibwork/storagekit/uploads";
+
+const intent = defineUploadIntent({
+  source: file, // web File | middleware file | Buffer | stream
+  directory: "uploads",
+  metadata: { tenantId: "tenant-1" },
+});
+const saved = await saveUploadIntent(storage, intent); // = saveUpload under the hood
+```
+
+See [docs/uploads.md](docs/uploads.md#upload-intents) for the full contract.
 
 `saveUpload()` is the universal intake: give it `{ body, originalName,
 mimeType }` from any middleware and it resolves a traversal-safe key, derives
@@ -271,12 +294,12 @@ contentType + metadata and streams the body to any driver.
 
 ```ts
 // public URL — never performs network requests
-await storage.getUrl('images/logo.png');
+await storage.getUrl("images/logo.png");
 
 // signed URLs — read (default) / write / delete
-await storage.getSignedUrl('documents/private.pdf', { expiresIn: 3600 });
-await storage.getSignedUrl('upload-target.bin', {
-  action: 'write',
+await storage.getSignedUrl("documents/private.pdf", { expiresIn: 3600 });
+await storage.getSignedUrl("upload-target.bin", {
+  action: "write",
   expiresIn: 900,
   native: { ResponseContentDisposition: 'attachment; filename="invoice.pdf"' }, // S3
 });
@@ -309,30 +332,35 @@ const info = await storage.nativeRequest((c) => c.someAdvancedSdkCall());
 ## Multiple disks
 
 ```ts
-import { createStorageManager } from 'storagekit';
+import { createStorageManager } from "storagekit";
 
 const disks = createStorageManager({
-  default: 'uploads',
+  default: "uploads",
   disks: {
-    uploads: { type: 's3', bucket: 'uploads' },
-    backup: { type: 'azure', container: 'backup', accountUrl: 'https://acct.blob.core.windows.net' },
-    temp: { type: 'local', root: './storage/temp' },
+    uploads: { type: "s3", bucket: "uploads" },
+    backup: {
+      type: "azure",
+      container: "backup",
+      accountUrl: "https://acct.blob.core.windows.net",
+    },
+    temp: { type: "local", root: "./storage/temp" },
   },
 });
 
-await disks.disk('uploads').upload('a.txt', '…');   // Storage<'s3'>
-await disks.disk('backup').upload('a.txt', '…');    // Storage<'azure'>
-await disks.disk('temp').delete('a.txt');           // Storage<'local'>
+await disks.disk("uploads").upload("a.txt", "…"); // Storage<'s3'>
+await disks.disk("backup").upload("a.txt", "…"); // Storage<'azure'>
+await disks.disk("temp").delete("a.txt");
+await disks.warmup(); // create every configured disk up front // Storage<'local'>
 ```
 
 ## Cross-storage copy
 
 ```ts
-import { copyBetween } from 'storagekit';
+import { copyBetween } from "storagekit";
 
-await copyBetween(sourceStorage, 'docs/file.pdf', destinationStorage, 'archive/file.pdf', {
+await copyBetween(sourceStorage, "docs/file.pdf", destinationStorage, "archive/file.pdf", {
   concurrency: 4,
-  onProgress: (bytes, total) => console.log(`${bytes}/${total ?? '?'}`),
+  onProgress: (bytes, total) => console.log(`${bytes}/${total ?? "?"}`),
 });
 ```
 
@@ -352,7 +380,7 @@ import {
   StorageQuotaError,
   StorageUnsupportedOperationError,
   StorageInvalidPathError,
-} from 'storagekit';
+} from "storagekit";
 
 try {
   await storage.download(path);
@@ -360,11 +388,11 @@ try {
   if (error instanceof StorageNotFoundError) {
     // handle missing object
   }
-  error.provider;   // 's3' | 'local' | …
-  error.operation;  // 'download'
+  error.provider; // 's3' | 'local' | …
+  error.operation; // 'download'
   error.path;
-  error.code;       // provider-native code when available
-  error.cause;      // the original SDK error
+  error.code; // provider-native code when available
+  error.cause; // the original SDK error
 }
 ```
 
@@ -375,12 +403,12 @@ error stays on `cause`. Deleting missing objects is idempotent everywhere.
 
 ```ts
 const storage = await createStorage({
-  type: 's3',
-  bucket: 'application',
-  prefix: 'production/',
+  type: "s3",
+  bucket: "application",
+  prefix: "production/",
 });
 
-await storage.upload('users/avatar.jpg', file);
+await storage.upload("users/avatar.jpg", file);
 // stored as production/users/avatar.jpg
 ```
 
@@ -430,34 +458,59 @@ import {
   registerStorageDriver,
   defineDriver,
   type StorageDriver,
-} from '@mohamedhabibwork/storagekit';
+} from "@mohamedhabibwork/storagekit";
 
 const driver = defineDriver({
-  type: 'memory',
-  async upload(path, body, options) { /* … */ return { path, provider: 'memory' }; },
-  async download(path) { /* → { stream, buffer(), text(), json() } */ },
+  type: "memory",
+  async upload(path, body, options) {
+    /* … */ return { path, provider: "memory" };
+  },
+  async download(path) {
+    /* → { stream, buffer(), text(), json() } */
+  },
   async delete(path) {},
-  async deleteMany(paths, options) { /* → { deleted, failed } */ },
-  async exists(path) { return false; },
-  async stat(path) { /* → FileStat */ },
-  async list(options) { /* → { files, directories, cursor, hasMore } */ },
+  async deleteMany(paths, options) {
+    /* → { deleted, failed } */
+  },
+  async exists(path) {
+    return false;
+  },
+  async stat(path) {
+    /* → FileStat */
+  },
+  async list(options) {
+    /* → { files, directories, cursor, hasMore } */
+  },
   async copy(source, destination, options) {},
   async move(source, destination, options) {},
-  async getUrl(path) { return ''; },
-  async getSignedUrl(path, options) { throw new Error('unsupported'); },
-  native() { return store; },
-  nativeRequest(fn) { return fn(store); },
+  async getUrl(path) {
+    return "";
+  },
+  async getSignedUrl(path, options) {
+    throw new Error("unsupported");
+  },
+  native() {
+    return store;
+  },
+  nativeRequest(fn) {
+    return fn(store);
+  },
   capabilities() {
     return {
-      signedUrls: false, multipartUpload: true, serverSideCopy: true,
-      versioning: false, metadata: true, directories: false, bulkDelete: false,
+      signedUrls: false,
+      multipartUpload: true,
+      serverSideCopy: true,
+      versioning: false,
+      metadata: true,
+      directories: false,
+      bulkDelete: false,
     };
   },
 });
 
-registerStorageDriver('memory', (config) => driver);
+registerStorageDriver("memory", (config) => driver);
 
-const storage = await createStorage({ type: 'memory', /* custom config fields */ });
+const storage = await createStorage({ type: "memory" /* custom config fields */ });
 ```
 
 Registration is global to the process, cannot collide with builtin types,
@@ -470,10 +523,10 @@ The shared contract suite is published so custom drivers can prove they
 behave like the built-ins:
 
 ```ts
-import { defineDriverContractTests } from '@mohamedhabibwork/storagekit/testing';
+import { defineDriverContractTests } from "@mohamedhabibwork/storagekit/testing";
 
 defineDriverContractTests({
-  name: 'my-driver',
+  name: "my-driver",
   createStorage: () => createMyStorage(config),
   capabilities: { signedUrls: true },
 });
@@ -489,17 +542,17 @@ no I/O. It even passes the same contract suite as the real providers, so
 swapping it in doesn't change what your code may assume:
 
 ```ts
-import { createFakeStorage } from '@mohamedhabibwork/storagekit/testing/fake';
+import { createFakeStorage } from "@mohamedhabibwork/storagekit/testing/fake";
 
 const storage = await createFakeStorage({
-  baseUrl: 'https://cdn.test',                  // powers getUrl() + fake signed URLs
-  signedUrls: true,                             // advertise + serve deterministic fake signed URLs
-  initialFiles: { 'seeded/a.txt': 'seed text' }, // preload the store
-  latencyMs: 25,                                // simulate provider latency
+  baseUrl: "https://cdn.test", // powers getUrl() + fake signed URLs
+  signedUrls: true, // advertise + serve deterministic fake signed URLs
+  initialFiles: { "seeded/a.txt": "seed text" }, // preload the store
+  latencyMs: 25, // simulate provider latency
 });
 
-await storage.upload('uploads/a.txt', 'hello');
-await (await storage.download('uploads/a.txt')).text(); // 'hello'
+await storage.upload("uploads/a.txt", "hello");
+await (await storage.download("uploads/a.txt")).text(); // 'hello'
 ```
 
 Extras for driving test scenarios (on the driver — construct
@@ -517,11 +570,11 @@ node:test, Bun, Deno). To resolve the fake through config-driven code
 paths, register it like a custom driver:
 
 ```ts
-import { registerStorageDriver } from '@mohamedhabibwork/storagekit';
-import { FakeStorageDriver } from '@mohamedhabibwork/storagekit/testing/fake';
+import { registerStorageDriver } from "@mohamedhabibwork/storagekit";
+import { FakeStorageDriver } from "@mohamedhabibwork/storagekit/testing/fake";
 
-registerStorageDriver('fake', (config) => new FakeStorageDriver(config as never));
-const storage = await createStorage({ type: 'fake' });
+registerStorageDriver("fake", (config) => new FakeStorageDriver(config as never));
+const storage = await createStorage({ type: "fake" });
 ```
 
 See [docs/custom-drivers.md](docs/custom-drivers.md#5-fake-driver-for-your-apps-tests) for details.
@@ -564,6 +617,30 @@ opt-in live OCI (`OCI_INTEGRATION_TESTS=true`).
   SDKs (mostly Oracle's SDK tree) and are never installed by consumers of
   this package.
 
+## Use with AI (llms.txt)
+
+This repo ships an `llms.txt` — a curated, LLM-readable map of the API, semantics, and docs, written so coding assistants get it right the first time.
+
+- **Cursor / Claude Code / Copilot**: open [`llms.txt`](https://github.com/mohamedhabibwork/storagekit/blob/main/llms.txt) or paste the raw text into your rules file (`CLAUDE.md`, `.cursorrules`, `AGENTS.md`).
+- **ChatGPT / Custom GPTs / Perplexity**: add the raw URL — https://raw.githubusercontent.com/mohamedhabibwork/storagekit/main/llms.txt
+- **Offline / agents in CI**: `llms.txt`, the README, and every guide in `docs/` ship inside the npm tarball, so agents can read them straight from `node_modules/@mohamedhabibwork/storagekit/`.
+- **Contributing to this repo**: [AGENTS.md](AGENTS.md) documents layout, commands, and conventions for coding agents.
+
 ## License
 
 MIT
+
+## Logging with loggerkit
+
+Managers accept an optional `logger` (any object with `debug/info/warn/error`), so a
+[`@mohamedhabibwork/loggerkit`](https://github.com/mohamedhabibwork/loggerkit) `Logger` plugs in
+directly with no extra dependency:
+
+```ts
+import { createLogger } from "@mohamedhabibwork/loggerkit";
+import { createStorageManager } from "@mohamedhabibwork/storagekit";
+
+const manager = createStorageManager({ ...config, logger: createLogger({ name: "storage" }) });
+```
+
+Provider creation and close events are logged at `debug`; creation failures at `error`.

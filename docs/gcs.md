@@ -8,28 +8,28 @@ GCS driver speaks the GCS REST API exactly the way every other GCS
 client does, including all native GCS options.
 
 ```ts
-import { createGcsStorage } from '@mohamedhabibwork/storagekit/gcs';
+import { createGcsStorage } from "@mohamedhabibwork/storagekit/gcs";
 
 // On Google Cloud (Cloud Run, GKE, GCE, Cloud Functions, …) — picks up
 // Application Default Credentials from the metadata server.
 const storage = await createGcsStorage({
-  type: 'gcs',
-  bucket: 'my-app-uploads',
+  type: "gcs",
+  bucket: "my-app-uploads",
 });
 
-await storage.upload('avatars/1.jpg', fileStream, {
-  contentType: 'image/jpeg',
-  native: { kmsKeyName: 'projects/p/locations/l/keyRings/r/cryptoKeys/k' },
+await storage.upload("avatars/1.jpg", fileStream, {
+  contentType: "image/jpeg",
+  native: { kmsKeyName: "projects/p/locations/l/keyRings/r/cryptoKeys/k" },
 });
 ```
 
 ```ts
 // Off-cloud — service-account JSON file or inline credentials.
 const storage = await createGcsStorage({
-  type: 'gcs',
-  bucket: 'my-app-uploads',
-  projectId: 'my-project',
-  keyFilename: '/etc/secrets/gcs-key.json',
+  type: "gcs",
+  bucket: "my-app-uploads",
+  projectId: "my-project",
+  keyFilename: "/etc/secrets/gcs-key.json",
 });
 ```
 
@@ -93,17 +93,17 @@ credentials. Off-cloud, ship a JSON key and point at it with
 
 ```ts
 interface GcsStorageConfig {
-  type: 'gcs';
-  bucket: string;                            // required
-  projectId?: string;                        // optional — auto from ADC
-  keyFilename?: string;                      // path to SA JSON key
-  credentials?: GcsStorageOptions['credentials'];  // inline creds
-  apiEndpoint?: string;                      // override (emulators)
-  retryOptions?: RetryOptions;               // SDK retry tuning
-  prefix?: string;                           // virtual prefix on every key
-  publicUrlBase?: string;                    // base for getUrl() if CDN-fronted
-  client?: Storage;                          // inject a pre-built client
-  clientOptions?: Partial<StorageOptions>;  // forwarded to new Storage()
+  type: "gcs";
+  bucket: string; // required
+  projectId?: string; // optional — auto from ADC
+  keyFilename?: string; // path to SA JSON key
+  credentials?: GcsStorageOptions["credentials"]; // inline creds
+  apiEndpoint?: string; // override (emulators)
+  retryOptions?: RetryOptions; // SDK retry tuning
+  prefix?: string; // virtual prefix on every key
+  publicUrlBase?: string; // base for getUrl() if CDN-fronted
+  client?: Storage; // inject a pre-built client
+  clientOptions?: Partial<StorageOptions>; // forwarded to new Storage()
 }
 ```
 
@@ -116,29 +116,29 @@ performs a network call).
 
 ```ts
 // upload — Buffer, string, Uint8Array, ArrayBuffer, Blob or Node stream
-await storage.upload('avatars/1.jpg', buffer, {
-  contentType: 'image/jpeg',
-  cacheControl: 'public,max-age=31536000',
-  metadata: { userId: '100' },
+await storage.upload("avatars/1.jpg", buffer, {
+  contentType: "image/jpeg",
+  cacheControl: "public,max-age=31536000",
+  metadata: { userId: "100" },
 });
 
 // download — stream-first
-const dl = await storage.download('reports/q1.pdf');
-dl.stream.pipe(response);                 // Node Readable
+const dl = await storage.download("reports/q1.pdf");
+dl.stream.pipe(response); // Node Readable
 const text = await dl.text();
 
 // metadata, existence, delete (idempotent — deleting missing is a no-op)
-await storage.exists('a.txt');
-const stat = await storage.stat('a.txt'); // { size, contentType, etag, ... }
-await storage.delete('a.txt');
+await storage.exists("a.txt");
+const stat = await storage.stat("a.txt"); // { size, contentType, etag, ... }
+await storage.delete("a.txt");
 
 // list / iterate
-const page = await storage.list({ prefix: 'avatars/', limit: 100 });
-for await (const f of storage.iterate('avatars/')) console.log(f.path);
+const page = await storage.list({ prefix: "avatars/", limit: 100 });
+for await (const f of storage.iterate("avatars/")) console.log(f.path);
 
 // copy / move (server-side, atomic on a single bucket)
-await storage.copy('tmp/a.jpg', 'images/a.jpg');
-await storage.move('tmp/b.pdf', 'docs/b.pdf');
+await storage.copy("tmp/a.jpg", "images/a.jpg");
+await storage.move("tmp/b.pdf", "docs/b.pdf");
 ```
 
 GCS resumable uploads are used for every body type — the SDK streams
@@ -149,17 +149,17 @@ from the top.
 
 ```ts
 // V4 GET — preferred for new code
-const read = await storage.getSignedUrl('private/report.pdf', { expiresIn: 3600 });
+const read = await storage.getSignedUrl("private/report.pdf", { expiresIn: 3600 });
 
 // V4 PUT — direct browser upload to a single object
-const put = await storage.getSignedUrl('upload-target.bin', {
-  action: 'write',
+const put = await storage.getSignedUrl("upload-target.bin", {
+  action: "write",
   expiresIn: 900,
-  native: { contentType: 'image/jpeg' },
+  native: { contentType: "image/jpeg" },
 });
 
 // V4 DELETE
-const del = await storage.getSignedUrl('to-remove.bin', { action: 'delete' });
+const del = await storage.getSignedUrl("to-remove.bin", { action: "delete" });
 ```
 
 `expiresIn` is in seconds, capped at 7 days. The SDK signs with the
@@ -173,13 +173,13 @@ Every `Storage<'gcs'>` method that touches the server accepts the GCS
 SDK's native options:
 
 ```ts
-await storage.upload('a.bin', body, {
-  contentType: 'application/octet-stream',
-  metadata: { env: 'prod' },
+await storage.upload("a.bin", body, {
+  contentType: "application/octet-stream",
+  metadata: { env: "prod" },
   native: {
-    kmsKeyName: 'projects/p/locations/l/keyRings/r/cryptoKeys/k',
-    predefinedAcl: 'private',         // bucket-level ACL shortcut
-    chunkSize: 8 * 1024 * 1024,        // resumable upload chunk size
+    kmsKeyName: "projects/p/locations/l/keyRings/r/cryptoKeys/k",
+    predefinedAcl: "private", // bucket-level ACL shortcut
+    chunkSize: 8 * 1024 * 1024, // resumable upload chunk size
     // any other CreateWriteStreamOptions field
   },
 });
@@ -195,9 +195,12 @@ the same field.
 const client = storage.native();
 
 // any SDK call the package does not wrap
-const { Bucket } = await import('@google-cloud/storage');
+const { Bucket } = await import("@google-cloud/storage");
 await storage.nativeRequest(async (s) => {
-  await s.bucket('other-bucket').file('x.txt').setMetadata({ metadata: { foo: 'bar' } });
+  await s
+    .bucket("other-bucket")
+    .file("x.txt")
+    .setMetadata({ metadata: { foo: "bar" } });
 });
 ```
 
@@ -207,14 +210,20 @@ GCS storage composes with the framework upload adapters unchanged —
 the unified surface is identical:
 
 ```ts
-import multer from 'multer';
-import { createMulterStorage } from '@mohamedhabibwork/storagekit/adapters/express';
+import multer from "multer";
+import { createMulterStorage } from "@mohamedhabibwork/storagekit/adapters/express";
 
-app.post('/upload', multer({
-  storage: createMulterStorage(storage, { directory: 'avatars' }),
-}).single('avatar'), (req, res) => res.json({
-  key: req.file!.key, etag: req.file!.etag,
-}));
+app.post(
+  "/upload",
+  multer({
+    storage: createMulterStorage(storage, { directory: "avatars" }),
+  }).single("avatar"),
+  (req, res) =>
+    res.json({
+      key: req.file!.key,
+      etag: req.file!.etag,
+    }),
+);
 ```
 
 See [`docs/uploads.md`](uploads.md) for every recipe (Express, NestJS,
@@ -240,11 +249,11 @@ Point storagekit at it (the SDK accepts `apiEndpoint` + an empty
 
 ```ts
 const storage = await createGcsStorage({
-  type: 'gcs',
-  bucket: 'test-bucket',
-  projectId: 'local-dev',
-  apiEndpoint: 'http://localhost:9023',
-  credentials: { client_email: 'fake@example.com', private_key: 'fake' },
+  type: "gcs",
+  bucket: "test-bucket",
+  projectId: "local-dev",
+  apiEndpoint: "http://localhost:9023",
+  credentials: { client_email: "fake@example.com", private_key: "fake" },
 });
 ```
 

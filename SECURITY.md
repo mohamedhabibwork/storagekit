@@ -20,11 +20,11 @@ Only the latest released version on the `main` branch receives security
 fixes. Older lines may receive patches on a best-effort basis if the
 maintainer has the bandwidth.
 
-| Version line | Supported |
-| --- | --- |
-| `0.3.x` (latest) | ✅ |
-| `0.2.x` | ⚠️ Critical fixes only, until 6 months after `0.3.0` release |
-| `< 0.2` | ❌ No longer supported |
+| Version line     | Supported                                                    |
+| ---------------- | ------------------------------------------------------------ |
+| `0.3.x` (latest) | ✅                                                           |
+| `0.2.x`          | ⚠️ Critical fixes only, until 6 months after `0.3.0` release |
+| `< 0.2`          | ❌ No longer supported                                       |
 
 The published version is `npm view @mohamedhabibwork/storagekit version` or
 <https://github.com/mohamedhabibwork/storagekit/releases>.
@@ -52,11 +52,11 @@ Please include:
 
 We follow a coordinated-disclosure-style process:
 
-| Stage | Target |
-| --- | --- |
-| Initial acknowledgment | within **3 business days** |
-| Triage + severity rating (CVSS-style) | within **7 business days** |
-| Patch released for supported versions | within **30 days** of triage |
+| Stage                                      | Target                        |
+| ------------------------------------------ | ----------------------------- |
+| Initial acknowledgment                     | within **3 business days**    |
+| Triage + severity rating (CVSS-style)      | within **7 business days**    |
+| Patch released for supported versions      | within **30 days** of triage  |
 | Public advisory (GitHub Security Advisory) | at the same time as the patch |
 
 If we cannot meet these targets for a specific issue we will tell you why

@@ -11,16 +11,16 @@ file. They must be turned on once via the web UI (or `gh api`).
 
 Open: `https://github.com/mohamedhabibwork/storagekit/settings/security_analysis`
 
-| Feature | Recommended setting |
-| --- | --- |
-| **Dependency graph** | Enabled (default). |
-| **Dependabot alerts** | **Enabled** — required for the security workflow below to open PRs against new advisories. |
-| **Dependabot security updates** | **Enabled** — Dependabot will open PRs that close any open GHSAs affecting this repo. |
-| **Dependabot version updates** | Enabled — already wired via `.github/dependabot.yml`. |
-| **Code scanning** | **Enabled** — required so the alerts from `.github/workflows/codeql.yml` actually surface under the Security tab. Default setup is fine; the workflow here uploads SARIF to the default database. |
-| **Secret scanning** | **Enabled** — GitHub will flag accidentally committed tokens / cloud keys. |
-| **Push protection** | **Enabled** — blocks pushes that contain a known secret pattern. Strongly recommended for any published library. |
-| **Private vulnerability reporting** | **Enabled** — this is what powers the "Report a vulnerability" button linked from `SECURITY.md`. |
+| Feature                             | Recommended setting                                                                                                                                                                               |
+| ----------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Dependency graph**                | Enabled (default).                                                                                                                                                                                |
+| **Dependabot alerts**               | **Enabled** — required for the security workflow below to open PRs against new advisories.                                                                                                        |
+| **Dependabot security updates**     | **Enabled** — Dependabot will open PRs that close any open GHSAs affecting this repo.                                                                                                             |
+| **Dependabot version updates**      | Enabled — already wired via `.github/dependabot.yml`.                                                                                                                                             |
+| **Code scanning**                   | **Enabled** — required so the alerts from `.github/workflows/codeql.yml` actually surface under the Security tab. Default setup is fine; the workflow here uploads SARIF to the default database. |
+| **Secret scanning**                 | **Enabled** — GitHub will flag accidentally committed tokens / cloud keys.                                                                                                                        |
+| **Push protection**                 | **Enabled** — blocks pushes that contain a known secret pattern. Strongly recommended for any published library.                                                                                  |
+| **Private vulnerability reporting** | **Enabled** — this is what powers the "Report a vulnerability" button linked from `SECURITY.md`.                                                                                                  |
 
 CLI equivalents (run from a checkout with admin scope):
 

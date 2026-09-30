@@ -8,20 +8,20 @@ Deno 2.
 
 ## Config
 
-| Option | Type | Default | Description |
-| --- | --- | --- | --- |
-| `root` | `string` | required | Root directory; every key resolves inside it |
-| `baseUrl` | `string` | — | Public base URL (CDN/static route) powering `getUrl()` |
-| `prefix` | `string` | — | Virtual prefix stored under `root`, identical behavior to object stores |
-| `permissions` | `{ file?, directory? }` | — | Octal modes for created files/directories (e.g. `0o644`) |
-| `createDirectories` | `boolean` | `true` | Create missing parent directories on upload |
-| `followSymlinks` | `boolean` | `false` | Follow symlinks in listings/stat by default |
+| Option              | Type                    | Default  | Description                                                             |
+| ------------------- | ----------------------- | -------- | ----------------------------------------------------------------------- |
+| `root`              | `string`                | required | Root directory; every key resolves inside it                            |
+| `baseUrl`           | `string`                | —        | Public base URL (CDN/static route) powering `getUrl()`                  |
+| `prefix`            | `string`                | —        | Virtual prefix stored under `root`, identical behavior to object stores |
+| `permissions`       | `{ file?, directory? }` | —        | Octal modes for created files/directories (e.g. `0o644`)                |
+| `createDirectories` | `boolean`               | `true`   | Create missing parent directories on upload                             |
+| `followSymlinks`    | `boolean`               | `false`  | Follow symlinks in listings/stat by default                             |
 
 ```ts
 const storage = await createStorage({
-  type: 'local',
-  root: './storage/app',
-  baseUrl: 'https://cdn.example.com/app',
+  type: "local",
+  root: "./storage/app",
+  baseUrl: "https://cdn.example.com/app",
   permissions: { file: 0o644, directory: 0o755 },
 });
 ```
@@ -35,16 +35,16 @@ and **refuses anything that would escape `root`** with
 ## Native options
 
 ```ts
-await storage.upload('secrets/key.pem', pem, {
-  native: { mode: 0o600 },                    // fs write mode
+await storage.upload("secrets/key.pem", pem, {
+  native: { mode: 0o600 }, // fs write mode
 });
-await storage.download('logs/app.log', {
-  native: { encoding: 'utf8' },               // fs read encoding
+await storage.download("logs/app.log", {
+  native: { encoding: "utf8" }, // fs read encoding
 });
-await storage.stat('link.bin', { native: { followSymlinks: true } });
-await storage.list({ prefix: 'x/', native: { followSymlinks: true } });
-await storage.delete('a/b/c.txt', { native: { cleanEmptyParents: true } });
-await storage.getUrl('f.bin', { native: { fileUrl: true } }); // file:// URL
+await storage.stat("link.bin", { native: { followSymlinks: true } });
+await storage.list({ prefix: "x/", native: { followSymlinks: true } });
+await storage.delete("a/b/c.txt", { native: { cleanEmptyParents: true } });
+await storage.getUrl("f.bin", { native: { fileUrl: true } }); // file:// URL
 ```
 
 ## Behavior notes
@@ -70,12 +70,12 @@ await storage.getUrl('f.bin', { native: { fileUrl: true } }); // file:// URL
 
 ```ts
 // upload from a stream (no buffering)
-await storage.upload('videos/movie.mp4', fs.createReadStream('movie.mp4'));
+await storage.upload("videos/movie.mp4", fs.createReadStream("movie.mp4"));
 
 // conflict detection
-await storage.upload('config.json', 'v1');
-await storage.upload('config.json', 'v2', { overwrite: false }); // StorageConflictError
+await storage.upload("config.json", "v1");
+await storage.upload("config.json", "v2", { overwrite: false }); // StorageConflictError
 
 // range download
-const dl = await storage.download('videos/movie.mp4', { range: { offset: 0, length: 1024 } });
+const dl = await storage.download("videos/movie.mp4", { range: { offset: 0, length: 1024 } });
 ```

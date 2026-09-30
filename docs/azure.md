@@ -11,32 +11,32 @@ npm install @azure/storage-blob
 
 ## Config
 
-| Option | Type | Description |
-| --- | --- | --- |
-| `container` | `string` | Required. Container name (must be valid: 3–63 chars, lowercase/digits/hyphens) |
-| `connectionString` | `string` | Auth route 1 — also enables SAS generation |
-| `accountUrl` + `credential` | `string` + `StorageSharedKeyCredential \| TokenCredential` | Auth route 2 (`@azure/identity` `DefaultAzureCredential` works here) |
-| `serviceClient` | `BlobServiceClient` | Auth route 3 — inject an existing service client |
-| `containerClient` | `ContainerClient` | Auth route 4 — inject an existing container client |
-| `prefix` | `string` | Virtual prefix for every key |
-| `publicUrlBase` | `string` | CDN base URL used by `getUrl()` |
+| Option                      | Type                                                       | Description                                                                    |
+| --------------------------- | ---------------------------------------------------------- | ------------------------------------------------------------------------------ |
+| `container`                 | `string`                                                   | Required. Container name (must be valid: 3–63 chars, lowercase/digits/hyphens) |
+| `connectionString`          | `string`                                                   | Auth route 1 — also enables SAS generation                                     |
+| `accountUrl` + `credential` | `string` + `StorageSharedKeyCredential \| TokenCredential` | Auth route 2 (`@azure/identity` `DefaultAzureCredential` works here)           |
+| `serviceClient`             | `BlobServiceClient`                                        | Auth route 3 — inject an existing service client                               |
+| `containerClient`           | `ContainerClient`                                          | Auth route 4 — inject an existing container client                             |
+| `prefix`                    | `string`                                                   | Virtual prefix for every key                                                   |
+| `publicUrlBase`             | `string`                                                   | CDN base URL used by `getUrl()`                                                |
 
 At least one auth route is required; the factory validates this.
 
 ```ts
 // connection string (Azurite/local dev or account keys)
 const storage = await createStorage({
-  type: 'azure',
-  container: 'uploads',
+  type: "azure",
+  container: "uploads",
   connectionString: process.env.AZURE_STORAGE_CONNECTION_STRING,
 });
 
 // managed identity / Entra ID
-import { DefaultAzureCredential } from '@azure/identity';
+import { DefaultAzureCredential } from "@azure/identity";
 const prod = await createStorage({
-  type: 'azure',
-  container: 'uploads',
-  accountUrl: 'https://myaccount.blob.core.windows.net',
+  type: "azure",
+  container: "uploads",
+  accountUrl: "https://myaccount.blob.core.windows.net",
   credential: new DefaultAzureCredential(),
 });
 ```
@@ -47,14 +47,14 @@ Streams go through `uploadStream` (block-blob staging — never buffered);
 buffers/strings/`Blob`s go through `uploadData`.
 
 ```ts
-await storage.upload('videos/movie.mp4', stream, {
-  contentType: 'video/mp4',
+await storage.upload("videos/movie.mp4", stream, {
+  contentType: "video/mp4",
   multipart: { partSize: 8 * 1024 * 1024, concurrency: 5 }, // block size / parallelism
   native: {
-    tier: 'Cool',                                   // access tier: Hot | Cool | Cold | Archive
-    tags: { project: 'media' },                     // blob index tags
-    conditions: { ifNoneMatch: '*' },               // e-tag conditions
-    blobHTTPHeaders: { blobContentEncoding: 'gzip' },
+    tier: "Cool", // access tier: Hot | Cool | Cold | Archive
+    tags: { project: "media" }, // blob index tags
+    conditions: { ifNoneMatch: "*" }, // e-tag conditions
+    blobHTTPHeaders: { blobContentEncoding: "gzip" },
   },
 });
 ```
@@ -66,13 +66,13 @@ headers land in `blobHTTPHeaders` automatically.
 ## Download / stat / delete
 
 ```ts
-const dl = await storage.download('docs/report.pdf', {
-  versionId: '2026-01-01T…',                          // → blobClient.withVersion()
-  range: { offset: 0, length: 2048 },                 // → download(offset, count)
+const dl = await storage.download("docs/report.pdf", {
+  versionId: "2026-01-01T…", // → blobClient.withVersion()
+  range: { offset: 0, length: 2048 }, // → download(offset, count)
   native: { conditions: { tagConditions: "project = 'media'" } },
 });
-await storage.stat('docs/report.pdf', { versionId: '…' });
-await storage.delete('docs/report.pdf', { versionId: '…' }); // idempotent (404 → no-op)
+await storage.stat("docs/report.pdf", { versionId: "…" });
+await storage.delete("docs/report.pdf", { versionId: "…" }); // idempotent (404 → no-op)
 ```
 
 ## List
@@ -82,8 +82,11 @@ One level by default via `listBlobsByHierarchy('/')` (delimiters become
 `listBlobsFlat`. Pagination uses Azure continuation tokens.
 
 ```ts
-await storage.list({ prefix: 'users/100/', limit: 250,
-  native: { includeDeleted: false, includeTags: true } });
+await storage.list({
+  prefix: "users/100/",
+  limit: 250,
+  native: { includeDeleted: false, includeTags: true },
+});
 ```
 
 ## Copy / move
@@ -95,9 +98,9 @@ sources need a SAS in the source URL — construct it yourself and pass it via
 `nativeRequest()`/`native` options.
 
 ```ts
-await storage.copy('temp/a.jpg', 'images/a.jpg', {
-  contentType: 'image/jpeg',
-  native: { tier: 'Cool', conditions: { ifModifiedSince: new Date() } },
+await storage.copy("temp/a.jpg", "images/a.jpg", {
+  contentType: "image/jpeg",
+  native: { tier: "Cool", conditions: { ifModifiedSince: new Date() } },
 });
 ```
 
@@ -109,12 +112,17 @@ delegation keys — not supported directly; use `nativeRequest()` with
 `getUserDelegationKey` + `generateBlobSASQueryParameters`.
 
 ```ts
-await storage.getSignedUrl('private.pdf', { expiresIn: 3600,
-  native: { contentType: 'application/pdf',
-            contentDisposition: 'attachment; filename="report.pdf"',
-            protocol: 'https', ipRange: { start: { ipAddress: '203.0.113.0' } } } });
-await storage.getSignedUrl('upload.bin', { action: 'write', expiresIn: 900 }); // permissions 'cw'
-await storage.getSignedUrl('old.bin',   { action: 'delete', expiresIn: 300 }); // permissions 'd'
+await storage.getSignedUrl("private.pdf", {
+  expiresIn: 3600,
+  native: {
+    contentType: "application/pdf",
+    contentDisposition: 'attachment; filename="report.pdf"',
+    protocol: "https",
+    ipRange: { start: { ipAddress: "203.0.113.0" } },
+  },
+});
+await storage.getSignedUrl("upload.bin", { action: "write", expiresIn: 900 }); // permissions 'cw'
+await storage.getSignedUrl("old.bin", { action: "delete", expiresIn: 300 }); // permissions 'd'
 ```
 
 Actions map to SAS permissions: `read` → `r`, `write` → `cw`, `delete` →

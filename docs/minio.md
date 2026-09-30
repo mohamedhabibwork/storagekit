@@ -13,24 +13,24 @@ npm install minio
 
 ## Config
 
-| Option | Type | Description |
-| --- | --- | --- |
-| `bucket` | `string` | Required. Bucket name |
-| `endPoint` | `string` | Required. Hostname (no scheme), e.g. `localhost` |
-| `port` | `number` | Defaults to 443 (TLS) / 80 (plain) |
-| `useSSL` | `boolean` | Default `true` |
-| `accessKey` / `secretKey` | `string` | Credentials (omit to rely on server policy/anonymous) |
-| `region` | `string` | Optional region |
-| `prefix` | `string` | Virtual prefix for every key |
-| `publicUrlBase` | `string` | CDN base URL used by `getUrl()` |
-| `clientOptions` | `Partial<minio.ClientOptions>` | Forwarded to `new Client(...)` (`sessionToken`, `transportAgent`, …) |
-| `client` | `minio.Client` | Inject an existing client |
+| Option                    | Type                           | Description                                                          |
+| ------------------------- | ------------------------------ | -------------------------------------------------------------------- |
+| `bucket`                  | `string`                       | Required. Bucket name                                                |
+| `endPoint`                | `string`                       | Required. Hostname (no scheme), e.g. `localhost`                     |
+| `port`                    | `number`                       | Defaults to 443 (TLS) / 80 (plain)                                   |
+| `useSSL`                  | `boolean`                      | Default `true`                                                       |
+| `accessKey` / `secretKey` | `string`                       | Credentials (omit to rely on server policy/anonymous)                |
+| `region`                  | `string`                       | Optional region                                                      |
+| `prefix`                  | `string`                       | Virtual prefix for every key                                         |
+| `publicUrlBase`           | `string`                       | CDN base URL used by `getUrl()`                                      |
+| `clientOptions`           | `Partial<minio.ClientOptions>` | Forwarded to `new Client(...)` (`sessionToken`, `transportAgent`, …) |
+| `client`                  | `minio.Client`                 | Inject an existing client                                            |
 
 ```ts
 const storage = await createStorage({
-  type: 'minio',
-  bucket: 'uploads',
-  endPoint: 'localhost',
+  type: "minio",
+  bucket: "uploads",
+  endPoint: "localhost",
   port: 9000,
   useSSL: false,
   accessKey: process.env.MINIO_ACCESS_KEY,
@@ -45,10 +45,10 @@ streams upload with an unknown length, which makes the MinIO client use its
 **native multipart machinery automatically**.
 
 ```ts
-await storage.upload('reports/q1.pdf', buffer, {
-  contentType: 'application/pdf',
-  metadata: { quarter: 'q1' },          // → x-amz-meta quarter
-  native: { metaData: { 'X-Amz-Meta-App': 'finance' } }, // extra bag, merged last
+await storage.upload("reports/q1.pdf", buffer, {
+  contentType: "application/pdf",
+  metadata: { quarter: "q1" }, // → x-amz-meta quarter
+  native: { metaData: { "X-Amz-Meta-App": "finance" } }, // extra bag, merged last
 });
 ```
 
@@ -58,13 +58,13 @@ await storage.upload('reports/q1.pdf', buffer, {
 `removeObject`/`removeObjects`. Versioned buckets:
 
 ```ts
-await storage.download('docs/a.pdf', { versionId: 'uuid' });
-await storage.download('docs/a.pdf', {
+await storage.download("docs/a.pdf", { versionId: "uuid" });
+await storage.download("docs/a.pdf", {
   range: { offset: 100, length: 50 },
-  native: { sseCustomerAlgorithm: 'AES256', sseCustomerKey: '…', sseCustomerKeyMD5: '…' },
+  native: { sseCustomerAlgorithm: "AES256", sseCustomerKey: "…", sseCustomerKeyMD5: "…" },
 });
-await storage.stat('docs/a.pdf', { versionId: 'uuid' });
-await storage.delete('docs/a.pdf', { versionId: 'uuid' });
+await storage.stat("docs/a.pdf", { versionId: "uuid" });
+await storage.delete("docs/a.pdf", { versionId: "uuid" });
 ```
 
 Normalized `stat` picks `content-type` out of the metadata bag
@@ -81,12 +81,12 @@ continuation tokens (1000-key pages) instead of client-side scanning.
 Server-side `copyObject` with native preconditions:
 
 ```ts
-await storage.copy('a.bin', 'b.bin', {
+await storage.copy("a.bin", "b.bin", {
   native: {
-    matchETag: '"d41d8…"',       // copy only if source ETag matches
-    matchETagExcept: '…',
-    modifiedSince: new Date('2026-01-01'),
-    unmodifiedSince: new Date('2026-06-01'),
+    matchETag: '"d41d8…"', // copy only if source ETag matches
+    matchETagExcept: "…",
+    modifiedSince: new Date("2026-01-01"),
+    unmodifiedSince: new Date("2026-06-01"),
   },
 });
 ```
@@ -105,14 +105,18 @@ package errors.
 ## URLs
 
 ```ts
-await storage.getUrl('images/logo.png');
+await storage.getUrl("images/logo.png");
 // https://<endPoint>[:port]/<bucket>/<key>   (or publicUrlBase)
 
-await storage.getSignedUrl('private.pdf', { expiresIn: 3600,
-  native: { responseHeaders: { 'response-content-disposition': 'attachment; filename="a.pdf"' },
-            requestDate: new Date() } });
-await storage.getSignedUrl('upload.bin', { action: 'write', expiresIn: 900 });
-await storage.getSignedUrl('old.bin',   { action: 'delete', expiresIn: 300 });
+await storage.getSignedUrl("private.pdf", {
+  expiresIn: 3600,
+  native: {
+    responseHeaders: { "response-content-disposition": 'attachment; filename="a.pdf"' },
+    requestDate: new Date(),
+  },
+});
+await storage.getSignedUrl("upload.bin", { action: "write", expiresIn: 900 });
+await storage.getSignedUrl("old.bin", { action: "delete", expiresIn: 300 });
 ```
 
 ## Capabilities

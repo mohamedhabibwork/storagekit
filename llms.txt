@@ -112,6 +112,14 @@ const saved = await saveUpload(storage, {
 // disable with `metadata: false`). `key` accepts a string or async resolver —
 // both traversal-checked. `native`, `signal`, `overwrite`, `contentType` pass through.
 
+// Upload intents — a declarative object you can build anywhere and run later
+// (HTTP handler, queue consumer, CLI); re-runnable value, driver-agnostic.
+import { defineUploadIntent, saveUploadIntent } from '@mohamedhabibwork/storagekit/uploads';
+const intent = defineUploadIntent({ source: file, directory: 'uploads', metadata: { tenantId: 't1' } });
+const saved2 = await saveUploadIntent(storage, intent);
+// source: web File/Blob (name/type/size auto) | { body, fieldname?, originalName?, mimeType?, size? } | bare bytes.
+// Fields: directory?, key? (string | resolver), contentType?, metadata? (| false), overwrite?, native?, signal?.
+
 // Express / NestJS / koa-multer — multer storage engine ('storagekit/adapters/express'):
 import multer from 'multer';
 import { createMulterStorage } from '@mohamedhabibwork/storagekit/adapters/express';
@@ -264,6 +272,7 @@ const disks = createStorageManager({ default: 'uploads', disks: {
 }});
 await disks.disk('uploads').upload('a.txt', 'x');   // typed per disk config
 await disks.defaultDisk();
+await disks.warmup();               // create every configured disk up front
 ```
 
 ## Hooks & events
@@ -387,4 +396,8 @@ const storage = await createFakeStorage({ baseUrl, signedUrls: true, initialFile
 - Per-driver guides: ./docs/local.md, ./docs/s3.md, ./docs/minio.md,
   ./docs/azure.md, ./docs/oracle.md, ./docs/rustfs.md, ./docs/gcs.md
   (shipped in the tarball)
+- Framework upload recipes: ./docs/uploads.md (multer/Express/NestJS/Koa,
+  Fastify, Hono, Elysia, Next.js, Remix, Nuxt, formidable, busboy)
+- End-to-end examples: ./docs/examples.md
+- Architecture & layer map: ./docs/architecture.md
 - Custom driver guide: ./docs/custom-drivers.md

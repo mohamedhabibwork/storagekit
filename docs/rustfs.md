@@ -7,19 +7,19 @@ what storagekit's RustFS driver does. The driver adds RustFS-specific
 defaults on top of the S3 surface so you can point at your server and go.
 
 ```ts
-import { createRustfsStorage } from '@mohamedhabibwork/storagekit/rustfs';
+import { createRustfsStorage } from "@mohamedhabibwork/storagekit/rustfs";
 
 const storage = await createRustfsStorage({
-  type: 'rustfs',
-  bucket: 'uploads',
-  endpoint: 'http://localhost:9000', // RustFS S3 API
-  accessKeyId: 'rustfsadmin',        // dev-only default; set RUSTFS_ACCESS_KEY in prod
-  secretAccessKey: 'rustfsadmin',
+  type: "rustfs",
+  bucket: "uploads",
+  endpoint: "http://localhost:9000", // RustFS S3 API
+  accessKeyId: "rustfsadmin", // dev-only default; set RUSTFS_ACCESS_KEY in prod
+  secretAccessKey: "rustfsadmin",
 });
 
-await storage.upload('avatars/1.jpg', fileStream, {
-  contentType: 'image/jpeg',
-  native: { StorageClass: 'STANDARD_IA' }, // AWS-shaped options, typed per storage type
+await storage.upload("avatars/1.jpg", fileStream, {
+  contentType: "image/jpeg",
+  native: { StorageClass: "STANDARD_IA" }, // AWS-shaped options, typed per storage type
 });
 ```
 
@@ -35,24 +35,24 @@ RustFS is wire-compatible with S3 but it is its own server: distinct
 install, default credentials, default region, default path-style setting.
 The driver bakes those defaults in (you can still override any of them):
 
-| Setting | RustFS default | storagekit default if you omit it |
-| --- | --- | --- |
-| `region` | `us-east-1` | `us-east-1` |
-| `forcePathStyle` | `true` | `true` |
-| `endpoint` | (required) | n/a — you must supply it |
+| Setting          | RustFS default | storagekit default if you omit it |
+| ---------------- | -------------- | --------------------------------- |
+| `region`         | `us-east-1`    | `us-east-1`                       |
+| `forcePathStyle` | `true`         | `true`                            |
+| `endpoint`       | (required)     | n/a — you must supply it          |
 
 Without this driver you would still be able to talk to RustFS through the
 S3 entrypoint by setting these explicitly:
 
 ```ts
-import { createS3Storage } from '@mohamedhabibwork/storagekit/s3';
+import { createS3Storage } from "@mohamedhabibwork/storagekit/s3";
 const storage = await createS3Storage({
-  type: 's3',
-  bucket: 'uploads',
-  endpoint: 'http://localhost:9000',
-  region: 'us-east-1',
+  type: "s3",
+  bucket: "uploads",
+  endpoint: "http://localhost:9000",
+  region: "us-east-1",
   forcePathStyle: true,
-  credentials: { accessKeyId: 'rustfsadmin', secretAccessKey: 'rustfsadmin' },
+  credentials: { accessKeyId: "rustfsadmin", secretAccessKey: "rustfsadmin" },
 });
 ```
 
@@ -77,20 +77,22 @@ entrypoint.
 
 ```ts
 interface RustfsStorageConfig {
-  type: 'rustfs';
+  type: "rustfs";
   bucket: string;
-  endpoint: string;                         // required — RustFS S3 API URL
-  region?: string;                          // default 'us-east-1'
-  credentials?: {
-    accessKeyId: string;
-    secretAccessKey: string;
-    sessionToken?: string;
-  } | AwsCredentialIdentityProvider;
-  forcePathStyle?: boolean;                 // default true
-  prefix?: string;                          // virtual prefix on every key
-  publicUrlBase?: string;                   // base URL for getUrl()
-  client?: S3Client;                        // inject a pre-built client
-  clientOptions?: Partial<S3ClientConfig>;  // forwarded to `new S3Client(...)`
+  endpoint: string; // required — RustFS S3 API URL
+  region?: string; // default 'us-east-1'
+  credentials?:
+    | {
+        accessKeyId: string;
+        secretAccessKey: string;
+        sessionToken?: string;
+      }
+    | AwsCredentialIdentityProvider;
+  forcePathStyle?: boolean; // default true
+  prefix?: string; // virtual prefix on every key
+  publicUrlBase?: string; // base URL for getUrl()
+  client?: S3Client; // inject a pre-built client
+  clientOptions?: Partial<S3ClientConfig>; // forwarded to `new S3Client(...)`
 }
 ```
 
@@ -102,44 +104,44 @@ is transparently applied on every operation and stripped from results;
 
 ```ts
 // upload — Buffer, string, Uint8Array, ArrayBuffer, Blob or Node stream
-await storage.upload('avatars/1.jpg', buffer, {
-  contentType: 'image/jpeg',
-  cacheControl: 'public,max-age=31536000',
+await storage.upload("avatars/1.jpg", buffer, {
+  contentType: "image/jpeg",
+  cacheControl: "public,max-age=31536000",
 });
 
 // download — stream-first
-const dl = await storage.download('reports/q1.pdf');
-dl.stream.pipe(response);                 // Node Readable
+const dl = await storage.download("reports/q1.pdf");
+dl.stream.pipe(response); // Node Readable
 const text = await dl.text();
 
 // metadata, existence, delete (idempotent — deleting missing is a no-op)
-await storage.exists('a.txt');
-const stat = await storage.stat('a.txt'); // { size, etag, contentType, ... }
-await storage.delete('a.txt');
+await storage.exists("a.txt");
+const stat = await storage.stat("a.txt"); // { size, etag, contentType, ... }
+await storage.delete("a.txt");
 
 // list / iterate
-const page = await storage.list({ prefix: 'avatars/', limit: 100 });
-for await (const f of storage.iterate('avatars/')) console.log(f.path);
+const page = await storage.list({ prefix: "avatars/", limit: 100 });
+for await (const f of storage.iterate("avatars/")) console.log(f.path);
 
 // copy / move (server-side)
-await storage.copy('tmp/a.jpg', 'images/a.jpg');
-await storage.move('tmp/b.pdf', 'docs/b.pdf');
+await storage.copy("tmp/a.jpg", "images/a.jpg");
+await storage.move("tmp/b.pdf", "docs/b.pdf");
 ```
 
 ## Presigned URLs
 
 ```ts
 // presigned GET (default)
-const url = await storage.getSignedUrl('private/report.pdf', { expiresIn: 3600 });
+const url = await storage.getSignedUrl("private/report.pdf", { expiresIn: 3600 });
 
 // presigned PUT — let the browser upload directly to RustFS
-const put = await storage.getSignedUrl('upload-target.bin', {
-  action: 'write',
+const put = await storage.getSignedUrl("upload-target.bin", {
+  action: "write",
   expiresIn: 900,
 });
 
 // presigned DELETE
-const del = await storage.getSignedUrl('to-remove.bin', { action: 'delete' });
+const del = await storage.getSignedUrl("to-remove.bin", { action: "delete" });
 ```
 
 `expiresIn` is in seconds, capped at 7 days. Native options pass through
@@ -153,13 +155,13 @@ Every `Storage<'rustfs'>` method that touches the server accepts the same
 minus the fields storagekit already maps:
 
 ```ts
-await storage.upload('a.bin', body, {
-  contentType: 'application/octet-stream',
+await storage.upload("a.bin", body, {
+  contentType: "application/octet-stream",
   native: {
-    StorageClass: 'STANDARD_IA',
-    ServerSideEncryption: 'AES256',
-    ACL: 'private',
-    Tagging: 'env=prod',
+    StorageClass: "STANDARD_IA",
+    ServerSideEncryption: "AES256",
+    ACL: "private",
+    Tagging: "env=prod",
   },
 });
 ```
@@ -174,10 +176,15 @@ the same field.
 const client = storage.native();
 
 // any AWS SDK v3 call the package does not wrap
-const { HeadObjectCommand } = await import('@aws-sdk/client-s3');
-await storage.nativeRequest(async (c) => c.send(new HeadObjectCommand({
-  Bucket: 'uploads', Key: 'a.bin',
-})));
+const { HeadObjectCommand } = await import("@aws-sdk/client-s3");
+await storage.nativeRequest(async (c) =>
+  c.send(
+    new HeadObjectCommand({
+      Bucket: "uploads",
+      Key: "a.bin",
+    }),
+  ),
+);
 ```
 
 ## Uploads from a framework
@@ -186,14 +193,20 @@ RustFS storage composes with the framework upload adapters unchanged —
 the S3-compatible surface is identical:
 
 ```ts
-import multer from 'multer';
-import { createMulterStorage } from '@mohamedhabibwork/storagekit/adapters/express';
+import multer from "multer";
+import { createMulterStorage } from "@mohamedhabibwork/storagekit/adapters/express";
 
-app.post('/upload', multer({
-  storage: createMulterStorage(storage, { directory: 'avatars' }),
-}).single('avatar'), (req, res) => res.json({
-  key: req.file!.key, etag: req.file!.etag,
-}));
+app.post(
+  "/upload",
+  multer({
+    storage: createMulterStorage(storage, { directory: "avatars" }),
+  }).single("avatar"),
+  (req, res) =>
+    res.json({
+      key: req.file!.key,
+      etag: req.file!.etag,
+    }),
+);
 ```
 
 See [`docs/uploads.md`](uploads.md) for every recipe (Express, NestJS,
@@ -203,8 +216,7 @@ Fastify, Hono, Next.js, formidable, web `File`).
 
 The fastest path is the official single-binary download — see
 [Installation](https://docs.rustfs.com/en/installation). For a throwaway
-local trial, the defaults (`rustfsadmin` / `rustfsadmin`, no TLS, port
-9000) are fine; replace them before exposing the server.
+local trial, the defaults (`rustfsadmin` / `rustfsadmin`, no TLS, port 9000) are fine; replace them before exposing the server.
 
 ```bash
 # install the binary (macOS / Linux — see the install page for Windows)
@@ -220,12 +232,12 @@ Then point storagekit at it:
 
 ```ts
 const storage = await createRustfsStorage({
-  type: 'rustfs',
-  bucket: 'uploads',
-  endpoint: 'http://localhost:9000',
+  type: "rustfs",
+  bucket: "uploads",
+  endpoint: "http://localhost:9000",
   credentials: {
-    accessKeyId: 'rustfsadmin',
-    secretAccessKey: 'rustfsadmin',
+    accessKeyId: "rustfsadmin",
+    secretAccessKey: "rustfsadmin",
   },
 });
 ```

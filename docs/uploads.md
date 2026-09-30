@@ -9,35 +9,39 @@ into a `storage.upload()` call with a safe object key, on **any** driver
 (Local, S3, MinIO, RustFS, Azure, Oracle, custom).
 
 No adapter imports its framework: each one satisfies the framework's shape
-structurally, so every framework package stays an *optional* peer dependency.
+structurally, so every framework package stays an _optional_ peer dependency.
 
-| Entry point | Use with |
-| --- | --- |
-| `storagekit/uploads` | Any framework — `saveUpload()`, `saveWebFile()`, helpers |
-| `storagekit/adapters/express` | Express, NestJS, Koa (`@koa/multer`) — multer storage engine |
-| `storagekit/adapters/fastify` | Fastify 4/5 with `@fastify/multipart` |
-| `storagekit/adapters/formidable` | formidable v2/v3 (any framework) |
-| — (via `saveUpload()`) | busboy, GraphQL Upload, anything yielding a stream |
+| Entry point                      | Use with                                                     |
+| -------------------------------- | ------------------------------------------------------------ |
+| `storagekit/uploads`             | Any framework — `saveUpload()`, `saveWebFile()`, helpers     |
+| `storagekit/adapters/express`    | Express, NestJS, Koa (`@koa/multer`) — multer storage engine |
+| `storagekit/adapters/fastify`    | Fastify 4/5 with `@fastify/multipart`                        |
+| `storagekit/adapters/formidable` | formidable v2/v3 (any framework)                             |
+| — (via `saveUpload()`)           | busboy, GraphQL Upload, anything yielding a stream           |
 
 ## Core: `saveUpload()`
 
 ```ts
-import { createLocalStorage } from '@mohamedhabibwork/storagekit/local';
-import { saveUpload } from '@mohamedhabibwork/storagekit/uploads';
+import { createLocalStorage } from "@mohamedhabibwork/storagekit/local";
+import { saveUpload } from "@mohamedhabibwork/storagekit/uploads";
 
-const storage = await createLocalStorage({ type: 'local', root: './data' });
+const storage = await createLocalStorage({ type: "local", root: "./data" });
 
 // file: whatever your middleware handed you
-const saved = await saveUpload(storage, {
-  body: file.stream,          // stream, Buffer, or Blob
-  fieldname: file.fieldname,
-  originalName: file.originalname,
-  mimeType: file.mimetype,
-}, { directory: 'uploads' });
+const saved = await saveUpload(
+  storage,
+  {
+    body: file.stream, // stream, Buffer, or Blob
+    fieldname: file.fieldname,
+    originalName: file.originalname,
+    mimeType: file.mimetype,
+  },
+  { directory: "uploads" },
+);
 
 await db.insert(attachments).values({
-  key: saved.key,             // uploads/<uuid>.png
-  name: saved.originalName,   // exact client filename, untouched
+  key: saved.key, // uploads/<uuid>.png
+  name: saved.originalName, // exact client filename, untouched
   etag: saved.result.etag,
 });
 ```
@@ -61,16 +65,55 @@ What it does for you:
 
 ```ts
 await saveUpload(storage, file, {
-  key: `users/${user.id}/avatar.jpg`,   // or a resolver: (file) => ...
-  overwrite: false,                     // second upload of same key fails
+  key: `users/${user.id}/avatar.jpg`, // or a resolver: (file) => ...
+  overwrite: false, // second upload of same key fails
   metadata: { userId: String(user.id) },
-  native: { StorageClass: 'STANDARD_IA' },   // typed per storage type
+  native: { StorageClass: "STANDARD_IA" }, // typed per storage type
 });
 ```
 
 Helpers: `sanitizeFilename(name)` (basename, strips control/Windows-hostile
 chars, caps at 255 preserving the extension) and
 `randomKey(directory, originalName)`.
+
+## Upload intents
+
+An **intent** is a plain object describing one upload — where the bytes come
+from and how to store them. Build it wherever it is convenient (HTTP handler,
+queue consumer, CLI, test), pass it around, and run it against any storage.
+`saveWebFile`, `saveFastifyFile` and the multer engine all feed the same
+intake underneath; the intent is the general shape you can hold onto.
+
+```ts
+import { defineUploadIntent, saveUploadIntent } from "@mohamedhabibwork/storagekit/uploads";
+
+const intent = defineUploadIntent({
+  source: file, // web File/Blob | middleware file | Buffer | stream | string
+  directory: "uploads", // key = uploads/<uuid>.<ext> unless `key` is set
+  contentType: "image/png", // optional; defaults to the source's own type
+  metadata: { tenantId: "t1" }, // merged over the automatic metadata (or `false` to disable)
+  overwrite: false, // forwarded to upload()
+  // key: (originalFile) => `users/1/${originalFile.originalName}`,
+  // native: { StorageClass: "INTELLIGENT_TIERING" }, signal: controller.signal,
+});
+
+const saved = await saveUploadIntent(storage, intent);
+// saved: { key, originalName?, mimeType?, result } — identical to saveUpload
+```
+
+Accepted `source` shapes:
+
+| Source                                                                        | Picked up automatically                          |
+| ----------------------------------------------------------------------------- | ------------------------------------------------ |
+| web `File` / `Blob`                                                           | `name` → originalName, `type` → mimeType, `size` |
+| middleware file `{ body, fieldname?, originalName?, mimeType?, size? }`       | exactly what you pass                            |
+| bare bytes (`string`, `Buffer`, `Uint8Array`, `ArrayBuffer`, Node `Readable`) | nothing — set `contentType` explicitly           |
+
+Because an intent is a re-runnable value, it composes cleanly with retries and
+with swapping drivers (run the same intent against local in dev and S3 in
+prod). `key` accepts a string (traversal-checked) or a resolver receiving the
+normalized file; `native` is typed per storage type; everything network-bound
+honors `signal`.
 
 ## Express — complete example
 
@@ -79,41 +122,42 @@ directly into storage (no disk scratch, no memory buffering), and the result
 lands on `req.file`. A full upload/serve app:
 
 ```ts
-import express from 'express';
-import multer from 'multer';
-import { createLocalStorage } from '@mohamedhabibwork/storagekit/local';
-import { createMulterStorage } from '@mohamedhabibwork/storagekit/adapters/express';
+import express from "express";
+import multer from "multer";
+import { createLocalStorage } from "@mohamedhabibwork/storagekit/local";
+import { createMulterStorage } from "@mohamedhabibwork/storagekit/adapters/express";
 
 const storage = await createLocalStorage({
-  type: 'local',
-  root: './data',
-  baseUrl: 'http://localhost:3000/files',   // makes getUrl() work
+  type: "local",
+  root: "./data",
+  baseUrl: "http://localhost:3000/files", // makes getUrl() work
 });
 
 const upload = multer({
-  storage: createMulterStorage(storage, { directory: 'uploads' }),
-  limits: { fileSize: 10 * 1024 * 1024 },   // 10 MB — see “Validation”
+  storage: createMulterStorage(storage, { directory: "uploads" }),
+  limits: { fileSize: 10 * 1024 * 1024 }, // 10 MB — see “Validation”
 });
 
 const app = express();
 
 // store a file → { key, url, etag }
-app.post('/upload', upload.single('file'), (req, res) => {
+app.post("/upload", upload.single("file"), (req, res) => {
   res.json({
-    key: req.file!.key,          // stored object key (uploads/<uuid>.<ext>)
-    url: req.file!.url,          // public URL when the provider derives one
+    key: req.file!.key, // stored object key (uploads/<uuid>.<ext>)
+    url: req.file!.url, // public URL when the provider derives one
     etag: req.file!.etag,
     name: req.file!.originalname,
   });
 });
 
 // stream a file back through the server
-app.get('/files/*splat', async (req, res, next) => {
+app.get("/files/*splat", async (req, res, next) => {
   try {
-    const key = req.params.splat;                 // Express 5; v4: req.params[0]
+    const key = req.params.splat; // Express 5; v4: req.params[0]
     const file = await storage.download(key);
-    res.setHeader('content-type', file.contentType ?? 'application/octet-stream');
-    if (file.contentLength !== undefined) res.setHeader('content-length', String(file.contentLength));
+    res.setHeader("content-type", file.contentType ?? "application/octet-stream");
+    if (file.contentLength !== undefined)
+      res.setHeader("content-length", String(file.contentLength));
     file.stream.pipe(res);
   } catch (error) {
     next(error);
@@ -121,10 +165,12 @@ app.get('/files/*splat', async (req, res, next) => {
 });
 
 // hand out a time-limited link instead (S3/MinIO/RustFS/Azure)
-app.get('/link/*splat', async (req, res, next) => {
+app.get("/link/*splat", async (req, res, next) => {
   try {
     res.json({ url: await storage.getSignedUrl(req.params.splat, { expiresIn: 600 }) });
-  } catch (error) { next(error); }
+  } catch (error) {
+    next(error);
+  }
 });
 
 app.listen(3000);
@@ -141,7 +187,7 @@ Behavior details:
 - TypeScript augmentation for the merged fields:
 
 ```ts
-import type { SavedUpload } from '@mohamedhabibwork/storagekit/uploads';
+import type { SavedUpload } from "@mohamedhabibwork/storagekit/uploads";
 
 declare global {
   namespace Express {
@@ -161,18 +207,22 @@ declare global {
 
 ```ts
 // N files under one field name
-app.post('/gallery', upload.array('photos', 12), (req, res) => {
+app.post("/gallery", upload.array("photos", 12), (req, res) => {
   res.json({ keys: req.files!.map((f) => f.key) });
 });
 
 // different fields at once: req.files.avatar, req.files.contract
-app.post('/apply', upload.fields([
-  { name: 'avatar', maxCount: 1 },
-  { name: 'contract', maxCount: 1 },
-]), (req, res) => {
-  const { avatar, contract } = req.files as Record<string, Express.Multer.File[]>;
-  res.json({ avatar: avatar[0].key, contract: contract[0].key });
-});
+app.post(
+  "/apply",
+  upload.fields([
+    { name: "avatar", maxCount: 1 },
+    { name: "contract", maxCount: 1 },
+  ]),
+  (req, res) => {
+    const { avatar, contract } = req.files as Record<string, Express.Multer.File[]>;
+    res.json({ avatar: avatar[0].key, contract: contract[0].key });
+  },
+);
 ```
 
 ## NestJS
@@ -180,15 +230,17 @@ app.post('/apply', upload.fields([
 `FileInterceptor` accepts any multer storage — the engine works unchanged:
 
 ```ts
-import { FileInterceptor } from '@nestjs/platform-express';
+import { FileInterceptor } from "@nestjs/platform-express";
 
-@Controller('uploads')
+@Controller("uploads")
 export class UploadsController {
-  @Post('avatar')
-  @UseInterceptors(FileInterceptor('avatar', {
-    storage: createMulterStorage(storage, { directory: 'avatars' }),
-    limits: { fileSize: 5 * 1024 * 1024 },
-  }))
+  @Post("avatar")
+  @UseInterceptors(
+    FileInterceptor("avatar", {
+      storage: createMulterStorage(storage, { directory: "avatars" }),
+      limits: { fileSize: 5 * 1024 * 1024 },
+    }),
+  )
   upload(@UploadedFile() file: Express.Multer.File) {
     return { key: file.key, name: file.originalname, url: file.url };
   }
@@ -200,17 +252,17 @@ export class UploadsController {
 `@koa/multer` (the maintained koa fork) uses the same engine interface:
 
 ```ts
-import Koa from 'koa';
-import Router from '@koa/router';
-import koaMulter from '@koa/multer';
-import { createMulterStorage } from '@mohamedhabibwork/storagekit/adapters/express';
+import Koa from "koa";
+import Router from "@koa/router";
+import koaMulter from "@koa/multer";
+import { createMulterStorage } from "@mohamedhabibwork/storagekit/adapters/express";
 
 const upload = koaMulter({
-  storage: createMulterStorage(storage, { directory: 'uploads' }),
+  storage: createMulterStorage(storage, { directory: "uploads" }),
 });
 
 const router = new Router();
-router.post('/upload', upload.single('file'), async (ctx) => {
+router.post("/upload", upload.single("file"), async (ctx) => {
   ctx.body = { key: ctx.file!.key, name: ctx.file!.originalname };
 });
 ```
@@ -218,27 +270,27 @@ router.post('/upload', upload.single('file'), async (ctx) => {
 ## Fastify — `@fastify/multipart`
 
 ```ts
-import Fastify from 'fastify';
-import multipart from '@fastify/multipart';
-import { saveFastifyFile } from '@mohamedhabibwork/storagekit/adapters/fastify';
+import Fastify from "fastify";
+import multipart from "@fastify/multipart";
+import { saveFastifyFile } from "@mohamedhabibwork/storagekit/adapters/fastify";
 
 const app = Fastify();
 await app.register(multipart);
 
 // single file
-app.post('/upload', async (req, reply) => {
+app.post("/upload", async (req, reply) => {
   const part = await req.file();
-  if (!part) return reply.code(400).send({ error: 'no file' });
-  const saved = await saveFastifyFile(storage, part, { directory: 'uploads' });
+  if (!part) return reply.code(400).send({ error: "no file" });
+  const saved = await saveFastifyFile(storage, part, { directory: "uploads" });
   return { key: saved.key, name: saved.originalName };
 });
 
 // every file in the form — fields are yielded too, skip them
-app.post('/upload-many', async (req) => {
+app.post("/upload-many", async (req) => {
   const keys: string[] = [];
   for await (const part of req.files()) {
-    if (part.type !== 'file') continue;
-    const saved = await saveFastifyFile(storage, part, { directory: 'uploads' });
+    if (part.type !== "file") continue;
+    const saved = await saveFastifyFile(storage, part, { directory: "uploads" });
     keys.push(saved.key);
   }
   return { keys };
@@ -251,27 +303,27 @@ reply is sent. On failure the stream is destroyed so the request settles.
 ## Hono
 
 ```ts
-import { Hono } from 'hono';
-import { saveWebFile } from '@mohamedhabibwork/storagekit/uploads';
+import { Hono } from "hono";
+import { saveWebFile } from "@mohamedhabibwork/storagekit/uploads";
 
 const app = new Hono();
 
-app.post('/upload', async (c) => {
+app.post("/upload", async (c) => {
   const body = await c.req.parseBody();
-  const file = body['file'];
-  if (!(file instanceof File)) return c.json({ error: 'no file' }, 400);
-  const saved = await saveWebFile(storage, file, { directory: 'uploads' });
+  const file = body["file"];
+  if (!(file instanceof File)) return c.json({ error: "no file" }, 400);
+  const saved = await saveWebFile(storage, file, { directory: "uploads" });
   return c.json({ key: saved.key, name: saved.originalName });
 });
 
 // multiple files under one field name
-app.post('/gallery', async (c) => {
+app.post("/gallery", async (c) => {
   const body = await c.req.parseBody({ all: true });
-  const photos = body['photos'];
-  const files = Array.isArray(photos) ? photos : [photos];   // single upload → singleton
+  const photos = body["photos"];
+  const files = Array.isArray(photos) ? photos : [photos]; // single upload → singleton
   const keys = [];
   for (const file of files) {
-    const saved = await saveWebFile(storage, file as File, { directory: 'gallery' });
+    const saved = await saveWebFile(storage, file as File, { directory: "gallery" });
     keys.push(saved.key);
   }
   return c.json({ keys });
@@ -285,15 +337,15 @@ is the whole integration:
 
 ```ts
 // app/api/upload/route.ts
-import { saveWebFile } from '@mohamedhabibwork/storagekit/uploads';
+import { saveWebFile } from "@mohamedhabibwork/storagekit/uploads";
 
 export async function POST(request: Request) {
   const form = await request.formData();
-  const file = form.get('file');
+  const file = form.get("file");
   if (!(file instanceof File)) {
-    return Response.json({ error: 'missing file' }, { status: 400 });
+    return Response.json({ error: "missing file" }, { status: 400 });
   }
-  const saved = await saveWebFile(storage, file, { directory: 'uploads' });
+  const saved = await saveWebFile(storage, file, { directory: "uploads" });
   return Response.json({ key: saved.key, url: saved.result.url });
 }
 ```
@@ -307,16 +359,20 @@ Elysia validates uploads with its own `t.File()` schema, then hands you a web
 `File`:
 
 ```ts
-import { Elysia, t } from 'elysia';
-import { saveWebFile } from '@mohamedhabibwork/storagekit/uploads';
+import { Elysia, t } from "elysia";
+import { saveWebFile } from "@mohamedhabibwork/storagekit/uploads";
 
 new Elysia()
-  .post('/upload', async ({ body: { file } }) => {
-    const saved = await saveWebFile(storage, file, { directory: 'uploads' });
-    return { key: saved.key };
-  }, {
-    body: t.Object({ file: t.File({ type: 'image' }) }),   // MIME validated by Elysia
-  })
+  .post(
+    "/upload",
+    async ({ body: { file } }) => {
+      const saved = await saveWebFile(storage, file, { directory: "uploads" });
+      return { key: saved.key };
+    },
+    {
+      body: t.Object({ file: t.File({ type: "image" }) }), // MIME validated by Elysia
+    },
+  )
   .listen(3000);
 ```
 
@@ -329,13 +385,13 @@ so one handler shape covers both:
 Bun.serve({
   port: 3000,
   async fetch(request) {
-    if (request.method !== 'POST' || new URL(request.url).pathname !== '/upload') {
-      return new Response('not found', { status: 404 });
+    if (request.method !== "POST" || new URL(request.url).pathname !== "/upload") {
+      return new Response("not found", { status: 404 });
     }
     const form = await request.formData();
-    const file = form.get('file');
-    if (!(file instanceof File)) return new Response('missing file', { status: 400 });
-    const saved = await saveWebFile(storage, file, { directory: 'uploads' });
+    const file = form.get("file");
+    if (!(file instanceof File)) return new Response("missing file", { status: 400 });
+    const saved = await saveWebFile(storage, file, { directory: "uploads" });
     return Response.json({ key: saved.key });
   },
 });
@@ -352,20 +408,20 @@ formidable writes uploads to temp files first; the adapter streams that temp
 file into storage:
 
 ```ts
-import formidable from 'formidable';
-import { saveFormidableFile } from '@mohamedhabibwork/storagekit/adapters/formidable';
+import formidable from "formidable";
+import { saveFormidableFile } from "@mohamedhabibwork/storagekit/adapters/formidable";
 
-app.post('/upload', (req, res) => {
+app.post("/upload", (req, res) => {
   const form = formidable({
-    maxFileSize: 10 * 1024 * 1024,   // 10 MB — formidable enforces this
+    maxFileSize: 10 * 1024 * 1024, // 10 MB — formidable enforces this
     uploadDir: os.tmpdir(),
   });
   form.parse(req, async (err, fields, files) => {
     if (err) return res.status(400).json({ error: err.message });
     const raw = files.file;
     const upload = Array.isArray(raw) ? raw[0] : raw;
-    if (!upload) return res.status(400).json({ error: 'missing file' });
-    const saved = await saveFormidableFile(storage, upload, { directory: 'uploads' });
+    if (!upload) return res.status(400).json({ error: "missing file" });
+    const saved = await saveFormidableFile(storage, upload, { directory: "uploads" });
     res.json({ key: saved.key, name: saved.originalName });
   });
 });
@@ -380,28 +436,32 @@ the whole integration surface.
 **busboy** (streaming parser — the same file events multer is built on):
 
 ```ts
-import busboy from 'busboy';
+import busboy from "busboy";
 
-app.post('/upload', (req, res) => {
+app.post("/upload", (req, res) => {
   const bb = busboy({ headers: req.headers, limits: { fileSize: 10 * 1024 * 1024 } });
   const keys: string[] = [];
 
-  bb.on('file', async (fieldname, stream, info) => {
+  bb.on("file", async (fieldname, stream, info) => {
     try {
-      const saved = await saveUpload(storage, {
-        body: stream,                       // piped straight into storage
-        fieldname,
-        originalName: info.filename,
-        mimeType: info.mimeType,
-      }, { directory: 'busboy' });
+      const saved = await saveUpload(
+        storage,
+        {
+          body: stream, // piped straight into storage
+          fieldname,
+          originalName: info.filename,
+          mimeType: info.mimeType,
+        },
+        { directory: "busboy" },
+      );
       keys.push(saved.key);
     } catch {
-      stream.destroy();                     // let the request settle on failure
+      stream.destroy(); // let the request settle on failure
     }
   });
 
-  bb.on('error', () => res.status(400).end());
-  bb.on('close', () => res.json({ keys }));
+  bb.on("error", () => res.status(400).end());
+  bb.on("close", () => res.json({ keys }));
   req.pipe(bb);
 });
 ```
@@ -433,13 +493,13 @@ const url = await storage.getUrl(key);
 
 // 2. Signed URL — time-limited, no traffic through your server.
 //    S3 / MinIO / RustFS / Azure SAS:
-const link = await storage.getSignedUrl(key, { action: 'read', expiresIn: 600 });
+const link = await storage.getSignedUrl(key, { action: "read", expiresIn: 600 });
 // Oracle has no presigned URLs — use pre-authenticated requests (PARs) via
 // the Oracle driver's native options instead.
 
 // 3. Stream through the server — full control (auth, audit, transforms).
 const file = await storage.download(key);
-file.stream.pipe(response);          // set content-type from file.contentType
+file.stream.pipe(response); // set content-type from file.contentType
 ```
 
 With the multer engine, `req.file.url` is pattern 1 filled in at upload time.
@@ -449,14 +509,14 @@ With the multer engine, `req.file.url` is pattern 1 filled in at upload time.
 Client-reported MIME types and sizes are **requests**, not facts — enforce
 your own limits.
 
-**Express/multer** — `limits` + `fileFilter` run *before* the storage engine,
+**Express/multer** — `limits` + `fileFilter` run _before_ the storage engine,
 so rejected files never reach storage:
 
 ```ts
-const ALLOWED_TYPES = new Set(['image/jpeg', 'image/png', 'image/webp', 'application/pdf']);
+const ALLOWED_TYPES = new Set(["image/jpeg", "image/png", "image/webp", "application/pdf"]);
 
 const upload = multer({
-  storage: createMulterStorage(storage, { directory: 'uploads' }),
+  storage: createMulterStorage(storage, { directory: "uploads" }),
   limits: { fileSize: 10 * 1024 * 1024, files: 5 },
   fileFilter: (_req, file, cb) => {
     if (ALLOWED_TYPES.has(file.mimetype)) cb(null, true);
@@ -471,10 +531,10 @@ in the handler before saving:
 ```ts
 const MAX_SIZE = 10 * 1024 * 1024;
 
-if (!ALLOWED_TYPES.has(file.type)) return reply.code(415).send({ error: 'unsupported type' });
-if (file.size > MAX_SIZE) return reply.code(413).send({ error: 'too large' });
+if (!ALLOWED_TYPES.has(file.type)) return reply.code(415).send({ error: "unsupported type" });
+if (file.size > MAX_SIZE) return reply.code(413).send({ error: "too large" });
 
-const saved = await saveWebFile(storage, file, { directory: 'uploads' });
+const saved = await saveWebFile(storage, file, { directory: "uploads" });
 ```
 
 **Sniff real content** for anything user-facing — `file-type` reads a few

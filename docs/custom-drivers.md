@@ -117,10 +117,11 @@ Optional but useful:
 ## 2. Register it
 
 ```ts
-import { registerStorageDriver } from '@mohamedhabibwork/storagekit';
+import { registerStorageDriver } from "@mohamedhabibwork/storagekit";
 
-registerStorageDriver('postgres', (config, runtime) =>
-  createPostgresDriver(config as unknown as MyConfig));
+registerStorageDriver("postgres", (config, runtime) =>
+  createPostgresDriver(config as unknown as MyConfig),
+);
 ```
 
 Rules:
@@ -135,9 +136,9 @@ Rules:
 
 ```ts
 const storage = await createStorage({
-  type: 'postgres',
-  connectionString: 'postgres://…',   // your fields, verbatim
-  table: 'objects',
+  type: "postgres",
+  connectionString: "postgres://…", // your fields, verbatim
+  table: "objects",
 });
 // → Storage<'postgres'>, native slots typed unknown
 ```
@@ -158,12 +159,14 @@ must pass:
 
 ```ts
 // vitest test file
-import { defineDriverContractTests } from '@mohamedhabibwork/storagekit/testing';
+import { defineDriverContractTests } from "@mohamedhabibwork/storagekit/testing";
 
 defineDriverContractTests({
-  name: 'postgres',
-  createStorage: async () => createStorage({ type: 'postgres', connectionString: testDsn }),
-  destroyStorage: async () => { /* cleanup */ },
+  name: "postgres",
+  createStorage: async () => createStorage({ type: "postgres", connectionString: testDsn }),
+  destroyStorage: async () => {
+    /* cleanup */
+  },
   capabilities: { signedUrls: false },
 });
 ```
@@ -182,17 +185,17 @@ type `'fake'`) that passes the full contract above — usable with zero
 setup, no SDKs and no I/O, in any test runner:
 
 ```ts
-import { createFakeStorage } from '@mohamedhabibwork/storagekit/testing/fake';
+import { createFakeStorage } from "@mohamedhabibwork/storagekit/testing/fake";
 
 const storage = await createFakeStorage({
-  baseUrl: 'https://cdn.test',        // getUrl() + fake signed URLs
-  signedUrls: true,                   // advertise + serve fake signed URLs
-  initialFiles: { 'seeded/a.txt': 'seed text' },
-  latencyMs: 25,                      // simulate provider latency
+  baseUrl: "https://cdn.test", // getUrl() + fake signed URLs
+  signedUrls: true, // advertise + serve fake signed URLs
+  initialFiles: { "seeded/a.txt": "seed text" },
+  latencyMs: 25, // simulate provider latency
 });
 
-await storage.upload('uploads/a.txt', 'hello');
-await (await storage.download('uploads/a.txt')).text(); // → 'hello'
+await storage.upload("uploads/a.txt", "hello");
+await (await storage.download("uploads/a.txt")).text(); // → 'hello'
 ```
 
 Test-support extras on the driver (reachable via
@@ -211,11 +214,11 @@ To flow the fake through config-driven code paths, register it as a custom
 driver:
 
 ```ts
-import { registerStorageDriver } from '@mohamedhabibwork/storagekit';
-import { FakeStorageDriver } from '@mohamedhabibwork/storagekit/testing/fake';
+import { registerStorageDriver } from "@mohamedhabibwork/storagekit";
+import { FakeStorageDriver } from "@mohamedhabibwork/storagekit/testing/fake";
 
-registerStorageDriver('fake', (config) => new FakeStorageDriver(config as never));
-const storage = await createStorage({ type: 'fake' });
+registerStorageDriver("fake", (config) => new FakeStorageDriver(config as never));
+const storage = await createStorage({ type: "fake" });
 ```
 
 Unlike `storagekit/testing` (the contract suite), `testing/fake` has no

@@ -11,17 +11,17 @@ npm install oci-common oci-objectstorage
 
 ## Config
 
-| Option | Type | Description |
-| --- | --- | --- |
-| `namespaceName` | `string` | Required. Object Storage namespace (stable per tenancy — `oci os ns get`) |
-| `bucketName` | `string` | Required. Bucket name |
-| `region` | `string` | Region (`eu-frankfurt-1`, …); needed by `getUrl()` and `copy()` unless overridden |
-| `prefix` | `string` | Virtual prefix for every key |
-| `publicUrlBase` | `string` | CDN base URL used by `getUrl()` |
-| `auth` | `OracleAuth` | Declarative auth (below); ignored when `authProvider` is set. Defaults to `{ type: 'config-file' }` |
-| `authProvider` | `AuthenticationDetailsProvider` | Inject a ready native provider (wins over `auth`) |
-| `client` | `ObjectStorageClient` | Inject an existing client (DI/tests) |
-| `clientOptions` | `object` | Forwarded to `new ObjectStorageClient(...)` |
+| Option          | Type                            | Description                                                                                         |
+| --------------- | ------------------------------- | --------------------------------------------------------------------------------------------------- |
+| `namespaceName` | `string`                        | Required. Object Storage namespace (stable per tenancy — `oci os ns get`)                           |
+| `bucketName`    | `string`                        | Required. Bucket name                                                                               |
+| `region`        | `string`                        | Region (`eu-frankfurt-1`, …); needed by `getUrl()` and `copy()` unless overridden                   |
+| `prefix`        | `string`                        | Virtual prefix for every key                                                                        |
+| `publicUrlBase` | `string`                        | CDN base URL used by `getUrl()`                                                                     |
+| `auth`          | `OracleAuth`                    | Declarative auth (below); ignored when `authProvider` is set. Defaults to `{ type: 'config-file' }` |
+| `authProvider`  | `AuthenticationDetailsProvider` | Inject a ready native provider (wins over `auth`)                                                   |
+| `client`        | `ObjectStorageClient`           | Inject an existing client (DI/tests)                                                                |
+| `clientOptions` | `object`                        | Forwarded to `new ObjectStorageClient(...)`                                                         |
 
 ## Authentication
 
@@ -44,14 +44,14 @@ Part size: default 64 MiB, floor 1 MiB, ceiling 128 MiB; concurrency default
 4 (max 16).
 
 ```ts
-await storage.upload('backups/db.dump', stream, {
-  contentType: 'application/octet-stream',
+await storage.upload("backups/db.dump", stream, {
+  contentType: "application/octet-stream",
   multipart: { partSize: 128 * 1024 * 1024, concurrency: 8 },
-  metadata: { env: 'prod' },                       // → opcMeta
+  metadata: { env: "prod" }, // → opcMeta
   native: {
-    storageTier: 'Archive',                        // Standard | InfrequentAccess | Archive
-    ifNoneMatch: '*',                              // conditional create
-    opcChecksumAlgorithm: 'SHA256',
+    storageTier: "Archive", // Standard | InfrequentAccess | Archive
+    ifNoneMatch: "*", // conditional create
+    opcChecksumAlgorithm: "SHA256",
   },
 });
 ```
@@ -61,13 +61,13 @@ await storage.upload('backups/db.dump', stream, {
 `GetObject` (response `value` stream), `HeadObject`, `DeleteObject`.
 
 ```ts
-const dl = await storage.download('docs/report.pdf', {
-  versionId: '…',
-  range: { offset: 1024, length: 2048 },           // → native common.Range
-  native: { opcSseCustomerAlgorithm: 'AES256' },
+const dl = await storage.download("docs/report.pdf", {
+  versionId: "…",
+  range: { offset: 1024, length: 2048 }, // → native common.Range
+  native: { opcSseCustomerAlgorithm: "AES256" },
 });
-await storage.stat('docs/report.pdf', { versionId: '…' });   // opcMeta → metadata
-await storage.delete('docs/report.pdf', { versionId: '…' });
+await storage.stat("docs/report.pdf", { versionId: "…" }); // opcMeta → metadata
+await storage.delete("docs/report.pdf", { versionId: "…" });
 ```
 
 ## List
@@ -76,8 +76,11 @@ await storage.delete('docs/report.pdf', { versionId: '…' });
 unless recursive, `start` from the cursor, `nextStartWith` out.
 
 ```ts
-await storage.list({ prefix: 'logs/2026/', limit: 500,
-  native: { startAfter: 'logs/2026/06-01', end: 'logs/2026/07-01' } });
+await storage.list({
+  prefix: "logs/2026/",
+  limit: 500,
+  native: { startAfter: "logs/2026/06-01", end: "logs/2026/07-01" },
+});
 ```
 
 ## Copy / move
@@ -88,10 +91,10 @@ or cross-tenancy copies. OCI copies are asynchronous server-side work — the
 response carries a work-request id, so the result has no `etag`.
 
 ```ts
-await storage.copy('a.txt', 'b.txt', {
-  native: { destinationRegion: 'us-ashburn-1', destinationObjectStorageTier: 'Archive' },
+await storage.copy("a.txt", "b.txt", {
+  native: { destinationRegion: "us-ashburn-1", destinationObjectStorageTier: "Archive" },
 });
-await storage.move('tmp/a.txt', 'docs/a.txt');   // copy + delete
+await storage.move("tmp/a.txt", "docs/a.txt"); // copy + delete
 ```
 
 ## Pre-authenticated requests (PARs)
@@ -103,14 +106,14 @@ persistent server-side resources (lifecycle + scope differ fundamentally
 from presigned URLs):
 
 ```ts
-import { createOracleStorage } from '@mohamedhabibwork/storagekit/oracle';
+import { createOracleStorage } from "@mohamedhabibwork/storagekit/oracle";
 
-const storage = await createOracleStorage({ type: 'oracle', namespaceName: 'ns', bucketName: 'b' });
+const storage = await createOracleStorage({ type: "oracle", namespaceName: "ns", bucketName: "b" });
 const par = await storage.createPreauthenticatedRequest({
-  objectName: 'reports/q1.pdf',       // or objectPrefix for many objects
-  accessType: 'ObjectRead',           // ObjectRead | ObjectWrite | ObjectReadWrite | AnyObjectReadWrite …
+  objectName: "reports/q1.pdf", // or objectPrefix for many objects
+  accessType: "ObjectRead", // ObjectRead | ObjectWrite | ObjectReadWrite | AnyObjectReadWrite …
   timeExpires: new Date(Date.now() + 3600_000),
-  name: 'q1-report-par',
+  name: "q1-report-par",
 });
 // par.accessUri — the pre-authenticated URL; par.id — delete it when done:
 // storage.nativeRequest(c => c.deletePreauthenticatedRequest({ … }))

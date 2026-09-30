@@ -9,14 +9,14 @@
 The `docs/` folder is rendered by **MkDocs + Material** into a static
 site, deployed to GitHub Pages on every push to `main`.
 
-| Thing | Where |
-| --- | --- |
-| Live URL | `https://mohamedhabibwork.github.io/storagekit/` |
-| Site config | `mkdocs.yml` (repo root) |
-| Source pages | `docs/*.md` |
-| Build workflow | `.github/workflows/docs.yml` |
-| Pinned dependencies | `requirements-docs.txt` |
-| Generated output (gitignored) | `site/` |
+| Thing                         | Where                                            |
+| ----------------------------- | ------------------------------------------------ |
+| Live URL                      | `https://mohamedhabibwork.github.io/storagekit/` |
+| Site config                   | `mkdocs.yml` (repo root)                         |
+| Source pages                  | `docs/*.md`                                      |
+| Build workflow                | `.github/workflows/docs.yml`                     |
+| Pinned dependencies           | `requirements-docs.txt`                          |
+| Generated output (gitignored) | `site/`                                          |
 
 The `README.md` is the single source of truth for the npm package
 description, install instructions, and the API walk-through. The site is
@@ -44,7 +44,7 @@ exactly what CI sees.
 1. Drop the markdown file in `docs/` — e.g. `docs/driver-x.md`.
 2. Add it to the `nav:` block in `mkdocs.yml`. MkDocs will not auto-pick
    files that are not in `nav:` (the `validation.nav.omitted_files:
-   ignore` setting is what stops it from erroring on `SITE.md`,
+ignore` setting is what stops it from erroring on `SITE.md`,
    `BRANCH_PROTECTION.md` isn't shipped… only what you list in `nav:`
    actually appears).
 3. Open the PR. The docs workflow builds with `--strict`, so a bad link
@@ -108,5 +108,5 @@ the setting without opening the web UI.
 - Switch `site_url` to a custom domain and add a `CNAME` file in
   `docs/assets/`.
 - Add the Mermaid diagram plugin (already declared under `pymdownx
-  .superfences` but commented in the workflow — just add
+.superfences` but commented in the workflow — just add
   `mkdocs-material[imaging]` to `requirements-docs.txt`).
