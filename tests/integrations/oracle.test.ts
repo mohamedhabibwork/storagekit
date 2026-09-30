@@ -1,7 +1,7 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it } from "vitest";
 
-import { defineDriverContractTests } from '../../src/testing/driver-contract';
-import type { OracleStorage } from '../../src/drivers/oracle/index';
+import { defineDriverContractTests } from "../../src/testing/driver-contract";
+import type { OracleStorage } from "../../src/drivers/oracle/index";
 
 /**
  * OCI has no local emulator. Live tests are strictly opt-in:
@@ -10,17 +10,17 @@ import type { OracleStorage } from '../../src/drivers/oracle/index';
  * plus a configured authentication provider (config file, instance
  * principals, ...) resolvable by oci-common.
  */
-const enabled = process.env.OCI_INTEGRATION_TESTS === 'true';
+const enabled = process.env.OCI_INTEGRATION_TESTS === "true";
 
-describe.skipIf(!enabled)('oracle live integration (opt-in)', () => {
+describe.skipIf(!enabled)("oracle live integration (opt-in)", () => {
   let storage: OracleStorage;
 
   defineDriverContractTests({
-    name: 'oracle',
+    name: "oracle",
     createStorage: async () => {
-      const { createOracleStorage } = await import('../../src/drivers/oracle/index.js');
+      const { createOracleStorage } = await import("../../src/drivers/oracle/index.js");
       storage = await createOracleStorage({
-        type: 'oracle',
+        type: "oracle",
         namespaceName: process.env.OCI_TEST_NAMESPACE!,
         bucketName: process.env.OCI_TEST_BUCKET!,
         region: process.env.OCI_TEST_REGION,
@@ -30,10 +30,10 @@ describe.skipIf(!enabled)('oracle live integration (opt-in)', () => {
     capabilities: { signedUrls: false },
   });
 
-  it('creates pre-authenticated requests through the oracle-specific API', async () => {
+  it("creates pre-authenticated requests through the oracle-specific API", async () => {
     const par = await storage.createPreauthenticatedRequest({
-      objectName: 'par-check.txt',
-      accessType: 'ObjectRead',
+      objectName: "par-check.txt",
+      accessType: "ObjectRead",
       timeExpires: new Date(Date.now() + 60 * 60 * 1000),
       name: `test-par-${Date.now()}`,
     });
@@ -42,8 +42,8 @@ describe.skipIf(!enabled)('oracle live integration (opt-in)', () => {
   });
 });
 
-describe.skipIf(enabled)('oracle live integration (gated)', () => {
-  it('is skipped unless OCI_INTEGRATION_TESTS=true', () => {
+describe.skipIf(enabled)("oracle live integration (gated)", () => {
+  it("is skipped unless OCI_INTEGRATION_TESTS=true", () => {
     expect(true).toBe(true);
   });
 });

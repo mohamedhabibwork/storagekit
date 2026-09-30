@@ -1,7 +1,7 @@
-import { beforeAll, describe, expect, it } from 'vitest';
+import { beforeAll, describe, expect, it } from "vitest";
 
-import { defineDriverContractTests } from '../../src/testing/driver-contract';
-import type { Storage } from '../../src/core/types';
+import { defineDriverContractTests } from "../../src/testing/driver-contract";
+import type { Storage } from "../../src/core/types";
 
 /**
  * Azure contract tests run against Azurite or a real account. Enable by
@@ -13,14 +13,14 @@ import type { Storage } from '../../src/core/types';
  */
 const enabled = Boolean(process.env.AZURE_TEST_CONNECTION_STRING);
 
-describe.skipIf(!enabled)('azure integration', () => {
-  let storage: Storage<'azure'>;
+describe.skipIf(!enabled)("azure integration", () => {
+  let storage: Storage<"azure">;
 
   const makeStorage = async () => {
-    const { createAzureStorage } = await import('../../src/drivers/azure/index.js');
+    const { createAzureStorage } = await import("../../src/drivers/azure/index.js");
     return createAzureStorage({
-      type: 'azure',
-      container: process.env.AZURE_TEST_CONTAINER ?? 'test-container',
+      type: "azure",
+      container: process.env.AZURE_TEST_CONTAINER ?? "test-container",
       connectionString: process.env.AZURE_TEST_CONNECTION_STRING,
     });
   };
@@ -34,26 +34,26 @@ describe.skipIf(!enabled)('azure integration', () => {
   });
 
   defineDriverContractTests({
-    name: 'azure',
+    name: "azure",
     createStorage: () => makeStorage(),
     capabilities: { signedUrls: true },
   });
 
-  it('exposes the raw ContainerClient via native()', async () => {
+  it("exposes the raw ContainerClient via native()", async () => {
     const client = storage.native();
-    expect(typeof client.getBlobClient).toBe('function');
-    expect(client.url).toContain(process.env.AZURE_TEST_CONTAINER ?? 'test-container');
+    expect(typeof client.getBlobClient).toBe("function");
+    expect(client.url).toContain(process.env.AZURE_TEST_CONTAINER ?? "test-container");
   });
 
-  it('generates SAS signed URLs', async () => {
-    const url = await storage.getSignedUrl('sas-check.txt', { expiresIn: 120 });
-    expect(url).toContain('sig=');
-    expect(url).toContain('se=');
+  it("generates SAS signed URLs", async () => {
+    const url = await storage.getSignedUrl("sas-check.txt", { expiresIn: 120 });
+    expect(url).toContain("sig=");
+    expect(url).toContain("se=");
   });
 });
 
-describe.skipIf(enabled)('azure integration (gated)', () => {
-  it('is skipped unless AZURE_TEST_CONNECTION_STRING is configured', () => {
+describe.skipIf(enabled)("azure integration (gated)", () => {
+  it("is skipped unless AZURE_TEST_CONNECTION_STRING is configured", () => {
     expect(true).toBe(true);
   });
 });

@@ -1,7 +1,7 @@
-import { beforeAll, describe, expect, it } from 'vitest';
+import { beforeAll, describe, expect, it } from "vitest";
 
-import { defineDriverContractTests } from '../../src/testing/driver-contract';
-import type { Storage } from '../../src/core/types';
+import { defineDriverContractTests } from "../../src/testing/driver-contract";
+import type { Storage } from "../../src/core/types";
 
 /**
  * Google Cloud Storage contract tests. Enable by exporting:
@@ -17,23 +17,23 @@ import type { Storage } from '../../src/core/types';
 const bucket = process.env.GCS_TEST_BUCKET;
 const enabled = Boolean(bucket);
 
-describe.skipIf(!enabled)('gcs integration', () => {
-  let storage: Storage<'gcs'>;
+describe.skipIf(!enabled)("gcs integration", () => {
+  let storage: Storage<"gcs">;
 
   const makeStorage = async () => {
-    const { createGcsStorage } = await import('../../src/drivers/gcs/index.js');
+    const { createGcsStorage } = await import("../../src/drivers/gcs/index.js");
     const endpoint = process.env.GCS_TEST_ENDPOINT;
     return createGcsStorage({
-      type: 'gcs',
+      type: "gcs",
       bucket: bucket!,
-      projectId: process.env.GCS_TEST_PROJECT_ID ?? 'storagekit-e2e',
+      projectId: process.env.GCS_TEST_PROJECT_ID ?? "storagekit-e2e",
       ...(endpoint
         ? {
             apiEndpoint: endpoint,
             credentials: {
-              client_email: 'fake@storagekit-e2e.iam.test',
+              client_email: "fake@storagekit-e2e.iam.test",
               private_key:
-                '-----BEGIN PRIVATE KEY-----\nMIIEvAIBADANBgkqhkiG9w0BAQEFAASCBKYwggSiAgEAAoIBAQDfake\n-----END PRIVATE KEY-----',
+                "-----BEGIN PRIVATE KEY-----\nMIIEvAIBADANBgkqhkiG9w0BAQEFAASCBKYwggSiAgEAAoIBAQDfake\n-----END PRIVATE KEY-----",
             },
           }
         : {}),
@@ -50,42 +50,42 @@ describe.skipIf(!enabled)('gcs integration', () => {
   });
 
   defineDriverContractTests({
-    name: 'gcs',
+    name: "gcs",
     createStorage: () => makeStorage(),
     capabilities: { signedUrls: true, bulkDelete: false },
   });
 
-  it('reports provider: gcs on upload/download results', async () => {
+  it("reports provider: gcs on upload/download results", async () => {
     const path = `provider-check-${Date.now()}.txt`;
-    const uploaded = await storage.upload(path, Buffer.from('hello gcs'), {
-      contentType: 'text/plain',
+    const uploaded = await storage.upload(path, Buffer.from("hello gcs"), {
+      contentType: "text/plain",
     });
-    expect(uploaded.provider).toBe('gcs');
+    expect(uploaded.provider).toBe("gcs");
     const downloaded = await storage.download(path);
-    expect(downloaded.provider).toBe('gcs');
-    expect((await downloaded.text()).trim()).toBe('hello gcs');
+    expect(downloaded.provider).toBe("gcs");
+    expect((await downloaded.text()).trim()).toBe("hello gcs");
     await storage.delete(path);
   });
 
-  it('exposes the underlying Storage client via native()', async () => {
-    const { createGcsStorage } = await import('../../src/drivers/gcs/index.js');
+  it("exposes the underlying Storage client via native()", async () => {
+    const { createGcsStorage } = await import("../../src/drivers/gcs/index.js");
     const s = await createGcsStorage({
-      type: 'gcs',
+      type: "gcs",
       bucket: bucket!,
-      projectId: process.env.GCS_TEST_PROJECT_ID ?? 'storagekit-e2e',
+      projectId: process.env.GCS_TEST_PROJECT_ID ?? "storagekit-e2e",
     });
-    expect(s.native().constructor.name).toBe('Storage');
+    expect(s.native().constructor.name).toBe("Storage");
     expect(s.capabilities().multipartUpload).toBe(true);
     expect(s.capabilities().signedUrls).toBe(true);
   });
 
-  it('treats deleting a missing object as a no-op', async () => {
+  it("treats deleting a missing object as a no-op", async () => {
     await expect(storage.delete(`definitely-not-here-${Date.now()}.txt`)).resolves.toBeUndefined();
   });
 });
 
-describe.skipIf(enabled)('gcs integration (gated)', () => {
-  it('is skipped unless GCS_TEST_BUCKET is configured', () => {
+describe.skipIf(enabled)("gcs integration (gated)", () => {
+  it("is skipped unless GCS_TEST_BUCKET is configured", () => {
     expect(true).toBe(true);
   });
 });

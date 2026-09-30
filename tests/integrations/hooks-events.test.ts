@@ -1,20 +1,20 @@
-import { afterAll, describe, expect, it } from 'vitest';
-import { rm } from 'node:fs/promises';
+import { afterAll, describe, expect, it } from "vitest";
+import { rm } from "node:fs/promises";
 
-import { createStorage } from '../../src/factory';
-import type { Storage, StorageOperationEvent } from '../../src/core/types';
+import { createStorage } from "../../src/factory";
+import type { Storage, StorageOperationEvent } from "../../src/core/types";
 
 afterAll(async () => {
   await Promise.all(
-    ['.tmp-hooks', '.tmp-events'].map((dir) => rm(dir, { recursive: true, force: true })),
+    [".tmp-hooks", ".tmp-events"].map((dir) => rm(dir, { recursive: true, force: true })),
   );
 });
 
-describe('hooks', () => {
-  it('runs before/after hooks around operations and reports errors', async () => {
+describe("hooks", () => {
+  it("runs before/after hooks around operations and reports errors", async () => {
     const calls: string[] = [];
     const storage = await createStorage(
-      { type: 'local', root: './.tmp-hooks' },
+      { type: "local", root: "./.tmp-hooks" },
       {
         hooks: {
           beforeUpload: (ctx) => {
@@ -42,44 +42,44 @@ describe('hooks', () => {
       },
     );
 
-    await storage.upload('hooked.txt', 'data');
+    await storage.upload("hooked.txt", "data");
     {
       // Drain the download stream before deleting the file — otherwise the
       // local driver's createReadStream emits an unhandled ENOENT on Linux
       // runners when the source disappears mid-flight.
-      const dl = await storage.download('hooked.txt');
+      const dl = await storage.download("hooked.txt");
       await dl.buffer();
     }
-    await storage.delete('hooked.txt');
-    await expect(storage.download('missing.txt')).rejects.toThrow();
+    await storage.delete("hooked.txt");
+    await expect(storage.download("missing.txt")).rejects.toThrow();
 
     expect(calls).toEqual([
-      'before:upload:hooked.txt',
-      'after:upload',
-      'before:download',
-      'after:download',
-      'before:delete',
-      'after:delete',
-      'before:download',
-      'error:download',
+      "before:upload:hooked.txt",
+      "after:upload",
+      "before:download",
+      "after:download",
+      "before:delete",
+      "after:delete",
+      "before:download",
+      "error:download",
     ]);
   });
 });
 
-describe('events', () => {
-  it('emits normalized operation events with durations', async () => {
-    const storage: Storage<'local'> = await createStorage({ type: 'local', root: './.tmp-events' });
+describe("events", () => {
+  it("emits normalized operation events with durations", async () => {
+    const storage: Storage<"local"> = await createStorage({ type: "local", root: "./.tmp-events" });
     const events: StorageOperationEvent[] = [];
-    storage.on('operation', (event) => events.push(event));
+    storage.on("operation", (event) => events.push(event));
 
-    await storage.upload('evented.txt', 'x');
-    await storage.stat('evented.txt');
-    await storage.delete('evented.txt');
+    await storage.upload("evented.txt", "x");
+    await storage.stat("evented.txt");
+    await storage.delete("evented.txt");
 
-    expect(events.map((e) => e.operation)).toEqual(['upload', 'stat', 'delete']);
+    expect(events.map((e) => e.operation)).toEqual(["upload", "stat", "delete"]);
     expect(events.every((e) => e.success)).toBe(true);
     expect(events.every((e) => e.duration >= 0)).toBe(true);
-    expect(events[0]?.path).toBe('evented.txt');
-    expect(events.every((e) => e.provider === 'local')).toBe(true);
+    expect(events[0]?.path).toBe("evented.txt");
+    expect(events.every((e) => e.provider === "local")).toBe(true);
   });
 });
