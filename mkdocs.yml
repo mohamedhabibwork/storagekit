@@ -95,6 +95,7 @@ nav:
       - Custom drivers: custom-drivers.md
       - Framework uploads: uploads.md
   - Project:
+      - Use cases: use-cases.md
       - Examples: examples.md
       - Architecture: architecture.md
       - Security setup: SECURITY.md

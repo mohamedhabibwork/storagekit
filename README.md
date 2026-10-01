@@ -115,6 +115,7 @@ tarball):
 | [docs/gcs.md](docs/gcs.md)                                                                        | Google Cloud Storage driver, ADC auth, fake-gcs-server emulator, V4 signed URLs, CMEK                                                                        |
 | [docs/custom-drivers.md](docs/custom-drivers.md)                                                  | full `StorageDriver` reference, registry semantics, contract testing, built-in fake driver for tests, correctness checklist                                  |
 | [docs/uploads.md](docs/uploads.md)                                                                | framework upload recipes: multer/Express/NestJS/Koa, Fastify, Hono, Next.js, Elysia, Bun/Deno, formidable, busboy, GraphQL Upload, validation & serving back |
+| [docs/use-cases.md](docs/use-cases.md)                                                            | every supported use case with a runnable example (uploads, ranges, prefix delete, checksums, signed URLs, tenant scoping, …)                                 |
 | [docs/examples.md](docs/examples.md)                                                              | end-to-end apps: upload service, streaming backup pipeline, fake-driver testing                                                                              |
 
 ## The design rule
@@ -366,6 +367,19 @@ await copyBetween(sourceStorage, "docs/file.pdf", destinationStorage, "archive/f
 
 Streams source → destination; the file is never fully buffered. For copies
 inside one provider prefer `storage.copy()` (server-side).
+
+## Helpers
+
+```ts
+import { deletePrefix, listAll, checksum, scopedStorage } from "storagekit";
+
+await deletePrefix(storage, "users/1/"); // delete a "directory"
+const files = await listAll(storage, "uploads/", { max: 1000 });
+const sha256 = await checksum(storage, "backups/db.tar.gz");
+const tenant = scopedStorage(storage, "tenants/42"); // namespaced view
+```
+
+See [docs/use-cases.md](docs/use-cases.md) for every use case.
 
 ## Errors
 
