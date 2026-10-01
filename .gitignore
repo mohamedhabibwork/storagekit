@@ -13,3 +13,4 @@ site/
 
 # Local MkDocs preview environment.
 .venv-docs/
+.mimosa
