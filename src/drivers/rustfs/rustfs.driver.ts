@@ -53,7 +53,7 @@ export class RustfsDriver implements StorageDriver<"rustfs"> {
       region: config.region ?? "us-east-1",
       forcePathStyle: config.forcePathStyle ?? true,
     };
-    this.inner = new S3Driver(s3Config, runtime);
+    this.inner = new S3Driver(s3Config, { ...runtime, endpointPolicy: "self-hosted" });
   }
 
   /** Load the SDK and build the underlying `S3Client`. Awaited by the factory. */

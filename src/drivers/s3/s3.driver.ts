@@ -73,6 +73,12 @@ async function loadAwsSdk(): Promise<AwsSdkBundle> {
 
 export interface S3DriverRuntimeOptions {
   detectContentType?: boolean;
+  /**
+   * "strict" (default) requires https endpoints except loopback http;
+   * self-hosted wrapper drivers (RustFS) opt into "self-hosted" since
+   * plain http on a trusted network is a supported deployment there.
+   */
+  endpointPolicy?: "strict" | "self-hosted";
 }
 
 export const MAX_SIGNED_URL_SECONDS = 7 * 24 * 60 * 60;
@@ -102,7 +108,14 @@ export class S3Driver implements StorageDriver<"s3"> {
         this.config.client ??
         new sdk.client.S3Client({
           ...(this.config.region !== undefined ? { region: this.config.region } : {}),
-          ...(this.config.endpoint !== undefined ? { endpoint: this.config.endpoint } : {}),
+          ...(this.config.endpoint !== undefined
+            ? {
+                endpoint: validateEndpoint(
+                  this.config.endpoint,
+                  this.runtime.endpointPolicy ?? "strict",
+                ),
+              }
+            : {}),
           ...(this.config.credentials !== undefined
             ? { credentials: this.config.credentials }
             : {}),
@@ -551,7 +564,10 @@ export class S3Driver implements StorageDriver<"s3"> {
     }
     const encoded = encodeKeyPath(key);
     if (this.config.endpoint) {
-      const base = this.config.endpoint.replace(/\/+$/, "");
+      const base = validateEndpoint(
+        this.config.endpoint,
+        this.runtime.endpointPolicy ?? "strict",
+      ).replace(/\/+$/, "");
       return `${base}/${this.config.bucket}/${encoded}`;
     }
     const host = this.config.region
@@ -584,6 +600,29 @@ export class S3Driver implements StorageDriver<"s3"> {
       this.fail(error, "getSignedUrl", normalized);
     }
   }
+}
+
+/**
+ * Custom endpoints receive credentials and (via getUrl) public links, so
+ * they must be https; plain http is allowed only for loopback hosts
+ * (LocalStack-style setups). Self-hosted wrapper drivers (RustFS) opt into
+ * "self-hosted" since plain http on a trusted network is a supported
+ * deployment there.
+ */
+function validateEndpoint(endpoint: string, policy: "strict" | "self-hosted"): string {
+  let parsed: URL;
+  try {
+    parsed = new URL(endpoint);
+  } catch {
+    throw new Error("s3 endpoint must be a valid URL.");
+  }
+  if (parsed.protocol === "https:") return endpoint;
+  if (policy === "self-hosted" && parsed.protocol === "http:") return endpoint;
+  const loopback = ["localhost", "127.0.0.1", "[::1]", "::1"].includes(parsed.hostname);
+  if (parsed.protocol === "http:" && loopback) return endpoint;
+  throw new Error(
+    "s3 endpoint must use https (plain http is allowed only for loopback or self-hosted drivers).",
+  );
 }
 
 function validateExpiry(expiresIn: number | undefined): number {
