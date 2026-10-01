@@ -21,6 +21,17 @@ export type { StorageManager } from "./manager";
 export { noopLogger, type KitLogger } from "./core/logger";
 export { copyBetween, type CopyBetweenOptions } from "./copy-between";
 export { StorageInstance } from "./storage";
+export {
+  deletePrefix,
+  checksum,
+  listAll,
+  scopedStorage,
+  type DeletePrefixOptions,
+  type ChecksumAlgorithm,
+  type ChecksumEncoding,
+  type ChecksumOptions,
+  type ListAllOptions,
+} from "./helpers";
 
 // Upload intake (framework-agnostic); framework-specific adapters live in
 // `storagekit/adapters/*` subpath entries.
