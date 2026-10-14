@@ -6,7 +6,7 @@ web-standard `File`/`Blob` that Hono, Next.js, Remix, Nuxt, Elysia, `Bun.serve`
 and Deno produce — ends up as the same three facts: a field name, a client
 filename, and a body (stream, buffer or blob). `storagekit/uploads` turns that
 into a `storage.upload()` call with a safe object key, on **any** driver
-(Local, S3, MinIO, RustFS, Azure, Oracle, custom).
+(Local, S3, MinIO, RustFS, R2, Azure, Oracle, GCS, custom).
 
 No adapter imports its framework: each one satisfies the framework's shape
 structurally, so every framework package stays an _optional_ peer dependency.

@@ -1,13 +1,13 @@
 # storagekit (@mohamedhabibwork/storagekit)
 
-> Unified TypeScript file management across Local filesystem, AWS S3, MinIO, Azure Blob Storage, Oracle OCI Object Storage, RustFS and Google Cloud Storage. One common API for common operations, with strongly-typed **provider-native options** preserved under a `native` key instead of being flattened to a lowest common denominator. Runs on Node.js >= 20, Bun >= 1.1 and Deno >= 2 (all smoke-tested in CI). Dual ESM/CJS with full TypeScript declarations. Custom drivers can be registered against the same API.
+> Unified TypeScript file management across Local filesystem, AWS S3, MinIO, Azure Blob Storage, Oracle OCI Object Storage, RustFS, Cloudflare R2 and Google Cloud Storage. One common API for common operations, with strongly-typed **provider-native options** preserved under a `native` key instead of being flattened to a lowest common denominator. Runs on Node.js >= 20, Bun >= 1.1 and Deno >= 2 (all smoke-tested in CI). Dual ESM/CJS with full TypeScript declarations. Custom drivers can be registered against the same API.
 
 ## Install
 
 ```bash
 npm install @mohamedhabibwork/storagekit
 # Provider SDKs are optional peer dependencies — install only what you use:
-# S3 / RustFS: npm i @aws-sdk/client-s3 @aws-sdk/lib-storage @aws-sdk/s3-request-presigner
+# S3 / RustFS / R2: npm i @aws-sdk/client-s3 @aws-sdk/lib-storage @aws-sdk/s3-request-presigner
 # MinIO:       npm i minio
 # Azure:       npm i @azure/storage-blob
 # Oracle:      npm i oci-common oci-objectstorage
@@ -18,7 +18,7 @@ npm install @mohamedhabibwork/storagekit
 **Entrypoints** (import only what you use; the root entry bundles no cloud SDK):
 `@mohamedhabibwork/storagekit` (core + factory + manager + copyBetween + upload intake),
 `.../local`, `.../s3`, `.../minio`, `.../azure`, `.../oracle`, `.../rustfs`,
-`.../gcs` (each also exports `createXxxStorage`), `.../testing` (driver contract suite),
+`.../r2`, `.../gcs` (each also exports `createXxxStorage`), `.../testing` (driver contract suite),
 `.../testing/fake` (in-memory fake driver + createFakeStorage() for tests, no vitest dep),
 `.../uploads` (upload intake helpers), `.../adapters/express`,
 `.../adapters/fastify`, `.../adapters/formidable` (framework upload adapters).
@@ -42,7 +42,7 @@ import { createStorage } from '@mohamedhabibwork/storagekit';
 
 // Returns Promise<Storage<'s3'>> — the type parameter is inferred from `type`
 const s3 = await createStorage({
-  type: 's3',                    // 'local' | 's3' | 'minio' | 'azure' | 'oracle'
+  type: 's3',                    // 'local' | 's3' | 'minio' | 'azure' | 'oracle' | 'rustfs' | 'r2' | 'gcs'
   bucket: 'uploads',
   region: 'eu-central-1',
 });

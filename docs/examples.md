@@ -91,7 +91,7 @@ for await (const file of local.iterate("uploads/")) {
 ```
 
 `copyBetween` streams through the process (never fully buffered) and works
-between any two providers — local, S3, MinIO, Azure, GCS, Oracle, RustFS.
+between any two providers — local, S3, MinIO, Azure, GCS, Oracle, RustFS, R2.
 
 ## 3. Describe uploads once, run them anywhere (intents)
 
