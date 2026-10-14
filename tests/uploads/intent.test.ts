@@ -12,10 +12,8 @@ import {
   type SavedUpload,
   type UploadFileInput,
   type UploadIntent,
-  type UploadOptions,
-  type UploadResult,
 } from "../../src/uploads";
-import type { Storage } from "../../src/core/types";
+import type { Storage, UploadOptions, UploadResult } from "../../src/core/types";
 
 interface RecordedUpload {
   path: string;
