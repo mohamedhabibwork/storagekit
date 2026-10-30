@@ -176,7 +176,7 @@
     "multer": "^2.3.0",
     "oci-common": "^2.107.0",
     "oci-objectstorage": "^2.107.0",
-    "oxfmt": "^0.72.0",
+    "oxfmt": "^0.75.0",
     "oxlint": "^1.82.0",
     "tsup": "^9.0.0",
     "typescript": "^7.0.2",
